@@ -23,7 +23,7 @@ To install within a |virtualenv|_, try::
 
 To develop on the project, link to the source files instead::
 
-    $ deactivate
+    (release-ghub-pypi) $ deactivate
     $ rmvirtualenv release-ghub-pypi
     $ git clone git@github.com:hotoffthehamster/release-ghub-pypi.git
     $ cd release-ghub-pypi
@@ -34,4 +34,5 @@ After creating the virtual environment,
 to start developing from a fresh terminal, run |workon|_::
 
     $ workon release-ghub-pypi
+    (release-ghub-pypi) $ ...
 
