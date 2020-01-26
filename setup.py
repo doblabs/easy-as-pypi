@@ -33,11 +33,15 @@ setup(
     #   https://packaging.python.org/en/latest/requirements.html
     install_requires=requirements,
 
-    # Specify which package(s) to install. (Note that using find_packages on
-    # this project is like `packages=['release-ghub-pypi']`.)
+    # Specify which package(s) to install.
+    # - Without any rules, find_packages returns, e.g.,
+    #     ['release_ghub_pypi', 'tests', 'tests.release_ghub_pypi']
+    # - With the 'exclude*' rule, this call is essentially:
+    #     packages=['release_ghub_pypi']
     # MEH/2020-01-24: (lb): I saw 'docs' included in another projects'
-    # find_packages, but sorta sure we don't need. (Also had no glob*.) E.g.,
-    #   packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    # find_packages -- but I'd guess we don't need. (It also had no
+    # glob*.) E.g.,
+    #     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     packages=find_packages(exclude=['tests*']),
     # Alternatively, to distribute just a my_module.py, use py_modules:
     #   py_modules=["my_module"],
