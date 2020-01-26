@@ -120,11 +120,13 @@ questions or concerns. Response times may vary depending on season.
 Getting Started
 ===============
 
-Ready to contribute? Here's how to set up |release-ghub-pypi|_ for local development.
+Ready to contribute? Here's how to set up |release-ghub-pypi|_
+for local development.
 
 1. Fork the |release-ghub-pypi|_ repo on GitHub.
 
-   * Visit `<https://github.com/hotoffthehamster/release-ghub-pypi>`__ and click *Fork*.
+   * Visit `<https://github.com/hotoffthehamster/release-ghub-pypi>`__
+     and click *Fork*.
 
 2. Clone your fork locally.
 
@@ -133,7 +135,8 @@ Ready to contribute? Here's how to set up |release-ghub-pypi|_ for local develop
 
     $ git clone git@github.com:<your_login>/release-ghub-pypi.git
 
-3. Install |release-ghub-pypi|_ into a Python virtual instance, or |virtualenv|_.
+3. Install |release-ghub-pypi|_ into a Python virtual instance,
+   or |virtualenv|_.
 
    First, ensure that you have |virtualenvwrapper|_ installed.
 
@@ -143,7 +146,8 @@ Ready to contribute? Here's how to set up |release-ghub-pypi|_ for local develop
     $ mkvirtualenv -a $(pwd) release-ghub-pypi
 
    *Note:* We use the ``-a`` option so that ``cdproject`` changes directories
-   to the ``release-ghub-pypi/`` directory when we're in the virtual environment.
+   to the ``release-ghub-pypi/`` directory when we're in the virtual
+   environment.
 
    Next, set up your fork for local development::
 
@@ -337,7 +341,8 @@ Ready to contribute? Here's how to set up |release-ghub-pypi|_ for local develop
    .. _rebase_atop_develop:
 
 10. Finally,
-    `submit a pull request <https://github.com/hotoffthehamster/release-ghub-pypi/pulls>`_
+    `submit a pull request
+    <https://github.com/hotoffthehamster/release-ghub-pypi/pulls>`_
     through the GitHub website.
 
     *Important:* Please rebase your code against ``develop`` and resolve
