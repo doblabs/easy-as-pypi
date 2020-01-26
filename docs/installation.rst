@@ -19,7 +19,7 @@ To install user-local, simply run::
 To install within a |virtualenv|_, try::
 
     $ mkvirtualenv release-ghub-pypi
-    $ pip install release-ghub-pypi
+    (release-ghub-pypi) $ pip install release-ghub-pypi
 
 To develop on the project, link to the source files instead::
 
@@ -28,7 +28,7 @@ To develop on the project, link to the source files instead::
     $ git clone git@github.com:hotoffthehamster/release-ghub-pypi.git
     $ cd release-ghub-pypi
     $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 release-ghub-pypi
-    $ make develop
+    (release-ghub-pypi) $ make develop
 
 After creating the virtual environment,
 to start developing from a fresh terminal, run |workon|_::
