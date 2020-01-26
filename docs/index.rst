@@ -1,11 +1,11 @@
-###############################
-release-ghub-pypi Documentation
-###############################
+.. ###############################
+.. release-ghub-pypi Documentation
+.. ###############################
 
-.. |release-ghub-pypi| replace:: ``release-ghub-pypi``
-.. _release-ghub-pypi: https://github.com/hotoffthehamster/release-ghub-pypi
+.. .. |release-ghub-pypi| replace:: ``release-ghub-pypi``
+.. .. _release-ghub-pypi: https://github.com/hotoffthehamster/release-ghub-pypi
 
-Documentation for |release-ghub-pypi|_.
+.. Documentation for |release-ghub-pypi|_.
 
 .. .. toctree::
 ..    :maxdepth: 4
@@ -15,8 +15,7 @@ Documentation for |release-ghub-pypi|_.
    :maxdepth: 2
    :hidden:
 
-   installation
-
+   Installation <installation>
    API Reference <modules>
    Help Us Improve <contributing>
    Code of Conduct <code-of-conduct>
