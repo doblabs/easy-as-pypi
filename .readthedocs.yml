@@ -1,0 +1,12 @@
+# This file exists within 'release-ghub-pypi':
+#
+#   https://github.com/hotoffthehamster/release-ghub-pypi
+
+version: 2
+
+python:
+  version: 3.7
+  install:
+     - method: pip
+       path: .
+

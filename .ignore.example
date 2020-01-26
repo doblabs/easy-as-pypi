@@ -1,0 +1,33 @@
+# This file exists within 'release-ghub-pypi':
+#
+#   https://github.com/hotoffthehamster/release-ghub-pypi
+
+# USAGE: `/bin/cp .ignore.example .ignore` and personalize.
+
+.git/
+
+*.egg-info/
+*.eggs/
+
+.pytest_cache/
+.tox/
+
+# `make coverage` generated file.
+.coverage
+
+# `make coverage-html`.
+htmlcov/
+
+# `make dist`.
+build/
+dist/
+
+# `make docs`.
+docs/_build
+
+# `make test-local` output saved for Vim quickfix.
+.make.out
+
+# Localization file.
+messages.pot
+

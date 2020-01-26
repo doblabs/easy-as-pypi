@@ -1,0 +1,11 @@
+# Specifies packages required to develop and release, except test packages.
+
+check-manifest >= 0.37
+flake8 >= 3.7.5
+isort >= 4.3.4
+setuptools >= 38.6.0
+setuptools_scm
+tox >= 3.14.0
+twine >= 1.11.0
+wheel >= 0.31.0
+

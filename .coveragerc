@@ -1,0 +1,9 @@
+# vim:tw=0:ts=2:sw=2:et:norl:ft=dosini
+
+# This file exists within 'release-ghub-pypi':
+#
+#   https://github.com/hotoffthehamster/release-ghub-pypi
+
+[run]
+source=release_ghub_pypi
+

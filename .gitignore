@@ -1,0 +1,48 @@
+# This file exists within 'release-ghub-pypi':
+#
+#   https://github.com/hotoffthehamster/release-ghub-pypi
+
+# Building/Packaging/Distributing.
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Byte-compiled/Optimized Python and Library/DLL files.
+*.py[cod]
+__pycache__/
+
+# Testing and CI tasks.
+.pytest_cache/
+.tox
+
+# `make coverage-html` output
+.coverage
+htmlcov/
+
+# pytest-cov / coverage / https://codecov.io
+coverage.xml
+
+# Akin to .gitignore's private .git/info/exclude, this repo includes an
+# .ignore.example file DEV might want to copy as .ignore and customize.
+.ignore
+
+# Optional private DEV Makefile.
+Makefile.local
+
+# Sphinx docs/ (from `make docs`):
+docs/_build/
+# `make docs` generates two files for the API reference -- one is just
+# an index file (modules.rst), and the other is the auto-generated API
+# reference. Generally, the generated files are sufficient:
+# 2020-01-25: For release-ghub-pypi, I will commit this two files,
+#  for diff'ability with other projects.
+#docs/modules.rst
+#docs/release_ghub_pypi.rst
+# But if you want, you could override the latter, say, to tweak the TOC.
+# See the alternatively formatted modules TOC:
+#   docs/release-ghub-pypi.rst
+
+# Translations
+*.mo
+

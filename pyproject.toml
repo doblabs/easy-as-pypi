@@ -1,0 +1,9 @@
+# This file exists within 'release-ghub-pypi':
+#
+#   https://github.com/hotoffthehamster/release-ghub-pypi
+
+# (lb): Including this file just to be pedantic.
+
+[build-system]
+requires = ["setuptools", "wheel"]
+
