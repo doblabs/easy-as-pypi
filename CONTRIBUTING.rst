@@ -144,6 +144,7 @@ for local development.
 
     $ cd release-ghub-pypi/
     $ mkvirtualenv -a $(pwd) release-ghub-pypi
+    (release-ghub-pypi) $
 
    *Note:* We use the ``-a`` option so that ``cdproject`` changes directories
    to the ``release-ghub-pypi/`` directory when we're in the virtual
