@@ -136,6 +136,12 @@ test-hint:
 .PHONY: test-hint
 
 test-local: venvforce test-hint
+
+	# (lb) The pipe to tee, `| tee`, masks the return code from py.test. I.e., on its own,
+	# `py.test | tee` will always return true (0), regardless of py.test's exit code. As
+	# such, don't run this task from Travis CI. Or, if you do, change shells and set pipefail.
+	# E.g., at the top of the file, include:
+
 	# If you want Make to fail if py.test fails, you want pipefail.
 	# Put this at the top of the Makefile:
 	#     SHELL = /bin/bash -o pipefail
