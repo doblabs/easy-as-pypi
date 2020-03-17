@@ -1,7 +1,7 @@
-release-ghub-pypi
-=================
+pypi-and-die
+============
 
 .. toctree::
    :maxdepth: 4
 
-   release-ghub-pypi
+   pypi-and-die

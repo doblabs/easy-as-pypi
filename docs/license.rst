@@ -3,12 +3,12 @@ LICENSE
 #######
 
 This software —
-``release-ghub-pypi`` —
+``pypi-and-die`` —
 is Copyright © 2020 Landon Bouma.
 All rights reserved.
 
 This software —
-``release-ghub-pypi`` —
+``pypi-and-die`` —
 is licensed under the MIT License.
 
 .. literalinclude:: ../LICENSE

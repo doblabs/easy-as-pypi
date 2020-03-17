@@ -1,6 +1,6 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
 # USAGE: `/bin/cp .ignore.example .ignore` and personalize.
 

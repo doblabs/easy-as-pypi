@@ -1,6 +1,6 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #
@@ -22,5 +22,5 @@
 # TORT OR OTHERWISE,  ARISING FROM,  OUT OF  OR IN  CONNECTION WITH THE
 # SOFTWARE   OR   THE   USE   OR   OTHER   DEALINGS  IN   THE  SOFTWARE.
 
-"""Tests for ``release-ghub-pypi``."""
+"""Tests for ``pypi-and-die``."""
 

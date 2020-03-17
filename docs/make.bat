@@ -1,10 +1,10 @@
 @ECHO OFF
 
-REM This file exists within 'human-friendly_pedantic-timedelta' aka 'pedantic_timedelta':
+REM This file exists within 'pypi-and-die':
 REM
 REM   https://github.com/hotoffthehamster/human-friendly_pedantic-timedelta
 
-set PROJECTNAME=release-ghub-pypi
+set PROJECTNAME=pypi-and-die
 
 REM *** END: Project customization. Remainder of file is _boilerplate_.
 

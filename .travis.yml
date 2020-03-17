@@ -1,10 +1,10 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
 # Travis CI config.
 #
-#   https://travis-ci.org/hotoffthehamster/release-ghub-pypi
+#   https://travis-ci.org/hotoffthehamster/pypi-and-die
 
 language: python
 

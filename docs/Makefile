@@ -1,10 +1,10 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
 # Makefile for Sphinx documentation
 
-PROJNAME = release-ghub-pypi
+PROJNAME = pypi-and-die
 
 # You can set these variables from the command line.
 SPHINXOPTS    =

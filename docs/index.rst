@@ -1,11 +1,11 @@
-.. ###############################
-.. release-ghub-pypi Documentation
-.. ###############################
+.. ##########################
+.. pypi-and-die Documentation
+.. ##########################
 
-.. .. |release-ghub-pypi| replace:: ``release-ghub-pypi``
-.. .. _release-ghub-pypi: https://github.com/hotoffthehamster/release-ghub-pypi
+.. .. |pypi-and-die| replace:: ``release-ghub-pypi``
+.. .. _pypi-and-die: https://github.com/hotoffthehamster/release-ghub-pypi
 
-.. Documentation for |release-ghub-pypi|_.
+.. Documentation for |pypi-and-die|_.
 
 .. .. toctree::
 ..    :maxdepth: 4

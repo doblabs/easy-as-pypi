@@ -10,29 +10,29 @@ Installation
 
 To install system-wide, run as superuser::
 
-    $ pip3 install release-ghub-pypi
+    $ pip3 install pypi-and-die
 
 To install user-local, simply run::
 
-    $ pip3 install -U release-ghub-pypi
+    $ pip3 install -U pypi-and-die
 
 To install within a |virtualenv|_, try::
 
-    $ mkvirtualenv release-ghub-pypi
-    (release-ghub-pypi) $ pip install release-ghub-pypi
+    $ mkvirtualenv pypi-and-die
+    (pypi-and-die) $ pip install release-ghub-pypi
 
 To develop on the project, link to the source files instead::
 
-    (release-ghub-pypi) $ deactivate
-    $ rmvirtualenv release-ghub-pypi
-    $ git clone git@github.com:hotoffthehamster/release-ghub-pypi.git
-    $ cd release-ghub-pypi
-    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 release-ghub-pypi
-    (release-ghub-pypi) $ make develop
+    (pypi-and-die) $ deactivate
+    $ rmvirtualenv pypi-and-die
+    $ git clone git@github.com:hotoffthehamster/pypi-and-die.git
+    $ cd pypi-and-die
+    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 pypi-and-die
+    (pypi-and-die) $ make develop
 
 After creating the virtual environment,
 to start developing from a fresh terminal, run |workon|_::
 
-    $ workon release-ghub-pypi
-    (release-ghub-pypi) $ ...
+    $ workon pypi-and-die
+    (pypi-and-die) $ ...
 
