@@ -1,9 +1,9 @@
 # vim:tw=0:ts=2:sw=2:et:norl:ft=dosini
 
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
 [run]
-source=release_ghub_pypi
+source=pypi_and_die
 

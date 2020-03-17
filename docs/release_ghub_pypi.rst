@@ -1,10 +1,10 @@
-release\_ghub\_pypi package
-===========================
+pypi\_and\_die package
+======================
 
 Module contents
 ---------------
 
-.. automodule:: release_ghub_pypi
+.. automodule:: pypi_and_die
    :members:
    :undoc-members:
    :show-inheritance:

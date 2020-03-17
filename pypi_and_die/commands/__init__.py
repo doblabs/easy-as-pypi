@@ -1,6 +1,6 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #
@@ -39,9 +39,9 @@ Root sub-module convenience references/aliases.
       from my_package.commands.my_module import my_command
 """
 
-from . import release_ghub_pypi
+from . import pypi_and_die
 
 __all__ = (
-    'release_ghub_pypi',
+    'pypi_and_die',
 )
 

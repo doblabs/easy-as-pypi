@@ -2,11 +2,11 @@
 Contributing
 ############
 
-.. |release-ghub-pypi| replace:: ``release-ghub-pypi``
-.. _release-ghub-pypi: https://github.com/hotoffthehamster/release-ghub-pypi
+.. |pypi-and-die| replace:: ``pypi-and-die``
+.. _pypi-and-die: https://github.com/hotoffthehamster/pypi-and-die
 
 .. |user-docs| replace:: user documentation
-.. _user-docs: https://github.com/hotoffthehamster/release-ghub-pypi/tree/develop/docs
+.. _user-docs: https://github.com/hotoffthehamster/pypi-and-die/tree/develop/docs
 
 .. |envlist| replace:: ``envlist``
 .. _envlist: https://tox.readthedocs.io/en/latest/config.html#conf-envlist
@@ -55,7 +55,7 @@ You can contribute in many ways:
 Report Bugs
 -----------
 
-Report bugs at https://github.com/hotoffthehamster/release-ghub-pypi/issues.
+Report bugs at https://github.com/hotoffthehamster/pypi-and-die/issues.
 
 When reporting a bug, please include:
 
@@ -85,9 +85,9 @@ us to improve it.
 
 This includes the official |user-docs|_,
 the `README
-<https://github.com/hotoffthehamster/release-ghub-pypi/blob/develop/README.rst>`__,
+<https://github.com/hotoffthehamster/pypi-and-die/blob/develop/README.rst>`__,
 and the inline docstrings that generate the `API documentation
-<https://release-ghub-pypi.readthedocs.io/en/latest/modules.html>`__
+<https://pypi-and-die.readthedocs.io/en/latest/modules.html>`__
 (per |PEP-257|_ and |goog-py-sty|_).
 
 We also appreciate reference from blog posts, articles, and other projects.
@@ -96,7 +96,7 @@ Submit Feedback
 ---------------
 
 The best way to send feedback is to file an issue at
-https://github.com/hotoffthehamster/release-ghub-pypi/issues.
+https://github.com/hotoffthehamster/pypi-and-die/issues.
 
 See above for reporting bugs.
 
@@ -120,12 +120,12 @@ questions or concerns. Response times may vary depending on season.
 Getting Started
 ===============
 
-Ready to contribute? Here's how to set up |release-ghub-pypi|_
+Ready to contribute? Here's how to set up |pypi-and-die|_
 for local development.
 
-1. Fork the |release-ghub-pypi|_ repo on GitHub.
+1. Fork the |pypi-and-die|_ repo on GitHub.
 
-   * Visit `<https://github.com/hotoffthehamster/release-ghub-pypi>`__
+   * Visit `<https://github.com/hotoffthehamster/pypi-and-die>`__
      and click *Fork*.
 
 2. Clone your fork locally.
@@ -133,51 +133,51 @@ for local development.
    Open a local terminal, change to a directory you'd like to develop from,
    and run the command::
 
-    $ git clone git@github.com:<your_login>/release-ghub-pypi.git
+    $ git clone git@github.com:<your_login>/pypi-and-die.git
 
-3. Install |release-ghub-pypi|_ into a Python virtual instance,
+3. Install |pypi-and-die|_ into a Python virtual instance,
    or |virtualenv|_.
 
    First, ensure that you have |virtualenvwrapper|_ installed.
 
    Next, set up a virtual environment for local development::
 
-    $ cd release-ghub-pypi/
-    $ mkvirtualenv -a $(pwd) release-ghub-pypi
-    (release-ghub-pypi) $
+    $ cd pypi-and-die/
+    $ mkvirtualenv -a $(pwd) pypi-and-die
+    (pypi-and-die) $
 
    *Note:* We use the ``-a`` option so that ``cdproject`` changes directories
-   to the ``release-ghub-pypi/`` directory when we're in the virtual
+   to the ``pypi-and-die/`` directory when we're in the virtual
    environment.
 
    Next, set up your fork for local development::
 
-    (release-ghub-pypi) $ cdproject
-    (release-ghub-pypi) $ make develop
+    (pypi-and-die) $ cdproject
+    (pypi-and-die) $ make develop
 
    *Hint:* As usual, run ``workon`` to activate the virtual environment, and
    ``deactivate`` to leave it. E.g.,::
 
     # Load the Python virtual instance.
-    $ workon release-ghub-pypi
-    (release-ghub-pypi) $
+    $ workon pypi-and-die
+    (pypi-and-die) $
 
     # Do your work.
-    (release-ghub-pypi) $ ...
+    (pypi-and-die) $ ...
 
     # Finish up.
-    (release-ghub-pypi) $ deactivate
+    (pypi-and-die) $ deactivate
     $
 
 4. Before starting work on a new feature or bug fix, make sure your
    ``develop`` branch is up to date with the official branch::
 
-    (release-ghub-pypi) $ cdproject
-    (release-ghub-pypi) $ git remote add upstream git@github.com:hotoffthehamster/release-ghub-pypi.git
-    (release-ghub-pypi) $ git fetch upstream
-    (release-ghub-pypi) $ git checkout develop
-    (release-ghub-pypi) $ git rebase upstream/develop
-    (release-ghub-pypi) $ git push origin HEAD
+    (pypi-and-die) $ cdproject
+    (pypi-and-die) $ git remote add upstream git@github.com:hotoffthehamster/pypi-and-die.git
+    (pypi-and-die) $ git fetch upstream
+    (pypi-and-die) $ git checkout develop
+    (pypi-and-die) $ git rebase upstream/develop
+    (pypi-and-die) $ git push origin HEAD
 
 5. Create a branch for local development. If you are working on an known issue,
    you may want to reference the Issue number in the branch name, e.g.,::
@@ -246,7 +246,7 @@ for local development.
 7. Throughout development, run tests and the linter -- and definitely before
    you submit a Pull Request.
 
-   |release-ghub-pypi|_ uses
+   |pypi-and-die|_ uses
    |flake8|_ for linting,
    |pytest|_ for unit testing, and
    |tox|_ for verifying against the many versions of Python.
@@ -343,7 +343,7 @@ for local development.
 
 10. Finally,
     `submit a pull request
-    <https://github.com/hotoffthehamster/release-ghub-pypi/pulls>`_
+    <https://github.com/hotoffthehamster/pypi-and-die/pulls>`_
     through the GitHub website.
 
     *Important:* Please rebase your code against ``develop`` and resolve
@@ -482,7 +482,7 @@ by running various developer tasks.
       $ tox -e flake8
 
       # is just like running flake8:
-      $ flake8 setup.py release_ghub_pypi/ tests/
+      $ flake8 setup.py pypi_and_die/ tests/
 
 2. You can lint the docs easily with one or two commands.
 
@@ -726,5 +726,5 @@ Code of Conduct
 Please respect and adhere to the `Code of Conduct <code-of-conduct.html>`__
 (please also read it!).
 
-** 🐬 Happy 🐠 Release-Ghub-PyPI 🦖 Hacking!! 🐡 **
+** 🐬 Happy 🐠 pypi-and-die 🦖 Hacking!! 🐡 **
 

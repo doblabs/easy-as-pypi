@@ -1,10 +1,10 @@
 # vim:tw=0:ts=2:sw=2:noet:ft=make:
 
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
-PROJNAME = release_ghub_pypi
+PROJNAME = pypi_and_die
 
 BUILDDIR = _build
 

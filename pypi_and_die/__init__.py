@@ -1,6 +1,6 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #
@@ -30,7 +30,7 @@ import sys
 import click
 from click_alias import ClickAliasedGroup
 
-from release_ghub_pypi import commands
+from pypi_and_die import commands
 
 __all__ = (
     '__arg0name__',
@@ -47,7 +47,7 @@ __author_email__ = 'hotoffthehamster+releaseghubpypi@gmail.com'
 # (lb): Not sure if the package name is available at runtime. Seems kinda meta,
 # like, Who am I? Useful for calling get_distribution, or to avoid hardcoding
 # the package name in text generated for the UX.
-__package_name__ = 'release-ghub-pypi'
+__package_name__ = 'pypi-and-die'
 __arg0name__ = os.path.basename(sys.argv[0])
 
 
@@ -57,5 +57,5 @@ def cli():
 
 
 # Add commands
-cli.add_command(commands.release_ghub_pypi.die)
+cli.add_command(commands.pypi_and_die.die)
 

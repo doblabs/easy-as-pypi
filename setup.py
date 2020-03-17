@@ -1,6 +1,6 @@
-# This file exists within 'release-ghub-pypi':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/release-ghub-pypi
+#   https://github.com/hotoffthehamster/pypi-and-die
 
 """
 Packaging instruction for setup tools.
@@ -35,9 +35,9 @@ setup(
 
     # Specify which package(s) to install.
     # - Without any rules, find_packages returns, e.g.,
-    #     ['release_ghub_pypi', 'tests', 'tests.release_ghub_pypi']
+    #     ['pypi_and_die', 'tests', 'tests.pypi_and_die']
     # - With the 'exclude*' rule, this call is essentially:
-    #     packages=['release_ghub_pypi']
+    #     packages=['pypi_and_die']
     # MEH/2020-01-24: (lb): I saw 'docs' included in another projects'
     # find_packages -- but I'd guess we don't need. (It also had no
     # glob*.) E.g.,
