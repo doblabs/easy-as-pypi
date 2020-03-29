@@ -1,6 +1,6 @@
-# This file exists within 'pypi-and-die':
+# This file exists within 'pep440-version-compare-cli':
 #
-#   https://github.com/hotoffthehamster/pypi-and-die
+#   https://github.com/hotoffthehamster/pep440-version-compare-cli
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #
@@ -22,12 +22,20 @@
 # TORT OR OTHERWISE,  ARISING FROM,  OUT OF  OR IN  CONNECTION WITH THE
 # SOFTWARE   OR   THE   USE   OR   OTHER   DEALINGS  IN   THE  SOFTWARE.
 
-"""Tests for ``pypi-and-die``."""
+"""Provides CLI runner() test fixture, for interacting with Click app."""
+
+import pytest
+
+from click.testing import CliRunner
+
+import pypi_and_die
 
 
-class TestOneAndDone(object):
-    def test_truthy(self, runner):
-        """Make sure that invoking the command passes without exception."""
-        result = runner()
-        assert result.exit_code == 0
+@pytest.fixture
+def runner():
+    """Provide a convenient fixture to simulate execution of (sub-) commands."""
+    def runner(args=[], **kwargs):
+        env = {}
+        return CliRunner().invoke(pypi_and_die.cli, args, env=env, **kwargs)
+    return runner
 

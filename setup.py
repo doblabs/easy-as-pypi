@@ -19,7 +19,11 @@ from setuptools import find_packages, setup
 # *** Package requirements.
 
 requirements = [
-    # FIXME: DEV: Add your project-specific requirements here.
+    # YOU: Add your project-specific requirements here.
+
+    # (lb): Click for life.
+    #  https://github.com/pallets/click
+    'click >= 7.0, < 8',
 ]
 
 # *** Minimal setup() function -- Prefer using config where possible.
