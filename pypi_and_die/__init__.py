@@ -28,7 +28,6 @@ import os
 import sys
 
 import click
-from click_alias import ClickAliasedGroup
 
 from pypi_and_die import commands
 
