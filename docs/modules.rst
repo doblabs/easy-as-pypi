@@ -1,7 +1,7 @@
-pypi-and-die
+pypi_and_die
 ============
 
 .. toctree::
    :maxdepth: 4
 
-   pypi-and-die
+   pypi_and_die

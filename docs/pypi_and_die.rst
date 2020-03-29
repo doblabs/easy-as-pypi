@@ -1,6 +1,13 @@
 pypi\_and\_die package
 ======================
 
+Subpackages
+-----------
+
+.. toctree::
+
+   pypi_and_die.commands
+
 Module contents
 ---------------
 
