@@ -5,16 +5,16 @@ pypi_and_die package
 Module Contents
 ---------------
 
-.. (lb): Addition options to consider: special-members, and noindex.
+.. (lb): This is *not* a generated file like pypi_and_die.rst (or modules.rst, etc.).
 ..
-..       To use these options, have `make docs` generate an API ref. doc
-..       (same as modules.rst?), e.g., docs/pypi_and_die.rst. Then,
-..       rename it (e.g., docs/pypi-and-die.rst) and add your new
-..       options.
+..       Rather, this file was copyied from a generated docs/pypi_and_die.rst
+..       and altered with additional options.
 ..
-..       NOTE: Be sure to compare the generated API reference to your
-..             custom doc to ensure you didn't inadvertently clobber
-..             anything.
+..       - Note that the Sphinx and autodoc extension docs suggest these options
+..         should be settable via docs/conf.py, but I had no such success.
+..
+..       - See comment in Makefile docs-html re: controlling which auto-generated
+..         files are created.
 
 .. automodule:: pypi_and_die
     :members:

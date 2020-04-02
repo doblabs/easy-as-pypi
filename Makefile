@@ -201,9 +201,22 @@ docs-html: venvforce
 	# Ref:
 	#   https://www.python.org/dev/peps/pep-0257/
 	# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
-	# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we also
-	# maintain a separate docs/<project-name>.rst, so that we can specify
-	# special methods' docs to include, such as `__new__`'s.
+	# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
+	# instead maintain a separate docs/<project-name>.rst, so that we can
+	# include special method docs, such as those for and __new__ methods.
+	# - I tried to disable the generation of modules.rst and pypi_and_die.rst
+	#   using options in conf.py, but failed. And I thought maybe one could
+	#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
+	#   command.
+	#   - Use -T to disable modules.rst creation, e.g.,
+	#           sphinx-apidoc -T -o docs/ pypi_and_die
+	#   - Use appended exclude pattherns to include command docs, e.g.,
+	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/commands/
+	#     will stop docs/pypi_and_die.commands.rst.
+	#   - To not generate docs/pypi_and_die.rst, just don't call sphinx-apidoc!
+	#     That is, neither of these will not work:
+	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/
+	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/__init__.py
 	/bin/rm -f docs/$(PROJNAME).rst
 	/bin/rm -f docs/modules.rst
 	sphinx-apidoc -o docs/ $(PROJNAME)
