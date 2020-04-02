@@ -197,8 +197,8 @@ docs: docs-html
 	$(PYBROWSER) docs/_build/html/index.html
 .PHONY: docs
 
-docs-html: venvforce
-	# Ref:
+docs-html: venvforce clean-docs
+	# Docstrings ref:
 	#   https://www.python.org/dev/peps/pep-0257/
 	# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
 	# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
@@ -210,16 +210,14 @@ docs-html: venvforce
 	#   command.
 	#   - Use -T to disable modules.rst creation, e.g.,
 	#           sphinx-apidoc -T -o docs/ pypi_and_die
-	#   - Use appended exclude pattherns to include command docs, e.g.,
+	#   - Use appended exclude patterns to include command docs, e.g.,
 	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/commands/
 	#     will stop docs/pypi_and_die.commands.rst.
 	#   - To not generate docs/pypi_and_die.rst, just don't call sphinx-apidoc!
-	#     That is, neither of these will not work:
+	#     That is, neither of these calls that use exclude patterns will work:
 	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/
 	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/__init__.py
-	/bin/rm -f docs/$(PROJNAME).rst
-	/bin/rm -f docs/modules.rst
-	sphinx-apidoc -o docs/ $(PROJNAME)
+	sphinx-apidoc --force -o docs/ $(PROJNAME)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 .PHONY: docs-html
