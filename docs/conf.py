@@ -44,8 +44,6 @@ sys.path.insert(0, project_root)
 # ┃                                                                     ┃
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
-import pypi_and_die
-
 project_dist = 'pypi-and-die'
 package_name = 'pypi_and_die'
 project_ghuser = 'hotoffthehamster'
