@@ -6,5 +6,5 @@
 
 - Initial public release.
 
-- Project impetus to codify release process for [dob](https://github.com/hotoffthehamster/dob), [nark](https://github.com/hotoffthehamster/nark), et al.
+- Project impetus to codify release process for [dob](https://github.com/tallybark/dob), [nark](https://github.com/tallybark/nark), et al.
 

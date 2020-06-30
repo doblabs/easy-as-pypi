@@ -4,8 +4,8 @@ pypi-and-die
 
 .. FEAT-REQU/2020-01-25: (lb): Add kcov Bash coverage of the release script.
 
-.. .. image:: https://travis-ci.org/hotoffthehamster/pypi-and-die.svg?branch=develop
-..   :target: https://travis-ci.org/hotoffthehamster/pypi-and-die
+.. .. image:: https://travis-ci.com/hotoffthehamster/pypi-and-die.svg?branch=develop
+..   :target: https://travis-ci.com/hotoffthehamster/pypi-and-die
 ..   :alt: Build Status
 ..
 .. .. image:: https://codecov.io/gh/hotoffthehamster/pypi-and-die/branch/develop/graph/badge.svg
