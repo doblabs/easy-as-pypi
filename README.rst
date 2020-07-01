@@ -25,7 +25,7 @@ pypi-and-die
 ..   :alt: PyPI Release Status
 
 .. image:: https://img.shields.io/github/license/landonb/pypi-and-die.svg?style=flat
-  :target: https://github.com/landonb/pypi-and-die/blob/master/LICENSE
+  :target: https://github.com/landonb/pypi-and-die/blob/release/LICENSE
   :alt: License Status
 
 One dev's boilerplate PyPI project.
