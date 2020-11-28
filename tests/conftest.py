@@ -1,6 +1,6 @@
-# This file exists within 'pep440-version-compare-cli':
+# This file exists within 'pypi-and-die':
 #
-#   https://github.com/hotoffthehamster/pep440-version-compare-cli
+#   https://github.com/hotoffthehamster/pypi-and-die
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #
