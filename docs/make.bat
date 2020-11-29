@@ -2,7 +2,7 @@
 
 REM This file exists within 'pypi-and-die':
 REM
-REM   https://github.com/hotoffthehamster/human-friendly_pedantic-timedelta
+REM   https://github.com/hotoffthehamster/pypi-and-die
 
 set PROJECTNAME=pypi-and-die
 

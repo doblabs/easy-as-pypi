@@ -2,8 +2,8 @@
 .. pypi-and-die Documentation
 .. ##########################
 
-.. .. |pypi-and-die| replace:: ``release-ghub-pypi``
-.. .. _pypi-and-die: https://github.com/hotoffthehamster/release-ghub-pypi
+.. .. |pypi-and-die| replace:: ``pypi-and-die``
+.. .. _pypi-and-die: https://github.com/hotoffthehamster/pypi-and-die
 
 .. Documentation for |pypi-and-die|_.
 
