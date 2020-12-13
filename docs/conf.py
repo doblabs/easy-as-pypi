@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-# This file exists within 'pypi-and-die':
+# This file exists within 'easy-as-pypi':
 #
-#   https://github.com/hotoffthehamster/pypi-and-die
+#   https://github.com/landonb/easy-as-pypi#🥧
 
 # Boilerplate documentation build configuration file,
 # (Originally) created by sphinx-quickstart on Tue Jul 9 22:26:36 2013

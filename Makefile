@@ -1,8 +1,8 @@
 # vim:tw=0:ts=2:sw=2:noet:ft=make:
 
-# This file exists within 'pypi-and-die':
+# This file exists within 'easy-as-pypi':
 #
-#   https://github.com/hotoffthehamster/pypi-and-die
+#   https://github.com/landonb/easy-as-pypi#🥧
 
 PROJNAME = pypi_and_die
 
