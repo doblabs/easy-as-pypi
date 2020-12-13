@@ -7,7 +7,7 @@ Submodules
 pypi\_and\_die.commands.pypi\_and\_die module
 ---------------------------------------------
 
-.. automodule:: pypi_and_die.commands.pypi_and_die
+.. automodule:: easy_as_pypi.commands.easy_as_pypi
    :members:
    :undoc-members:
    :show-inheritance:
@@ -16,7 +16,7 @@ pypi\_and\_die.commands.pypi\_and\_die module
 Module contents
 ---------------
 
-.. automodule:: pypi_and_die.commands
+.. automodule:: easy_as_pypi.commands
    :members:
    :undoc-members:
    :show-inheritance:

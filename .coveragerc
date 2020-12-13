@@ -5,5 +5,5 @@
 #   https://github.com/landonb/easy-as-pypi#🥧
 
 [run]
-source=pypi_and_die
+source=easy_as_pypi
 

@@ -6,12 +6,12 @@ Subpackages
 
 .. toctree::
 
-   pypi_and_die.commands
+   easy_as_pypi.commands
 
 Module contents
 ---------------
 
-.. automodule:: pypi_and_die
+.. automodule:: easy_as_pypi
    :members:
    :undoc-members:
    :show-inheritance:

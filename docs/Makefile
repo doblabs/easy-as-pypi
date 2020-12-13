@@ -4,7 +4,7 @@
 
 # Makefile for Sphinx documentation
 
-PROJNAME = pypi-and-die
+PROJNAME = easy-as-pypi
 
 # You can set these variables from the command line.
 SPHINXOPTS    =

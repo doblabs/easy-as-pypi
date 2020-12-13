@@ -28,7 +28,7 @@ import pytest
 
 from click.testing import CliRunner
 
-import pypi_and_die
+import easy_as_pypi
 
 
 @pytest.fixture
@@ -36,6 +36,6 @@ def runner():
     """Provide a convenient fixture to simulate execution of (sub-) commands."""
     def runner(args=[], **kwargs):
         env = {}
-        return CliRunner().invoke(pypi_and_die.cli, args, env=env, **kwargs)
+        return CliRunner().invoke(easy_as_pypi.cli, args, env=env, **kwargs)
     return runner
 

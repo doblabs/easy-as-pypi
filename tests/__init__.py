@@ -22,5 +22,5 @@
 # TORT OR OTHERWISE,  ARISING FROM,  OUT OF  OR IN  CONNECTION WITH THE
 # SOFTWARE   OR   THE   USE   OR   OTHER   DEALINGS  IN   THE  SOFTWARE.
 
-"""Tests for the ``pypi-and-die`` package."""
+"""Tests for the ``easy-as-pypi`` package."""
 

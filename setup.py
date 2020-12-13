@@ -39,9 +39,9 @@ setup(
 
     # Specify which package(s) to install.
     # - Without any rules, find_packages returns, e.g.,
-    #     ['pypi_and_die', 'tests', 'tests.pypi_and_die']
+    #     ['easy_as_pypi', 'tests', 'tests.easy_as_pypi']
     # - With the 'exclude*' rule, this call is essentially:
-    #     packages=['pypi_and_die']
+    #     packages=['easy_as_pypi']
     # MEH/2020-01-24: (lb): I saw 'docs' included in another projects'
     # find_packages -- but I'd guess we don't need. (It also had no
     # glob*.) E.g.,

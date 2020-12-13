@@ -1,11 +1,11 @@
 .. ##########################
-.. pypi-and-die Documentation
+.. easy-as-pypi Documentation
 .. ##########################
 
-.. .. |pypi-and-die| replace:: ``pypi-and-die``
-.. .. _pypi-and-die: https://github.com/landonb/easy-as-pypi
+.. .. |easy-as-pypi| replace:: ``easy-as-pypi``
+.. .. _easy-as-pypi: https://github.com/landonb/easy-as-pypi
 
-.. Documentation for |pypi-and-die|_.
+.. Documentation for |easy-as-pypi|_.
 
 .. .. toctree::
 ..    :maxdepth: 4

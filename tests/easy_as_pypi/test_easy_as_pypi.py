@@ -22,7 +22,7 @@
 # TORT OR OTHERWISE,  ARISING FROM,  OUT OF  OR IN  CONNECTION WITH THE
 # SOFTWARE   OR   THE   USE   OR   OTHER   DEALINGS  IN   THE  SOFTWARE.
 
-"""Tests for ``pypi-and-die``."""
+"""Tests for ``easy-as-pypi``."""
 
 
 class TestOneAndDone(object):

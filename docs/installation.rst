@@ -10,29 +10,29 @@ Installation
 
 To install system-wide, run as superuser::
 
-    $ pip3 install pypi-and-die
+    $ pip3 install easy-as-pypi
 
 To install user-local, simply run::
 
-    $ pip3 install -U pypi-and-die
+    $ pip3 install -U easy-as-pypi
 
 To install within a |virtualenv|_, try::
 
-    $ mkvirtualenv pypi-and-die
-    (pypi-and-die) $ pip install release-ghub-pypi
+    $ mkvirtualenv easy-as-pypi
+    (easy-as-pypi) $ pip install release-ghub-pypi
 
 To develop on the project, link to the source files instead::
 
-    (pypi-and-die) $ deactivate
-    $ rmvirtualenv pypi-and-die
+    (easy-as-pypi) $ deactivate
+    $ rmvirtualenv easy-as-pypi
     $ git clone git@github.com:landonb/easy-as-pypi.git
-    $ cd pypi-and-die
-    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 pypi-and-die
-    (pypi-and-die) $ make develop
+    $ cd easy-as-pypi
+    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 easy-as-pypi
+    (easy-as-pypi) $ make develop
 
 After creating the virtual environment,
 to start developing from a fresh terminal, run |workon|_::
 
-    $ workon pypi-and-die
-    (pypi-and-die) $ ...
+    $ workon easy-as-pypi
+    (easy-as-pypi) $ ...
 

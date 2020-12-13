@@ -2,7 +2,7 @@
 #
 #   https://github.com/landonb/easy-as-pypi#🥧
 
-graft pypi_and_die
+graft easy_as_pypi
 
 # We could include specific files, e.g.,
 #   include docs/*.rst
@@ -14,7 +14,7 @@ prune docs/_build
 prune docs/_static
 # Ignore Sphinx-/`make docs`-generated files.
 exclude docs/modules.rst
-recursive-exclude docs pypi_and_die*.rst
+recursive-exclude docs easy_as_pypi*.rst
 # Ignore GitHub release CI shim.
 exclude docs/history-ci.md
 # Uncomment if you included assets, e.g., project logo.

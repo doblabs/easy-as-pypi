@@ -39,9 +39,9 @@ Root sub-module convenience references/aliases.
       from my_package.commands.my_module import my_command
 """
 
-from . import pypi_and_die
+from . import easy_as_pypi
 
 __all__ = (
-    'pypi_and_die',
+    'easy_as_pypi',
 )
 

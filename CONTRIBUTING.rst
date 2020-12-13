@@ -2,8 +2,8 @@
 Contributing
 ############
 
-.. |pypi-and-die| replace:: ``pypi-and-die``
-.. _pypi-and-die: https://github.com/landonb/easy-as-pypi
+.. |easy-as-pypi| replace:: ``easy-as-pypi``
+.. _easy-as-pypi: https://github.com/landonb/easy-as-pypi
 
 .. |user-docs| replace:: user documentation
 .. _user-docs: https://github.com/landonb/easy-as-pypi/tree/release/docs
@@ -120,10 +120,10 @@ questions or concerns. Response times may vary depending on season.
 Getting Started
 ===============
 
-Ready to contribute? Here's how to set up |pypi-and-die|_
+Ready to contribute? Here's how to set up |easy-as-pypi|_
 for local development.
 
-1. Fork the |pypi-and-die|_ repo on GitHub.
+1. Fork the |easy-as-pypi|_ repo on GitHub.
 
    * Visit `<https://github.com/landonb/easy-as-pypi>`__
      and click *Fork*.
@@ -133,51 +133,51 @@ for local development.
    Open a local terminal, change to a directory you'd like to develop from,
    and run the command::
 
-    $ git clone git@github.com:<your_login>/pypi-and-die.git
+    $ git clone git@github.com:<your_login>/easy-as-pypi.git
 
-3. Install |pypi-and-die|_ into a Python virtual instance,
+3. Install |easy-as-pypi|_ into a Python virtual instance,
    or |virtualenv|_.
 
    First, ensure that you have |virtualenvwrapper|_ installed.
 
    Next, set up a virtual environment for local development::
 
-    $ cd pypi-and-die/
-    $ mkvirtualenv -a $(pwd) pypi-and-die
-    (pypi-and-die) $
+    $ cd easy-as-pypi/
+    $ mkvirtualenv -a $(pwd) easy-as-pypi
+    (easy-as-pypi) $
 
    *Note:* We use the ``-a`` option so that ``cdproject`` changes directories
-   to the ``pypi-and-die/`` directory when we're in the virtual
+   to the ``easy-as-pypi/`` directory when we're in the virtual
    environment.
 
    Next, set up your fork for local development::
 
-    (pypi-and-die) $ cdproject
-    (pypi-and-die) $ make develop
+    (easy-as-pypi) $ cdproject
+    (easy-as-pypi) $ make develop
 
    *Hint:* As usual, run ``workon`` to activate the virtual environment, and
    ``deactivate`` to leave it. E.g.,::
 
     # Load the Python virtual instance.
-    $ workon pypi-and-die
-    (pypi-and-die) $
+    $ workon easy-as-pypi
+    (easy-as-pypi) $
 
     # Do your work.
-    (pypi-and-die) $ ...
+    (easy-as-pypi) $ ...
 
     # Finish up.
-    (pypi-and-die) $ deactivate
+    (easy-as-pypi) $ deactivate
     $
 
 4. Before starting work on a new feature or bug fix, make sure your
    ``develop`` branch is up to date with the official branch::
 
-    (pypi-and-die) $ cdproject
-    (pypi-and-die) $ git remote add upstream git@github.com:landonb/easy-as-pypi.git
-    (pypi-and-die) $ git fetch upstream
-    (pypi-and-die) $ git checkout develop
-    (pypi-and-die) $ git rebase upstream/develop
-    (pypi-and-die) $ git push origin HEAD
+    (easy-as-pypi) $ cdproject
+    (easy-as-pypi) $ git remote add upstream git@github.com:landonb/easy-as-pypi.git
+    (easy-as-pypi) $ git fetch upstream
+    (easy-as-pypi) $ git checkout develop
+    (easy-as-pypi) $ git rebase upstream/develop
+    (easy-as-pypi) $ git push origin HEAD
 
 5. Create a branch for local development. If you are working on an known issue,
    you may want to reference the Issue number in the branch name, e.g.,::
@@ -246,7 +246,7 @@ for local development.
 7. Throughout development, run tests and the linter -- and definitely before
    you submit a Pull Request.
 
-   |pypi-and-die|_ uses
+   |easy-as-pypi|_ uses
    |flake8|_ for linting,
    |pytest|_ for unit testing, and
    |tox|_ for verifying against the many versions of Python.
@@ -482,7 +482,7 @@ by running various developer tasks.
       $ tox -e flake8
 
       # is just like running flake8:
-      $ flake8 setup.py pypi_and_die/ tests/
+      $ flake8 setup.py easy_as_pypi/ tests/
 
 2. You can lint the docs easily with one or two commands.
 
@@ -715,5 +715,5 @@ Contributor Code of Conduct
 Please respect and adhere to the `Code of Conduct <code-of-conduct.html>`__
 (please also read it!).
 
-** 🐬 Happy 🐠 pypi-and-die 🦖 Hacking!! 🐡 **
+** 🐬 Happy 🐠 easy-as-pypi 🦖 Hacking!! 🐡 **
 

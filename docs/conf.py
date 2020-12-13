@@ -44,8 +44,8 @@ sys.path.insert(0, project_root)
 # ┃                                                                     ┃
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
-project_dist = 'pypi-and-die'
-package_name = 'pypi_and_die'
+project_dist = 'easy-as-pypi'
+package_name = 'easy_as_pypi'
 project_ghuser = 'landonb'
 project_ghrepo = project_dist
 project_texinfo = 'One line description of project.'
@@ -252,7 +252,7 @@ html_context = {
 # 16x16 or 32x32 pixels large.
 #html_favicon = None
 # (lb): Set your project logo thusly:
-#  html_favicon = 'assets/pypi-and-die_logo.png'
+#  html_favicon = 'assets/easy-as-pypi_logo.png'
 
 # Add any paths that contain custom static files (such as style sheets)
 # here, relative to this directory. They are copied after the builtin

@@ -1,10 +1,10 @@
 @ECHO OFF
 
-REM This file exists within 'pypi-and-die':
+REM This file exists within 'easy-as-pypi':
 REM
 REM   https://github.com/landonb/easy-as-pypi
 
-set PROJECTNAME=pypi-and-die
+set PROJECTNAME=easy-as-pypi
 
 REM *** END: Project customization. Remainder of file is _boilerplate_.
 

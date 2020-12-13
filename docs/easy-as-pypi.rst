@@ -1,13 +1,13 @@
 ####################
-pypi_and_die package
+easy_as_pypi package
 ####################
 
 Module Contents
 ---------------
 
-.. (lb): This is *not* a generated file like pypi_and_die.rst (or modules.rst, etc.).
+.. (lb): This is *not* a generated file like easy_as_pypi.rst (or modules.rst, etc.).
 ..
-..       Rather, this file was copyied from a generated docs/pypi_and_die.rst
+..       Rather, this file was copyied from a generated docs/easy_as_pypi.rst
 ..       and altered with additional options.
 ..
 ..       - Note that the Sphinx and autodoc extension docs suggest these options
@@ -16,7 +16,7 @@ Module Contents
 ..       - See comment in Makefile docs-html re: controlling which auto-generated
 ..         files are created.
 
-.. automodule:: pypi_and_die
+.. automodule:: easy_as_pypi
     :members:
     :special-members: __new__
     :undoc-members:

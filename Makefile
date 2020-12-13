@@ -4,7 +4,7 @@
 #
 #   https://github.com/landonb/easy-as-pypi#🥧
 
-PROJNAME = pypi_and_die
+PROJNAME = easy_as_pypi
 
 BUILDDIR = _build
 
@@ -204,19 +204,19 @@ docs-html: venvforce clean-docs
 	# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
 	# instead maintain a separate docs/<project-name>.rst, so that we can
 	# include special method docs, such as those for and __new__ methods.
-	# - I tried to disable the generation of modules.rst and pypi_and_die.rst
+	# - I tried to disable the generation of modules.rst and easy_as_pypi.rst
 	#   using options in conf.py, but failed. And I thought maybe one could
 	#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
 	#   command.
 	#   - Use -T to disable modules.rst creation, e.g.,
-	#           sphinx-apidoc -T -o docs/ pypi_and_die
+	#           sphinx-apidoc -T -o docs/ easy_as_pypi
 	#   - Use appended exclude patterns to include command docs, e.g.,
-	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/commands/
-	#     will stop docs/pypi_and_die.commands.rst.
-	#   - To not generate docs/pypi_and_die.rst, just don't call sphinx-apidoc!
+	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/commands/
+	#     will stop docs/easy_as_pypi.commands.rst.
+	#   - To not generate docs/easy_as_pypi.rst, just don't call sphinx-apidoc!
 	#     That is, neither of these calls that use exclude patterns will work:
-	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/
-	#           sphinx-apidoc -T -o docs/ pypi_and_die pypi_and_die/__init__.py
+	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
+	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
 	sphinx-apidoc --force -o docs/ $(PROJNAME)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
