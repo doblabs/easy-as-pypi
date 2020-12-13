@@ -27,7 +27,7 @@ To develop on the project, link to the source files instead::
     $ rmvirtualenv easy-as-pypi
     $ git clone git@github.com:landonb/easy-as-pypi.git
     $ cd easy-as-pypi
-    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 easy-as-pypi
+    $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.8 easy-as-pypi
     (easy-as-pypi) $ make develop
 
 After creating the virtual environment,
