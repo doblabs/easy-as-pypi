@@ -1,17 +1,16 @@
-pypi\_and\_die.commands package
+easy\_as\_pypi.commands package
 ===============================
 
 Submodules
 ----------
 
-pypi\_and\_die.commands.pypi\_and\_die module
+easy\_as\_pypi.commands.easy\_as\_pypi module
 ---------------------------------------------
 
 .. automodule:: easy_as_pypi.commands.easy_as_pypi
    :members:
    :undoc-members:
    :show-inheritance:
-
 
 Module contents
 ---------------
