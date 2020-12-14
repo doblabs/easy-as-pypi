@@ -4,24 +4,13 @@
 # License: MIT
 
 # USAGE: Copy the first function to a new file, customize it,
-# source it, then run this file. See make-a-pypi.template.py
-# for an example.
-
-# FIXME/2020-12-13 16:20: Apply sed to README.rst. (Or create empty README.)
-
-# FIXME/2020-12-13 16:20: Rewrite HISTORY.rst.
-
-# MAYBE/2020-12-13 16:20: Make entry_points and Click command optional.
-# See:
+# source it, then run this file.
 #
-#   # FIXME: INCLUDE_ONLY_IF: HAS CLI (see other INCLUDE_ONLY_IFs).
-#   [options.entry_points]
-#   console_scripts =
-#       # <app> = <pkg>.<cls>.run
-#       easy_as_pypi_config = easy_as_pypi_config:cli
-#   # FIXME: INCLUDE_ONLY_IF: HAS CLI (see other INCLUDE_ONLY_IFs).
-#   exclude_lines =
-#       if __name__ == .__main__.:
+# - For an example, see:
+#
+#     make-your-own-branded-pypi-project--example.sh
+#
+#   for in the same directory as this script.
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
