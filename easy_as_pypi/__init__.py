@@ -56,5 +56,6 @@ def cli():
 
 
 # Add commands
-cli.add_command(commands.easy_as_pypi.die)
+# YOU: Change as appropriate.
+cli.add_command(commands.easy_as_pypi.eat)
 

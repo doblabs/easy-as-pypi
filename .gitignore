@@ -37,7 +37,7 @@ docs/_build/
 #   docs/easy_as_pypi.rst
 # We could exclude these from the repo, because generated, but don't, so
 # that they'll appear in `git ls-files` diffs between projects that share
-# the PyPI-and-Die boilerplate, which is helpful when syncing changes.
+# the Easy-as-PyPI boilerplate, which is helpful when syncing changes.
 #
 # You might also want to tweak the generated docs/easy_as_pypi.rst file,
 # to, say, tweak the TOC. For an example, see:

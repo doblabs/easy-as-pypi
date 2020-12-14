@@ -22,7 +22,7 @@
 # TORT OR OTHERWISE,  ARISING FROM,  OUT OF  OR IN  CONNECTION WITH THE
 # SOFTWARE   OR   THE   USE   OR   OTHER   DEALINGS  IN   THE  SOFTWARE.
 
-"""A simple Click command to die."""
+"""A simple Click command for YOU: to replace."""
 
 import sys
 
@@ -30,7 +30,7 @@ import click
 
 
 @click.command()
-def die():
-    """Kills you."""
-    sys.exit(1)
+def eat():
+    """Eats."""
+    click.echo("nom nom")
 
