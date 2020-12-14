@@ -3,7 +3,7 @@
 .. ##########################
 
 .. .. |pypi-and-die| replace:: ``pypi-and-die``
-.. .. _pypi-and-die: https://github.com/hotoffthehamster/pypi-and-die
+.. .. _pypi-and-die: https://github.com/landonb/easy-as-pypi
 
 .. Documentation for |pypi-and-die|_.
 

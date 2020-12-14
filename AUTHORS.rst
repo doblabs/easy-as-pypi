@@ -6,12 +6,12 @@ Credits
 Corporate Sponsor
 #################
 
-- `HotOffThe Hamster <https://github.com/hotoffthehamster>`__
+- `Tally Bark LLC <https://github.com/tallybark>`__
 
 ################
 Human Maintainer
 ################
 
 - `Landon Bouma <https://github.com/landonb>`__
-  ``<hotoffthehamster+landonb -at- gmail.com>``
+  ``<tallybark+easyaspypi -at- gmail.com>``
 

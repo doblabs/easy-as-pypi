@@ -25,7 +25,7 @@ To develop on the project, link to the source files instead::
 
     (pypi-and-die) $ deactivate
     $ rmvirtualenv pypi-and-die
-    $ git clone git@github.com:hotoffthehamster/pypi-and-die.git
+    $ git clone git@github.com:landonb/easy-as-pypi.git
     $ cd pypi-and-die
     $ mkvirtualenv -a $(pwd) --python=/usr/bin/python3.7 pypi-and-die
     (pypi-and-die) $ make develop

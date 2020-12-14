@@ -3,10 +3,10 @@ Contributing
 ############
 
 .. |pypi-and-die| replace:: ``pypi-and-die``
-.. _pypi-and-die: https://github.com/hotoffthehamster/pypi-and-die
+.. _pypi-and-die: https://github.com/landonb/easy-as-pypi
 
 .. |user-docs| replace:: user documentation
-.. _user-docs: https://github.com/hotoffthehamster/pypi-and-die/tree/release/docs
+.. _user-docs: https://github.com/landonb/easy-as-pypi/tree/release/docs
 
 .. |envlist| replace:: ``envlist``
 .. _envlist: https://tox.readthedocs.io/en/latest/config.html#conf-envlist
@@ -55,7 +55,7 @@ You can contribute in many ways:
 Report Bugs
 -----------
 
-Report bugs at https://github.com/hotoffthehamster/pypi-and-die/issues.
+Report bugs at https://github.com/landonb/easy-as-pypi/issues.
 
 When reporting a bug, please include:
 
@@ -85,9 +85,9 @@ us to improve it.
 
 This includes the official |user-docs|_,
 the `README
-<https://github.com/hotoffthehamster/pypi-and-die/blob/release/README.rst>`__,
+<https://github.com/landonb/easy-as-pypi/blob/release/README.rst>`__,
 and the inline docstrings that generate the `API documentation
-<https://pypi-and-die.readthedocs.io/en/latest/modules.html>`__
+<https://easy-as-pypi.readthedocs.io/en/latest/modules.html>`__
 (per |PEP-257|_ and |goog-py-sty|_).
 
 We also appreciate reference from blog posts, articles, and other projects.
@@ -96,7 +96,7 @@ Submit Feedback
 ---------------
 
 The best way to send feedback is to file an issue at
-https://github.com/hotoffthehamster/pypi-and-die/issues.
+https://github.com/landonb/easy-as-pypi/issues.
 
 See above for reporting bugs.
 
@@ -125,7 +125,7 @@ for local development.
 
 1. Fork the |pypi-and-die|_ repo on GitHub.
 
-   * Visit `<https://github.com/hotoffthehamster/pypi-and-die>`__
+   * Visit `<https://github.com/landonb/easy-as-pypi>`__
      and click *Fork*.
 
 2. Clone your fork locally.
@@ -173,7 +173,7 @@ for local development.
    ``develop`` branch is up to date with the official branch::
 
     (pypi-and-die) $ cdproject
-    (pypi-and-die) $ git remote add upstream git@github.com:hotoffthehamster/pypi-and-die.git
+    (pypi-and-die) $ git remote add upstream git@github.com:landonb/easy-as-pypi.git
     (pypi-and-die) $ git fetch upstream
     (pypi-and-die) $ git checkout develop
     (pypi-and-die) $ git rebase upstream/develop
@@ -343,7 +343,7 @@ for local development.
 
 10. Finally,
     `submit a pull request
-    <https://github.com/hotoffthehamster/pypi-and-die/pulls>`_
+    <https://github.com/landonb/easy-as-pypi/pulls>`_
     through the GitHub website.
 
     *Important:* Please rebase your code against ``develop`` and resolve

@@ -4,7 +4,7 @@
 
 # Travis CI config.
 #
-#   https://travis-ci.com/hotoffthehamster/pypi-and-die
+#   https://travis-ci.com/landonb/easy-as-pypi
 
 language: python
 

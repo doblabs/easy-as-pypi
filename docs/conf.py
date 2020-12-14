@@ -46,14 +46,14 @@ sys.path.insert(0, project_root)
 
 project_dist = 'pypi-and-die'
 package_name = 'pypi_and_die'
-project_ghuser = 'hotoffthehamster'
+project_ghuser = 'landonb'
 project_ghrepo = project_dist
 project_texinfo = 'One line description of project.'
 project_docinfo = '{} Documentation'.format(project_dist)
-project_htmlhelp_basename = 'ReleaseGhubPypidoc'
-project_copy = 'Landon Bouma, HotOffThe Hamster, & contributors.'
+project_htmlhelp_basename = 'EasyAsPypidoc'
+project_copy = 'Landon Bouma.'
 project_auth = 'Landon Bouma'
-project_orgn = 'HotOffThe Hamster'
+project_orgn = 'Tally Bark LLC'
 
 exclude_patterns = [
     'CODE-OF-CONDUCT.rst',
@@ -224,7 +224,7 @@ html_context = {
 
 # File-wide metadata.
 # (lb): I found this documented somewhere but it did not fix "Edit on GitHub" broken link.
-#   github_url = 'https://github.com/hotoffthehamster/pypi-and-die'
+#   github_url = 'https://github.com/landonb/easy-as-pypi'
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []

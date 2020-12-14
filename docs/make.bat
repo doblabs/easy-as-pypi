@@ -2,7 +2,7 @@
 
 REM This file exists within 'pypi-and-die':
 REM
-REM   https://github.com/hotoffthehamster/pypi-and-die
+REM   https://github.com/landonb/easy-as-pypi
 
 set PROJECTNAME=pypi-and-die
 
