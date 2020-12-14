@@ -303,13 +303,20 @@ setup_source_string_matching () {
 
 # SYNC_ME: Copied from landonb/git-bump-version-tag.
 
-GITSMART_RE_VERSION_TAG='[v0-9][0-9.]*'
+# Use git-tag's simple glob to first filter on tags starting with 'v' or 0-9.
+GITSMART_RE_VERSION_TAG='[v0-9]*'
+# DEV: Copy-paste test snippet:
+#   git --no-pager tag -l "${GITSMART_RE_VERSION_TAG}"
+
+# The git-tag pattern is a simple glob, so use extra grep to really filter.
+GITSMART_RE_GREPFILTER='^[0-9]\+\.[0-9.]\+$'
 
 # Match groups: \1: major * \2: minor * \4: patch * \5: seppa * \6: alpha.
 GITSMART_RE_VERSPARTS='^v?([0-9]+)\.([0-9]+)(\.([0-9]+)([^0-9]*)(.*))?'
 
 latest_version_basetag () {
   git tag -l "${GITSMART_RE_VERSION_TAG}" |
+    grep -e "${GITSMART_RE_GREPFILTER}" |
     /usr/bin/env sed -E "s/${GITSMART_RE_VERSPARTS}/\1.\2.\4/" |
     sort -r --version-sort |
     head -n1
