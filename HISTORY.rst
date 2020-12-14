@@ -15,5 +15,5 @@ History
 
 - Initial public release.
 
-- Project impetus to codify release process for |dob|_, |nark|_, et al.
+- Project originated to maintain common PyPI reference for |dob|_, |nark|_, et al.
 
