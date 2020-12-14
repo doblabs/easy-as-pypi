@@ -114,7 +114,7 @@ lint: venvforce
 	doc8
 .PHONY: lint
 
-test: venvforce test-hint
+test: venvforce
 	py.test $(TEST_ARGS) tests/
 .PHONY: test
 
@@ -125,11 +125,7 @@ test-all: venvforce
 test-debug: test-local quickfix
 .PHONY: test-debug
 
-test-hint:
-	@echo "Use the PYTEST_ADDOPTS environment variable to add extra command line options."
-.PHONY: test-hint
-
-test-local: venvforce test-hint
+test-local: venvforce
 
 	# (lb) The pipe to tee, `| tee`, masks the return code from py.test. I.e., on its own,
 	# `py.test | tee` will always return true (0), regardless of py.test's exit code. As
@@ -156,7 +152,7 @@ test-local: venvforce test-hint
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
 
-test-one: venvforce test-hint
+test-one: venvforce
 	# You can also obviously: TEST_ARGS=-x make test
 	# See also, e.g.,:
 	#   py.test --pdb -vv -k test_function tests/
