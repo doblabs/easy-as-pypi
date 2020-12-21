@@ -2,8 +2,6 @@
 easy-as-pypi
 @@@@@@@@@@@@
 
-.. FEAT-REQU/2020-01-25: (lb): Add kcov Bash coverage of the release script.
-
 .. .. image:: https://travis-ci.com/landonb/easy-as-pypi.svg?branch=develop
 ..   :target: https://travis-ci.com/landonb/easy-as-pypi
 ..   :alt: Build Status
