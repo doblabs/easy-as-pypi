@@ -5,22 +5,33 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 
-# pytest settings can be set in any of these files:
-#   pytest.ini, pyproject.toml, tox.ini, setup.cfg
-# though it's recommended to avoid the latter. Ref:
-#   https://docs.pytest.org/en/stable/customize.html#setup-cfg
+# py.test options
+# ===============
+#
+# - pytest settings can be set in any of these files:
+#
+#     pytest.ini / pyproject.toml / tox.ini / setup.cfg
+#
+#   though it's recommended to avoid the latter.
+#
+# - Ref:
+#
+#     https://docs.pytest.org/en/stable/customize.html#setup-cfg
+#
+# - Hint:
+#
+#  --strict-markers   markers not registered in the `markers` section
+#                     of the configuration file raise errors.
+#
+#  --tb=style         traceback print mode (auto/long/short/line/native/no).
+#
+#  -r chars           show extra test summary info as specified by chars:
+#                     (f)ailed, (E)rror, (s)kipped, (x)failed, (X)passed,
+#                     (p)assed, (P)assed with output, (a)ll except passed
+#                     (p/P), or (A)ll.  (w)arnings are enabled by default
+#                     (see --disable-warnings),  'N' can be used to reset
+#                     the list. (default: 'fE').
+#
 [tool.pytest.ini_options]
-# 2020-12-13: (lb): TBH, not sure where I got these options from, or why,
-#                   probably from hamster-cli and I just never removed them
-#                   or understood if-why I needed them.
-#  --strict-markers      markers not registered in the `markers` section of the
-#                        configuration file raise errors.
-#  --tb=style            traceback print mode (auto/long/short/line/native/no).
-#  -r chars              show extra test summary info as specified by chars:
-#                        (f)ailed, (E)rror, (s)kipped, (x)failed, (X)passed,
-#                        (p)assed, (P)assed with output, (a)ll except passed
-#                        (p/P), or (A)ll. (w)arnings are enabled by default (see
-#                        --disable-warnings), 'N' can be used to reset the list.
-#                        (default: 'fE').
-addopts = "--tb=short --strict-markers -rsx"
+addopts = "--tb=short --strict-markers -ra"
 
