@@ -9,19 +9,27 @@ PROJNAME = easy_as_pypi
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# `make docs` docs/ subdir HTML target, e.g.,
+#   ./docs/_build/html/index.html
 BUILDDIR = _build
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# DEV: Set BROWSER environ to pick your browser, otherwise webbrowser ignores
-# the system default and goes through its list, which starts with 'mozilla'.
+# USAGE: Set BROWSER environ to pick your browser, otherwise webbrowser
+# ignores the system default and goes through its list, which starts
+# with 'mozilla'.
+#
 # E.g.,
 #
 #   BROWSER=chromium-browser make view-coverage
 #
-# Alternatively, one could be less distro-friendly and leverage sensible-utils, e.g.,
+# Alternatively, you could leverage sensible-utils (Linux), e.g.,
 #
-#   PYBROWSER := sensible-browser
+#   BROWSER=sensible-browser make view-coverage
+#
+# (and probably `open` on macOS, I'd guess).
+
+# Here we define a macro used to set a local variable we can run later.
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
 try:
@@ -32,12 +40,59 @@ except:
 webbrowser.open("file://" + pathname2url(os.path.abspath(sys.argv[1])))
 endef
 export BROWSER_PYSCRIPT
-# NOTE: Cannot name BROWSER, else overrides environ of same name.
+
 PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
+
+# Note that setting the Makefile "BROWSER" variable  — or any variable with
+# the same name as an existing environ from the shell (e.g., try "HOME") —
+# changes the same-named environ name, e.g.,
+#
+#   - Herein:
+#
+#       BROWSER := python -c "$$BROWSER_PYSCRIPT"
+#
+#       print-browser-vars:
+#         @echo "\$$(BROWSER): $(BROWSER)"
+#         @echo "\$${BROWSER}: $${BROWSER}"
+#       .PHONY: print-browser-vars
+#
+#   - Shell:
+#
+#       $ make print-browser-vars
+#       $(BROWSER): python -c import os, webbrowser, sys try: from urllib ...
+#       ${BROWSER}: python -c "$BROWSER_PYSCRIPT"
+#
+#   I.e., $(BROWSER) was set to the macro we defined (as the result of
+#   the := assignment), and ${BROWSER} was set to the assignment statement
+#   itself.
+#
+# But if we set a variable with a unique name that doesn't match an
+# existing environ, that the shell variable of the same name is left
+# unset, e.g.,
+#
+#   - Herein:
+#
+#     PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
+#
+#     print-pybrowser-vars:
+#       @echo "\$$(PYBROWSER): $(PYBROWSER)"
+#       @echo "\$${PYBROWSER}: $${PYBROWSER}"
+#     .PHONY: print-browser-vars
+#
+#   - Shell:
+#
+#     $ make print-pybrowser-vars
+#     $(PYBROWSER): python -c import os, webbrowser, sys try: from urllib ...
+#     ${PYBROWSER}:
+#
+#
+# This I cannot explain (though I'd assume it's documented or at least
+# there's a reasonable explanation).
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# YOU/DEV: If you want to define your own tasks, add your own Makefile.
+# USAGE: If you want to define your own tasks, add your own Makefile.
+#
 # You could e.g., define a help task extension thusly:
 #
 #   $ echo -e "help-local::\n\t@echo 'More help!'" > Makefile.local
@@ -165,6 +220,16 @@ isort: venvforce
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# *** Collection of pytest runners.
+
+# SAVVY: Consider other useful options we don't expose via this Makefile, e.g.,:
+#
+#     pytest --pdb -vv -k test_function tests/
+#
+#                      ^^^^^^^^^^^^^^^^  Test specific function or class
+#                  ^^^                   Increase verbosity
+#            ^^^^^                       Start pdb on error or KeyboardInterrupt
+
 test: venvforce
 	py.test $(TEST_ARGS) tests/
 .PHONY: test
@@ -176,37 +241,46 @@ test-all: venvforce
 test-debug: test-local quickfix
 .PHONY: test-debug
 
+# SAVVY: By default, a pipeline returns the exit code of the final command,
+# so if you pipe to `tee`, the pipeline always returns true, e.g.,
+#
+#   py.test ... | tee ...
+#
+# will always return true, regardless of py.text failing or not.
+#
+# - One work-around is the pipefail option,
+#   e.g., put this at the top of the Makefile:
+#
+#     SHELL = /bin/bash -o pipefail
+#     ...
+#     test-local:
+#       set -o pipefail
+#       py.test ... | tee ...
+#
+#   But then pipefail (and bash) apply to all targets that shell-out.
+#
+# - A better approach is to use the PIPESTATUS environ.
+#
+# - Another approach that I didn't care to test — I like the PIPESTATUS
+#   approach — but that might work would be to combine the operation in-
+#   to one command, e.g.,
+#
+#     SHELL = /bin/bash
+#     ...
+#     test-local:
+#       set -o pipefail; \
+#       py.test ... | tee ...
+#
+#   But, as mentioned above, then we're applying Bash to all shell-outs,
+#   and this author would prefer POSIX-compatible shell code when possible.
 test-local: venvforce
-
-	# (lb) The pipe to tee, `| tee`, masks the return code from py.test. I.e., on its own,
-	# `py.test | tee` will always return true (0), regardless of py.test's exit code. As
-	# such, don't run this task from Travis CI. Or, if you do, change shells and set pipefail.
-	# E.g., at the top of the file, include:
-
-	# If you want Make to fail if py.test fails, you want pipefail.
-	# Put this at the top of the Makefile:
-	#     SHELL = /bin/bash -o pipefail
-	# or don't call tasks that pipe from Travis CI (avoid false positives).
-	#
-	# EXPLAIN/2020-01-24: The previous comment does not jive with the next one-
-	#                     I'm wondering if that's why I added the exit $PIPESTATUS.
-	#
-	# (lb): I tried using pipefail to catch failure, but it didn't trip. E.g.,:
-	#           SHELL = /bin/bash
-	#           ...
-	#           test-local:
-	#             set -o pipefail
-	#             py.test ... | tee ...
-	#       Alternatively, we can access the special PIPESTATUS environ instead.
 	py.test $(TEST_ARGS) tests/ | tee .make.out
 	# Express the exit code of py.test, not the tee.
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
 
+# ALTLY: Use `TEST_ARGS=-x make test`
 test-one: venvforce
-	# You can also obviously: TEST_ARGS=-x make test
-	# See also, e.g.,:
-	#   py.test --pdb -vv -k test_function tests/
 	py.test $(TEST_ARGS) -x tests/
 .PHONY: test-one
 
@@ -248,26 +322,26 @@ docs: docs-html
 	$(PYBROWSER) docs/_build/html/index.html
 .PHONY: docs
 
+# Docstrings ref:
+#   https://www.python.org/dev/peps/pep-0257/
+# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
+# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
+# instead maintain a separate docs/<project-name>.rst, so that we can
+# include special method docs, such as those for and __new__ methods.
+# - I tried to disable the generation of modules.rst and easy_as_pypi.rst
+#   using options in conf.py, but failed. And I thought maybe one could
+#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
+#   command.
+#   - Use -T to disable modules.rst creation, e.g.,
+#           sphinx-apidoc -T -o docs/ easy_as_pypi
+#   - Use appended exclude patterns to include command docs, e.g.,
+#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/commands/
+#     will stop docs/easy_as_pypi.commands.rst.
+#   - To not generate docs/easy_as_pypi.rst, just don't call sphinx-apidoc!
+#     That is, neither of these calls that use exclude patterns will work:
+#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
+#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
 docs-html: venvforce clean-docs
-	# Docstrings ref:
-	#   https://www.python.org/dev/peps/pep-0257/
-	# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
-	# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
-	# instead maintain a separate docs/<project-name>.rst, so that we can
-	# include special method docs, such as those for and __new__ methods.
-	# - I tried to disable the generation of modules.rst and easy_as_pypi.rst
-	#   using options in conf.py, but failed. And I thought maybe one could
-	#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
-	#   command.
-	#   - Use -T to disable modules.rst creation, e.g.,
-	#           sphinx-apidoc -T -o docs/ easy_as_pypi
-	#   - Use appended exclude patterns to include command docs, e.g.,
-	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/commands/
-	#     will stop docs/easy_as_pypi.commands.rst.
-	#   - To not generate docs/easy_as_pypi.rst, just don't call sphinx-apidoc!
-	#     That is, neither of these calls that use exclude patterns will work:
-	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
-	#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
 	sphinx-apidoc --force -o docs/ $(PROJNAME)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
@@ -278,6 +352,8 @@ servedocs: docs
 .PHONY: servedocs
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# Depends: The following code tested against cloc v1.81.
 
 CLOC := $(shell command -v cloc 2> /dev/null)
 .PHONY: CLOC
