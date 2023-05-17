@@ -1,7 +1,3 @@
-# This file exists within 'easy-as-pypi':
-#
-#   https://github.com/landonb/easy-as-pypi#🥧
-
 # USAGE: `/bin/cp .ignore.example .ignore` and personalize.
 
 /.git/
