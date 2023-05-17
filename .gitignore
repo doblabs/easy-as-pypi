@@ -2,11 +2,8 @@
 #
 #   https://github.com/pydob/easy-as-pypi#🥧
 
-# Packaging — `make dist`.
-/build/
+# Packaging — `make build`.
 /dist/
-*.egg-info/
-/.eggs/
 
 # Python byte code.
 *.py[cod]
