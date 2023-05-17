@@ -234,12 +234,12 @@ develop: depends-active-venv
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 lint: depends-active-venv
-	flake8 setup.py $(PACKAGE_NAME)/ tests/
+	flake8 $(PACKAGE_NAME)/ tests/
 	doc8
 .PHONY: lint
 
 isort: depends-active-venv
-	isort --recursive setup.py $(PACKAGE_NAME)/ tests/
+	isort --recursive $(PACKAGE_NAME)/ tests/
 	# DX: End files with blank line.
 	git ls-files | while read file; do \
 		if [ -n "$$(tail -n1 $$file)" ]; then \
