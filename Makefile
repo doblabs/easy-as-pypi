@@ -329,7 +329,7 @@ clean-docs:
 .PHONY: clean-docs
 
 docs: docs-html
-	$(PYBROWSER) docs/_build/html/index.html
+	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html
 .PHONY: docs
 
 # Docstrings ref:
