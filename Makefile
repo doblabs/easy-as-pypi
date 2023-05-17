@@ -4,9 +4,15 @@
 #
 #   https://github.com/landonb/easy-as-pypi#🥧
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 PROJNAME = easy_as_pypi
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 BUILDDIR = _build
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # DEV: Set BROWSER environ to pick your browser, otherwise webbrowser ignores
 # the system default and goes through its list, which starts with 'mozilla'.
@@ -30,12 +36,16 @@ export BROWSER_PYSCRIPT
 # NOTE: Cannot name BROWSER, else overrides environ of same name.
 PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # YOU/DEV: If you want to define your own tasks, add your own Makefile.
 # You could e.g., define a help task extension thusly:
 #
 #   $ echo -e "help-local::\n\t@echo 'More help!'" > Makefile.local
 
 -include Makefile.local
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 help: help-main help-local
 .PHONY: help
@@ -73,6 +83,8 @@ help-main:
 	@echo "   view-coverage   open coverage docs in new tab (set BROWSER to specify app)"
 .PHONY: help-main
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 clean: clean-build clean-pyc clean-test
 .PHONY: clean
 
@@ -97,6 +109,8 @@ clean-test:
 	/bin/rm -fr htmlcov/
 .PHONY: clean-test
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 dist: venvforce clean
 	python setup.py sdist
 	python setup.py bdist_wheel
@@ -107,6 +121,8 @@ release: venvforce clean
 	python setup.py sdist bdist_wheel
 	twine upload -r pypi -s dist/*
 .PHONY: release
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 install: venvforce clean
 	python setup.py install
@@ -119,11 +135,15 @@ venvforce:
 	fi
 .PHONY: venvforce
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 develop: venvforce
 	pip install -U pip setuptools wheel
 	pip install -U -r requirements/dev.pip
 	pip install -U -e .
 .PHONY: develop
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 lint: venvforce
 	flake8 setup.py $(PROJNAME)/ tests/
@@ -143,6 +163,8 @@ isort: venvforce
 	done
 	@echo "ça va"
 .PHONY: isort
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 test: venvforce
 	py.test $(TEST_ARGS) tests/
@@ -197,6 +219,8 @@ quickfix:
 	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i .make.out
 .PHONY: quickfix
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 coverage: venvforce
 	coverage run -m pytest $(TEST_ARGS) tests
 	coverage report
@@ -212,6 +236,8 @@ coverage-html: coverage coverage-to-html view-coverage
 view-coverage:
 	$(PYBROWSER) htmlcov/index.html
 .PHONY: view-coverage
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 clean-docs:
 	$(MAKE) -C docs clean BUILDDIR=$(BUILDDIR)
@@ -252,6 +278,8 @@ servedocs: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 .PHONY: servedocs
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 CLOC := $(shell command -v cloc 2> /dev/null)
 .PHONY: CLOC
 
@@ -261,6 +289,8 @@ ifndef CLOC
 endif
 	@cloc --exclude-dir=build,dist,docs,$(PROJNAME).egg-info,.eggs,.git,htmlcov,.pytest_cache,.tox .
 .PHONY: cloc
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 whoami:
 	@echo $(PROJNAME)
