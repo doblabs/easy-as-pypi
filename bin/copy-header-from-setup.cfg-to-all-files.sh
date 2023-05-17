@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # vim:tw=0:ts=2:sw=2:et:norl:nospell
-# Project: https://github.com/landonb/easy-as-pypi#🥧
+# Project: https://github.com/pydob/easy-as-pypi#🥧
 # License: MIT
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -39,7 +39,7 @@ update_copy_headers () {
 
   grepn="^# Copyright © ${source_header_copy_years} ${source_header_copy_names}\. All rights reserved\.$"
   if [ "${header_len}" = "-3" ]; then
-    # E.g., "^#   https://github.com/landonb/easy-as-pypi#🥧$"
+    # E.g., "^#   https://github.com/pydob/easy-as-pypi#🥧$"
     grepn="^#   ${source_header_projecturl}$"
   fi
 

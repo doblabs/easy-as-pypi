@@ -3,7 +3,7 @@
 .. ##########################
 
 .. .. |easy-as-pypi| replace:: ``easy-as-pypi``
-.. .. _easy-as-pypi: https://github.com/landonb/easy-as-pypi
+.. .. _easy-as-pypi: https://github.com/pydob/easy-as-pypi
 
 .. Documentation for |easy-as-pypi|_.
 

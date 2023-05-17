@@ -2,7 +2,7 @@
 
 # This file exists within 'easy-as-pypi':
 #
-#   https://github.com/landonb/easy-as-pypi#🥧
+#   https://github.com/pydob/easy-as-pypi#🥧
 
 # Boilerplate documentation build configuration file,
 # (Originally) created by sphinx-quickstart on Tue Jul 9 22:26:36 2013
@@ -46,7 +46,7 @@ sys.path.insert(0, project_root)
 
 project_dist = 'easy-as-pypi'
 package_name = 'easy_as_pypi'
-project_ghuser = 'landonb'
+project_ghuser = 'pydob'
 project_ghrepo = project_dist
 project_texinfo = 'One line description of project.'
 project_docinfo = '{} Documentation'.format(project_dist)
@@ -224,7 +224,7 @@ html_context = {
 
 # File-wide metadata.
 # (lb): I found this documented somewhere but it did not fix "Edit on GitHub" broken link.
-#   github_url = 'https://github.com/landonb/easy-as-pypi'
+#   github_url = 'https://github.com/pydob/easy-as-pypi'
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []
