@@ -124,7 +124,11 @@ help-main:
 	@echo "   clean-docs      remove docs from the build"
 	@echo "   clean-pyc       remove Python file artifacts"
 	@echo "   clean-test      remove test and coverage artifacts"
-	@echo "   cloc            \"count lines of code\""
+	@echo "   cloc            run \`cloc-digest\` command aka \"count lines of code\""
+	@echo "   cloc-complete   print cloc results for each file, sorted by count"
+	@echo "   cloc-digest     print cloc project summary"
+	@echo "   cloc-file-sort  print cloc results for each file, sorted by path"
+	@echo "   cloc-sources    print cloc results for source and tests directories"
 	@echo "   coverage        check code coverage quickly with the default Python"
 	@echo "   coverage-html   generate HTML coverage reference for every source file"
 	@echo "   docs            generate Sphinx HTML documentation, including API docs"
@@ -145,6 +149,7 @@ help-main:
 #           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
 #           test-local      called by \`test-debug\` to generate .make.out from pytest
 #           venvforce       fails make command unless virtualenv active
+#           depends-cloc    fails make command unless \`cloc\` installed
 #           CLOC            set to \`cloc \` if cloc installed
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -364,16 +369,83 @@ servedocs: docs
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # Depends: The following code tested against cloc v1.81.
+# - See `depends-cloc` below for verifying cloc version.
 
 CLOC := $(shell command -v cloc 2> /dev/null)
 .PHONY: CLOC
 
-cloc:
-ifndef CLOC
-	$(error "Please install cloc from: https://github.com/AlDanial/cloc")
-endif
-	@cloc --exclude-dir=build,dist,docs,$(PACKAGE_NAME).egg-info,.eggs,.git,htmlcov,.pytest_cache,.tox .
+# ***
+
+cloc: cloc-digest
 .PHONY: cloc
+
+# ***
+
+define CLOC_IGNORE_FILES
+docs/conf.py
+endef
+export CLOC_IGNORE_FILES
+
+cloc-digest: depends-cloc
+	@cloc \
+		--exclude-dir=sphinx_rtd_theme \
+		$$(git ls-files | grep -v -x -F "$${CLOC_IGNORE_FILES}")
+.PHONY: cloc-digest
+
+cloc-complete: depends-cloc
+	@cloc \
+		--by-file \
+		--exclude-dir=sphinx_rtd_theme \
+		$$(git ls-files | grep -v -x -F "$${CLOC_IGNORE_FILES}")
+.PHONY: cloc-complete
+
+# ***
+
+cloc-sources:
+	@echo "\n  *** Source files under $(SOURCE_DIR)/:\n"
+	@cloc --by-file "$(SOURCE_DIR)"
+	@echo "\n  *** Pytest files under tests/:\n"
+	@cloc --by-file "tests"
+.PHONY: cloc-sources
+
+# ***
+
+# Show results for each file, like `cloc --by-file`, except cloc doesn't
+# sort the results. So use SQL pipeline to sort it ourselves, then feed
+# the results back to cloc's sqlite_formatter to pretty-print.
+cloc-file-sort: depends-cloc
+	@( \
+		( \
+			cloc \
+				--sql 1 \
+				--exclude-dir="sphinx_rtd_theme" \
+				$$(git ls-files); \
+			echo ".header on"; \
+			echo "select \
+							File, \
+							nBlank   as '    blank', \
+							nComment as '  comment', \
+							nCode    as '     code' \
+						from t \
+						order by File"; \
+		) \
+		| sqlite3; \
+		echo "|         |         |         "; \
+	) | "$$(dirname "$$(realpath "$$(which cloc)")")"/sqlite_formatter
+.PHONY: cloc-file-sort
+
+# ***
+
+depends-cloc:
+ifndef CLOC
+	$(error "ERROR: Please install `cloc` from: https://github.com/AlDanial/cloc")
+endif
+	@if ! echo "$$(cloc --version)" | grep -q "^[1]\."; then \
+		echo; \
+		echo "ALERT: Unsupported cloc version?: $$(cloc --version) (or update Makefile)"; \
+		echo; \
+	fi
+.PHONY: depends-cloc
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
