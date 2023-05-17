@@ -30,3 +30,7 @@
 /*.py[cod]
 __pycache__/
 
+# Editable pyproject.toml and .venv-<project> — `make develop`.
+/.editable/
+/.venv*/
+
