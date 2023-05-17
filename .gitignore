@@ -3,34 +3,34 @@
 #   https://github.com/pydob/easy-as-pypi#🥧
 
 # Packaging — `make dist`.
-build/
-dist/
+/build/
+/dist/
 *.egg-info/
-.eggs/
+/.eggs/
 
 # Python byte code.
 *.py[cod]
-__pycache__/
+/__pycache__/
 
 # Testing/CI tasks.
-.pytest_cache/
-.tox
+/.pytest_cache/
+/.tox/
 
 # Coverage — `make coverage`.
-.coverage
+/.coverage
 # Coverage — `make coverage-html`.
-htmlcov/
+/htmlcov/
 # Coverage — `codecov` https://codecov.io.
-coverage.xml
+/coverage.xml
 
-# User's personal .ignore (e.g., .ignore.example).
-.ignore
+# User's personal .ignore (see .ignore.example).
+/.ignore
 
 # Optional private DEV Makefile.
-Makefile.local
+/Makefile.local
 
 # Sphinx Docs — `make docs`.
-docs/_build/
+/docs/_build/
 # `make docs` generates at least two files for the API reference, an
 # index file (modules.rst), and an API reference (project-name.rst).
 #   docs/modules.rst
@@ -44,7 +44,7 @@ docs/_build/
 #   docs/easy-as-pypi.rst
 
 # Test output for Vim quickfix — `make test-local`.
-.make.out
+/.make.out
 
 # Translations files.
 *.mo
