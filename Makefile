@@ -11,7 +11,7 @@ PACKAGE_NAME = easy_as_pypi
 
 # `make docs` docs/ subdir HTML target, e.g.,
 #   ./docs/_build/html/index.html
-BUILDDIR = _build
+DOCS_BUILDDIR = _build
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -323,7 +323,7 @@ view-coverage:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 clean-docs:
-	$(MAKE) -C docs clean BUILDDIR=$(BUILDDIR)
+	$(MAKE) -C docs clean BUILDDIR=$(DOCS_BUILDDIR)
 	/bin/rm -f docs/$(PACKAGE_NAME).*rst
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-docs
