@@ -73,13 +73,6 @@ help-main:
 	@echo "   view-coverage   open coverage docs in new tab (set BROWSER to specify app)"
 .PHONY: help-main
 
-venvforce:
-	@if [ -z "${VIRTUAL_ENV}" ]; then \
-		>&2 echo "ERROR: Run from a virtualenv!"; \
-		exit 1; \
-	fi
-.PHONY: venvforce
-
 clean: clean-build clean-pyc clean-test
 .PHONY: clean
 
@@ -104,6 +97,28 @@ clean-test:
 	/bin/rm -fr htmlcov/
 .PHONY: clean-test
 
+dist: venvforce clean
+	python setup.py sdist
+	python setup.py bdist_wheel
+	ls -l dist
+.PHONY: dist
+
+release: venvforce clean
+	python setup.py sdist bdist_wheel
+	twine upload -r pypi -s dist/*
+.PHONY: release
+
+install: venvforce clean
+	python setup.py install
+.PHONY: install
+
+venvforce:
+	@if [ -z "${VIRTUAL_ENV}" ]; then \
+		>&2 echo "ERROR: Run from a virtualenv!"; \
+		exit 1; \
+	fi
+.PHONY: venvforce
+
 develop: venvforce
 	pip install -U pip setuptools wheel
 	pip install -U -r requirements/dev.pip
@@ -114,6 +129,20 @@ lint: venvforce
 	flake8 setup.py $(PROJNAME)/ tests/
 	doc8
 .PHONY: lint
+
+isort: venvforce
+	isort --recursive setup.py $(PROJNAME)/ tests/
+	# DX: End files with blank line.
+	git ls-files | while read file; do \
+		if [ -n "$$(tail -n1 $$file)" ]; then \
+			echo "Blanking: $$file"; \
+			echo >> $$file; \
+		else \
+			echo "DecentOk: $$file"; \
+		fi \
+	done
+	@echo "ça va"
+.PHONY: isort
 
 test: venvforce
 	py.test $(TEST_ARGS) tests/
@@ -219,42 +248,9 @@ docs-html: venvforce clean-docs
 	$(MAKE) -C docs html
 .PHONY: docs-html
 
-isort: venvforce
-	isort --recursive setup.py $(PROJNAME)/ tests/
-	# DX: End files with blank line.
-	git ls-files | while read file; do \
-		if [ -n "$$(tail -n1 $$file)" ]; then \
-			echo "Blanking: $$file"; \
-			echo >> $$file; \
-		else \
-			echo "DecentOk: $$file"; \
-		fi \
-	done
-	@echo "ça va"
-.PHONY: isort
-
 servedocs: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 .PHONY: servedocs
-
-release: venvforce clean
-	python setup.py sdist bdist_wheel
-	twine upload -r pypi -s dist/*
-.PHONY: release
-
-dist: venvforce clean
-	python setup.py sdist
-	python setup.py bdist_wheel
-	ls -l dist
-.PHONY: dist
-
-install: venvforce clean
-	python setup.py install
-.PHONY: install
-
-whoami:
-	@echo $(PROJNAME)
-.PHONY: whoami
 
 CLOC := $(shell command -v cloc 2> /dev/null)
 .PHONY: CLOC
@@ -265,4 +261,8 @@ ifndef CLOC
 endif
 	@cloc --exclude-dir=build,dist,docs,$(PROJNAME).egg-info,.eggs,.git,htmlcov,.pytest_cache,.tox .
 .PHONY: cloc
+
+whoami:
+	@echo $(PROJNAME)
+.PHONY: whoami
 
