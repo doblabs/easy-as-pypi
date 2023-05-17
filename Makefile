@@ -11,6 +11,32 @@ SOURCE_DIR = easy_as_pypi
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Path to package and dependency source code clones, necessary if
+# you want to run `make develop` to setup an editable virtualenv.
+EDITABLES_ROOT ?= $(shell echo ~/.kit/py)
+
+# Local dir wherein to place editable pyproject.toml,
+#   e.g., `.editable/pyproject.toml`.
+EDITABLE_DIR ?= .editable
+
+# Local "editable" virtualenv directory (`make develop`).
+VENV_NAME ?= .venv-$(PACKAGE_NAME)
+
+# The "editable" virtualenv Python version (`make develop`).
+# - USYNC: Keep current with tox.ini's `basepython`.
+VENV_PYVER ?= 3.11
+
+# Additional `python -m venv` options.
+#
+# - You most likely won't need this except for special cases, e.g.,
+#   if you installed GnuCash and want access to its bindings, you
+#   may need to fallback on system site-packages to find `gnucash`.
+#
+#     VENV_ARGS = --system-site-packages
+VENV_ARGS =
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # `make docs` docs/ subdir HTML target, e.g.,
 #   ./docs/_build/html/index.html
 DOCS_BUILDDIR ?= _build
@@ -117,7 +143,9 @@ help-main:
 	@echo "   build           create sdist and bdist (under ./dist/)"
 	@echo "                     sdist is sources dist (tar-gzip)"
 	@echo "                     bdist is \"built dist\", aka wheel (zip)"
-	@echo "   develop         install (or update) all packages required for development"
+	@echo "   develop         install package and \"our\" deps in editable mode"
+	@echo "                     uses local virtualenv VENV_NAME [./$(VENV_NAME)]"
+	@echo "                     \`cd $$(pwd) && workon\` to activate"
 	@echo "   install         install app to \"global\" virtualenv"
 	@echo "                     uses virtualenv root WORKON_HOME [$${WORKON_HOME:-$${HOME}/.virtualenvs}]"
 	@echo "                     \`workon $(PACKAGE_NAME)\` to activate (from anywhere)"
@@ -140,9 +168,15 @@ help-main:
 	@echo "   coverage-html   generate line-by-line HTML coverage reports"
 	@echo "   docs            generate Sphinx HTML documentation, including API docs"
 	@echo "   docs-live       watches and regenerates docs as they're edited"
+	@echo "   editable        create custom pyproject.toml for \`develop\` command"
+	@echo "                     saves under local EDITABLE_DIR dir [./$(EDITABLE_DIR)/]"
+	@echo "   editables       run \`editable\` command on all of \"our\" local projects"
+	@echo "                     see \`print-ours\` for list of \"our\" projects"
 	@echo "   help            print this message"
 	@echo "   isort           sort and group module imports using \`isort\`"
 	@echo "   lint            automatically make style fixes with \`flake8\`"
+	@echo "   print-ours      print list of \"our\" projects — those we control"
+	@echo "                     and those \`develop\` will make editable if found"
 	@echo "   test            run pytest against active virtualenv or Python"
 	@echo "   test-all        run tox (pytest all supported Python versions)"
 	@echo "   test-debug      prepare pytest results for Vim quickfix"
@@ -350,11 +384,201 @@ depends-active-venv:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-develop: depends-active-venv
-	pip install -U pip setuptools wheel
-	pip install -U -r requirements/dev.pip
-	pip install -U -e .
+# USAGE: Run `make develop` to wire venv for active, "editable" development
+#        (so you don't have to always `poetry install` after making changes).
+#
+# - Caveat: You need to clone dependencies to the same directory
+#           and tell make where to find it, e.g.,
+#
+#             EDITABLES_ROOT=~/.kit/py make develop
+
+develop: editables editable
+	eval "$$(~/.local/bin/pyenv init -)"; \
+	pyenv install -s $(VENV_PYVER); \
+	pyenv shell $(VENV_PYVER); \
+	if [ ! -d "$(VENV_NAME)" ]; then \
+		python3 -m venv $(VENV_ARGS) "$(VENV_NAME)"; \
+	fi; \
+	. "$(VENV_NAME)/bin/activate"; \
+	pip install -U pip setuptools; \
+	pip install poetry; \
+	poetry self add "poetry-dynamic-versioning[plugin]"; \
+	poetry -C $(EDITABLE_DIR) install --with dist,lint,test,docstyle,docs,extras; \
+
+	@echo
+	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop
+
+# ***
+
+# SYNC_ME: List of "our" related projects to make --editable.
+# - These projects are all managed by tallybark (hence "our")
+#   and will each be installed in editable mode (akin to the
+#   `pip install -e <path/to/proj>` command, but using Poetry).
+EDITABLE_PJS = \
+	dob \
+	birdseye \
+	\
+	ansi-escape-room \
+	click-hotoffthehamster \
+	click-hotoffthehamster-alias \
+	config-decorator \
+	easy-as-pypi-appdirs \
+	easy-as-pypi-config \
+	easy-as-pypi-getver \
+	easy-as-pypi-termio \
+	human-friendly_pedantic-timedelta \
+	pep440-version-compare-cli \
+	sqlalchemy-migrate-hotoffthehamster \
+	\
+	dob-bright \
+	dob-prompt \
+	dob-viewer \
+	nark \
+	\
+	dob-plugin-git-hip \
+	dob-plugin-hamster-dance \
+	dob-plugin-my-post-processor \
+	dob-plugin-stale-fact-goader \
+
+# ***
+
+# USAGE: Run `EDITABLES_ROOT=<path> make editable` to create dev-friendly
+# `.editable/pyproject.toml` that'll install the project in editable mode.
+#
+# - E.g., after you've cloned EDITABLE_PJS projects to ~/.kit/py, run:
+#
+#     EDITABLES_ROOT=~/.kit/py make editable
+#
+# to create `.editable/pyproject.toml` with the correct local paths.
+#
+# - You wouldn't normally run this task: `make develop` runs it.
+#
+#   - But it would be useful to run on its own if you're diagnosing
+#     a poetry-install failure.
+
+# USEIT: If you are using our virtualenvwrapper fork, you can activate
+# the editable virtualenv easily:
+#
+#   $ cd <path-to-project>
+#   $ workon
+#
+# - If not, just do it the old-fashioned way:
+#
+#   $ . <venv-name>/bin/activate
+
+# - Note we use quoted [ -d ] test [ -d "$${pyprojs_full}/$${project}" ]
+#   to support space characters in path name, but the shell won't expand
+#   a *quoted* tilde '~', so we do that ourselves.
+#   - But because not Bash, we cannot use variable pattern substitution:
+#       "$${pyprojs_root/#\~/$$HOME}"
+#     So we use `sed` instead, but we use '@' delimiters and not normal '/',
+#     because path contains '/' (so then path now cannot contain @ symbol).
+
+# - If a project is not found locally, an ALERT is printed, but you don't
+#   need to care unless you want to hack on that project, too. E.g., if
+#   you only care that the main project is editable, say, Birdseye, just
+#   clone that repo locally and don't worry about the dependency repos.
+#   - Otherwise, clone 'em all, though maybe consider `myrepos` or a similar
+#     multiple repository tool to ease the burden of fetching and maintaining
+#     them all.
+
+# - The second sed simply strips the trailing '|' the for-loop might leave.
+
+# - The third sed adds "../" prefixes to the new .editable/pyproject.toml,
+#   so it references the README.rst and pacakge from its parent directory.
+#
+#   - Note the sed expects a specific pyproject format:
+#
+#     - The README is easy, just keep the line like this:
+#
+#         readme = "README.rst"
+#
+#       and it'll be transformed to:
+#
+#         readme = "../README.rst"
+#
+#     - The packages list is trickier.
+#
+#       - An old-school setup, foregoing a src/ directory, might look like this:
+#
+#           packages = [{include = "easy_as_pypi"}]
+#
+#         which will be transformed to:
+#
+#           packages = [{include = "../easy_as_pypi"}]
+#
+#       - A setup using the conventional src/ directory could look like this:
+#
+#           packages = [{include = "easy_as_pypi", from = "src"}]
+#
+#         which is transformed to:
+#
+#           packages = [{include = "easy_as_pypi", from = "../src"}]
+#
+#         But note that Poetry looks for a src/<package> dir by default, so
+#         you may be able to omit the 'packages' setting in your project TOML.
+#
+#         - The ../SOURCE_DIR symlink (possibly src -> ../src) will steer
+#           Poetry to the correct location.
+
+editable:
+	@mkdir -p $(EDITABLE_DIR)
+	@#
+	@echo \
+		"# This file is automatically @generated by Makefile and should not be changed by hand.\n" \
+		> $(EDITABLE_DIR)/pyproject.toml
+	@#
+	@concat_pjs=""; \
+	pyprojs_full="$$(echo "$(EDITABLES_ROOT)" | sed "s@~@$${HOME}@")"; \
+	for project in $(EDITABLE_PJS); do \
+		if [ -d "$${pyprojs_full}/$${project}" ]; then \
+			concat_pjs="$${concat_pjs}$${project}|"; \
+		else \
+			echo "ALERT: Missing project: $${pyprojs_full}/$${project}"; \
+		fi; \
+	done; \
+	concat_pjs="$$(echo "$${concat_pjs}" | sed 's@|$$@@')" ; \
+	sed -E \
+		-e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
+		-e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
+		-e 's#^(readme = ")#\1../#' \
+		pyproject.toml \
+	| awk \
+			-v pyprojs_root="$(EDITABLES_ROOT)" \
+			' \
+				match($$0, /^('$${concat_pjs}')( |$$)/, matches) { \
+					print matches[1] " = {path = \"" pyprojs_root "/" matches[1] "/$(EDITABLE_DIR)\", develop = true}"; \
+					next; \
+				} 1 \
+			' - \
+		>> $(EDITABLE_DIR)/pyproject.toml;
+	@#
+	@editable_link="$(EDITABLE_DIR)/$(SOURCE_DIR)"; \
+	[ -h "$${editable_link}" ] && command rm "$${editable_link}"; \
+	command ln -s "../$(SOURCE_DIR)" "$${editable_link}";
+.PHONY: editable
+
+# USAGE: Call `make editables` to call `make editable` on each of "our"
+# projects (EDITABLE_PJS), which creates all dependencies' ".editable/"
+# dirs. and the assets therein (currently just a symlink to source dir).
+#
+# - This is called by `make develop` to prep all the dependencies, but
+#   you can also call it yourself, e.g.,
+#
+#     EDITABLES_ROOT=~/.kit/py make editables
+editables:
+	@for project in $(EDITABLE_PJS); do \
+		make editable -C "$(EDITABLES_ROOT)/$${project}"; \
+		echo; \
+	done
+.PHONY: editables
+
+print-ours:
+	@for project in $(EDITABLE_PJS); do \
+		echo "$${project}"; \
+	done
+.PHONY: print-ours
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
