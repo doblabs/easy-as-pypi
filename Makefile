@@ -151,11 +151,11 @@ help-main:
 
 # Not documented (internal):
 #           coverage-to-html  converts completed coverage run results to HTML
+#           depends-active-venv  fails make command unless virtualenv active
+#           depends-cloc    fails make command unless \`cloc\` installed
 #           docs-html       called by \`docs\` to generate HTML docs
 #           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
 #           test-local      called by \`test-debug\` to generate .make.out from pytest
-#           depends-active-venv  fails make command unless virtualenv active
-#           depends-cloc    fails make command unless \`cloc\` installed
 #           CLOC            set to \`cloc \` if cloc installed
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
