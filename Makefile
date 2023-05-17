@@ -117,8 +117,10 @@ help-main:
 	@echo "   build           create sdist and bdist (under ./dist/)"
 	@echo "                     sdist is sources dist (tar-gzip)"
 	@echo "                     bdist is \"built dist\", aka wheel (zip)"
-	@echo "   install         install the package to the active Python's site-packages"
 	@echo "   develop         install (or update) all packages required for development"
+	@echo "   install         install app to \"global\" virtualenv"
+	@echo "                     uses virtualenv root WORKON_HOME [$${WORKON_HOME:-$${HOME}/.virtualenvs}]"
+	@echo "                     \`workon $(PACKAGE_NAME)\` to activate (from anywhere)"
 	@echo "   publish         package and upload release (bdist) to PyPI"
 	@echo "   dist-list       show sdist and bdist contents (from \`build\` target)"
 	@echo
@@ -156,7 +158,9 @@ help-main:
 #           docs-html       called by \`docs\` to generate HTML docs
 #           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
 #           test-local      called by \`test-debug\` to generate .make.out from pytest
+#           warn-unless-virtualenvwrapper  prints message if virtualenvwrapper not wired
 #           CLOC            set to \`cloc \` if cloc installed
+#           WORKON          set to \`workon \` if workon (virtualenvwrapper) installed
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -214,9 +218,127 @@ release: publish
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-install: depends-active-venv clean
-	python setup.py install
+# USAGE: Run `make install` to create a "global" virtualenv.
+#
+# - A "global" virtualenv installs to WORKON_HOME (~/.virtualenvs by
+#   default) as inspired by virtualenvwrapper.
+#
+#   - But note we call `python -m venv` directly and don't bother
+#     with virtualenvwrapper's `mkvirtualenv` command.
+#
+# CXREF: https://github.com/landonb/virtualenvwrapper (our fork)
+#   https://github.com/python-virtualenvwrapper/virtualenvwrapper (original)
+
+# USEIT: The author only uses a subset of virtualenvwrapper commands:
+#
+# - The `workon` command lets you start a virtualenv easily from any
+#   directory, e.g.,
+#
+#     $ workon <project-name>
+#
+#   It also supports tab completion.
+#
+# - The `cdproject` command changes to the project directory.
+#
+# - The `cdsitepackages` command changes to the current environment's
+#   site-packages/ directory.
+#
+#   This is especially useful if you're digging into a package issue,
+#   or if you want to edit a dependency's sources (the author sometimes
+#   sets a breakpoint in a package dependency to help diagnose an issue
+#   or to learn more about the code).
+
+# SAVVY: Note that you *could* install to system Python using
+# Poetry directly (there's no make task to do so), e.g.,
+#
+#   $ deactivate
+#   $ poetry install
+#
+# But you likely want to isolate the environment, because there's no
+# way we can guarantee that our dependencies match whatever else you
+# might have installed to the system Python. Hence the somewhat
+# opinionated virtualenv installation choices — you should use a
+# virtualenv, and we're just providing the framework we like to use.
+
+# SAVVY: There's no target for deleting and recreating the virtualenv.
+# - You could call virtualenvwrapper's `rmvirtualenv <project-name>`,
+#   or just remove it directly.
+# MAYBE/2023-05-16: Make a cleanup-venv task?
+
+# IGNOR: If you run make-install again, pip-install-poetry downgrades libs:
+#
+#   ERROR: pip's dependency resolver does not currently take into account
+#     all the packages that are installed. This behaviour is the source of
+#     the following dependency conflicts.
+#   click-hotoffthehamster 0.0.1 requires platformdirs<4.0.0,>=3.5.0, but you have platformdirs 2.6.2 which is incompatible.
+#   click-hotoffthehamster 0.0.1 requires virtualenv<21.0.0,>=20.23.0, but you have virtualenv 20.21.1 which is incompatible.
+#   tox 4.5.1 requires platformdirs>=3.2, but you have platformdirs 2.6.2 which is incompatible.
+#
+# But then the subsequent poetry-install restores them:
+#
+#   Package operations: 0 installs, 4 updates, 0 removals
+#
+#     • Updating packaging (21.3 -> 23.1)
+#     • Updating filelock (3.8.0 -> 3.12.0)
+#     • Updating platformdirs (2.5.2 -> 3.5.1)
+#     • Updating virtualenv (20.16.5 -> 20.23.0)
+#
+# - So just don't worry about it (if you see that ERROR and corresponding red text).
+
+# INERT/2023-05-16: This used to `clean`, but I don't see any reason.
+#   install: warn-unless-virtualenvwrapper clean
+#     ...
+
+install: warn-unless-virtualenvwrapper
+	eval "$$($$(which pyenv) init -)"; \
+	pyenv shell --unset; \
+	\
+	project_dir="$$(pwd)"; \
+	workon_home="$${WORKON_HOME:-$${HOME}/.virtualenvs}"; \
+	mkdir -p "$${workon_home}"; \
+	cd "$${workon_home}"; \
+	if [ ! -d "$(PACKAGE_NAME)" ]; then \
+		python3 -m venv $(VENV_ARGS) "$(PACKAGE_NAME)"; \
+		echo "$${project_dir}" > "$(PACKAGE_NAME)/.project"; \
+	fi; \
+	. "$(PACKAGE_NAME)/bin/activate"; \
+	cd "$${project_dir}"; \
+	\
+	echo; \
+	echo "pip install -U pip setuptools"; \
+	pip install -U pip setuptools; \
+	\
+	echo; \
+	echo "pip install poetry"; \
+	pip install poetry; \
+	\
+	echo; \
+	echo "poetry self add 'poetry-dynamic-versioning[plugin]'"; \
+	poetry self add "poetry-dynamic-versioning[plugin]"; \
+	\
+	echo; \
+	echo "poetry install"; \
+	poetry install; \
+	\
+	echo; \
+	echo "Ready to rock:"; \
+	echo "  . $${workon_home}/bin/activate"; \
+	echo "Or if using virtualenvwrapper:"; \
+	echo "  workon $(PACKAGE_NAME)";
 .PHONY: install
+
+# ***
+
+# SAVVY: virtualenvwrapper.sh defines VIRTUALENVWRAPPER_HOOK_DIR, and
+#        virtualenvwrapper_lazy.sh defines _VIRTUALENVWRAPPER_API.
+warn-unless-virtualenvwrapper:
+	@if [ -z "$${_VIRTUALENVWRAPPER_API}" ] && [ -z "$${VIRTUALENVWRAPPER_HOOK_DIR}" ]; then \
+		echo "ALERT: Please install workon from: https://github.com/landonb/virtualenvwrapper"; \
+		echo; \
+	fi;
+.PHONY: warn-unless-virtualenvwrapper
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 depends-active-venv:
 	@if [ -z "${VIRTUAL_ENV}" ]; then \
