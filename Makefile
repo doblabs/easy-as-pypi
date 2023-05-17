@@ -149,7 +149,7 @@ help-main:
 #           docs-html       called by \`docs\` to generate HTML docs
 #           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
 #           test-local      called by \`test-debug\` to generate .make.out from pytest
-#           venvforce       fails make command unless virtualenv active
+#           depends-active-venv  fails make command unless virtualenv active
 #           depends-cloc    fails make command unless \`cloc\` installed
 #           CLOC            set to \`cloc \` if cloc installed
 
@@ -181,33 +181,33 @@ clean-test:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-dist: venvforce clean
+dist: depends-active-venv clean
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
 .PHONY: dist
 
-release: venvforce clean
+release: depends-active-venv clean
 	python setup.py sdist bdist_wheel
 	twine upload -r pypi -s dist/*
 .PHONY: release
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-install: venvforce clean
+install: depends-active-venv clean
 	python setup.py install
 .PHONY: install
 
-venvforce:
+depends-active-venv:
 	@if [ -z "${VIRTUAL_ENV}" ]; then \
 		>&2 echo "ERROR: Run from a virtualenv!"; \
 		exit 1; \
 	fi
-.PHONY: venvforce
+.PHONY: depends-active-venv
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-develop: venvforce
+develop: depends-active-venv
 	pip install -U pip setuptools wheel
 	pip install -U -r requirements/dev.pip
 	pip install -U -e .
@@ -215,12 +215,12 @@ develop: venvforce
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-lint: venvforce
+lint: depends-active-venv
 	flake8 setup.py $(PACKAGE_NAME)/ tests/
 	doc8
 .PHONY: lint
 
-isort: venvforce
+isort: depends-active-venv
 	isort --recursive setup.py $(PACKAGE_NAME)/ tests/
 	# DX: End files with blank line.
 	git ls-files | while read file; do \
@@ -246,11 +246,11 @@ isort: venvforce
 #                  ^^^                   Increase verbosity
 #            ^^^^^                       Start pdb on error or KeyboardInterrupt
 
-test: venvforce
+test: depends-active-venv
 	pytest $(TEST_ARGS) tests/
 .PHONY: test
 
-test-all: venvforce
+test-all: depends-active-venv
 	tox
 .PHONY: test-all
 
@@ -289,14 +289,14 @@ test-debug: test-local quickfix
 #
 #   But, as mentioned above, then we're applying Bash to all shell-outs,
 #   and this author would prefer POSIX-compatible shell code when possible.
-test-local: venvforce
+test-local: depends-active-venv
 	pytest $(TEST_ARGS) tests/ | tee .make.out
 	# Express the exit code of pytest, not the tee.
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
 
 # ALTLY: Use `TEST_ARGS=-x make test`
-test-one: venvforce
+test-one: depends-active-venv
 	pytest $(TEST_ARGS) -x tests/
 .PHONY: test-one
 
@@ -310,7 +310,7 @@ quickfix:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-coverage: venvforce
+coverage: depends-active-venv
 	coverage run -m pytest $(TEST_ARGS) tests
 	coverage report
 .PHONY: coverage
@@ -357,7 +357,7 @@ docs: docs-html
 #     That is, neither of these calls that use exclude patterns will work:
 #           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
 #           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
-docs-html: venvforce clean-docs
+docs-html: depends-active-venv clean-docs
 	sphinx-apidoc --force -o docs/ $(PACKAGE_NAME)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
