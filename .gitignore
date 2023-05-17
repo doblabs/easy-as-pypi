@@ -5,10 +5,6 @@
 # Packaging — `make build`.
 /dist/
 
-# Python byte code.
-*.py[cod]
-/__pycache__/
-
 # Testing/CI tasks.
 /.pytest_cache/
 /.tox/
@@ -19,12 +15,6 @@
 /htmlcov/
 # Coverage — `codecov` https://codecov.io.
 /coverage.xml
-
-# User's personal .ignore (see .ignore.example).
-/.ignore
-
-# Optional private DEV Makefile.
-/Makefile.local
 
 # Sphinx Docs — `make docs`.
 /docs/_build/
@@ -45,4 +35,14 @@
 
 # Translations files.
 *.mo
+
+# Byte code.
+*.py[cod]
+__pycache__/
+
+# User's personal .ignore (see .ignore.example).
+/.ignore
+
+# Optional private DEV Makefile.
+/Makefile.local
 
