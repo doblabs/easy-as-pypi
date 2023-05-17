@@ -112,10 +112,12 @@ help-main:
 	@echo
 	@echo " Installing and Packaging"
 	@echo " ------------------------"
+	@echo "   build           create sdist and bdist (under ./dist/)"
+	@echo "                     sdist is sources dist (tar-gzip)"
+	@echo "                     bdist is \"built dist\", aka wheel (zip)"
 	@echo "   install         install the package to the active Python's site-packages"
 	@echo "   develop         install (or update) all packages required for development"
-	@echo "   dist            package"
-	@echo "   release         package and upload a release"
+	@echo "   publish         package and upload release (bdist) to PyPI"
 	@echo
 	@echo " Developing and Testing"
 	@echo " ----------------------"
@@ -159,11 +161,7 @@ clean: clean-build clean-pyc clean-test
 .PHONY: clean
 
 clean-build:
-	/bin/rm -fr build/
-	/bin/rm -fr dist/
-	/bin/rm -fr .eggs/
-	find . -name '*.egg-info' -exec /bin/rm -fr {} +
-	find . -name '*.egg' -exec /bin/rm -f {} +
+	/bin/rm -rf dist/
 .PHONY: clean-build
 
 clean-pyc:
@@ -181,15 +179,21 @@ clean-test:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-dist: depends-active-venv clean-build
-	python setup.py sdist
-	python setup.py bdist_wheel
+build: depends-active-venv clean-build
+	poetry build
 	ls -l dist
+.PHONY: build
+
+dist: build
 .PHONY: dist
 
-release: depends-active-venv clean-build
-	python setup.py sdist bdist_wheel
-	twine upload -r pypi -s dist/*
+# ***
+
+publish: depends-active-venv clean-build
+	poetry publish
+.PHONY: publish
+
+release: publish
 .PHONY: release
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
