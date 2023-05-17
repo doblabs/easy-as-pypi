@@ -4,32 +4,32 @@
 
 # USAGE: `/bin/cp .ignore.example .ignore` and personalize.
 
-.git/
+/.git/
 
 # Packaging — `make dist`.
-build/
-dist/
-*.egg-info/
-*.eggs/
+/build/
+/dist/
+/*.egg-info/
+/*.eggs/
 
 # Testing/CI tasks.
-.pytest_cache/
-.tox/
+/.pytest_cache/
+/.tox/
 
 # Coverage — `make coverage`.
-.coverage
+/.coverage
 # Coverage — `make coverage-html`.
-htmlcov/
+/htmlcov/
 # Coverage — `codecov` https://codecov.io.
-coverage.xml
+/coverage.xml
 
 # Sphinx Docs — `make docs`.
-docs/_build
-docs/_themes/sphinx_rtd_theme/
+/docs/_build/
+/docs/_themes/sphinx_rtd_theme/
 
 # Test output for Vim quickfix — `make test-local`.
-.make.out
+/.make.out
 
 # Localization file.
-messages.pot
+/messages.pot
 
