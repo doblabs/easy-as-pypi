@@ -2,11 +2,8 @@
 
 /.git/
 
-# Packaging — `make dist`.
-/build/
+# Packaging — `make build`.
 /dist/
-/*.egg-info/
-/*.eggs/
 
 # Testing/CI tasks.
 /.pytest_cache/
