@@ -128,6 +128,7 @@ help-main:
 	@echo "   coverage        check code coverage quickly with the default Python"
 	@echo "   coverage-html   generate HTML coverage reference for every source file"
 	@echo "   docs            generate Sphinx HTML documentation, including API docs"
+	@echo "   servedocs       watches and regenerates docs as they're edited"
 	@echo "   help            print helpful list of commands (this list)"
 	@echo "   isort           run isort; sorts and groups imports in every module"
 	@echo "   lint            check style with flake8"
@@ -135,7 +136,16 @@ help-main:
 	@echo "   test-all        run tests on every Python version with tox"
 	@echo "   test-one        run tests until the first one fails"
 	@echo "   view-coverage   open coverage docs in new tab (set BROWSER to specify app)"
+	@echo "   whoami          print project package name [$(PACKAGE_NAME)]"
 .PHONY: help-main
+
+# Not documented (internal):
+#           coverage-to-html  converts completed coverage run results to HTML
+#           docs-html       called by \`docs\` to generate HTML docs
+#           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
+#           test-local      called by \`test-debug\` to generate .make.out from pytest
+#           venvforce       fails make command unless virtualenv active
+#           CLOC            set to \`cloc \` if cloc installed
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
