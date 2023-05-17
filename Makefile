@@ -181,13 +181,13 @@ clean-test:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-dist: depends-active-venv clean
+dist: depends-active-venv clean-build
 	python setup.py sdist
 	python setup.py bdist_wheel
 	ls -l dist
 .PHONY: dist
 
-release: depends-active-venv clean
+release: depends-active-venv clean-build
 	python setup.py sdist bdist_wheel
 	twine upload -r pypi -s dist/*
 .PHONY: release
