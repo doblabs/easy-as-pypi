@@ -1,8 +1,7 @@
 # vim:tw=0:ts=2:sw=2:noet:ft=make:
-
-# This file exists within 'easy-as-pypi':
-#
-#   https://github.com/landonb/easy-as-pypi#🥧
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/landonb/easy-as-pypi#🥧
+# License: MIT
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
