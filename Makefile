@@ -1,6 +1,7 @@
 # vim:tw=0:ts=2:sw=2:noet:ft=make:
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/pydob/ <varies>
+# Pattern: https://github.com/pydob/easy-as-pypi#🥧
 # License: MIT
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-
-# This file exists within 'easy-as-pypi':
-#
-#   https://github.com/pydob/easy-as-pypi#🥧
+# This file exists within 'easy-as-pypi-termio':
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/ <varies>
+# Pattern: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
 
 # Boilerplate documentation build configuration file,
 # (Originally) created by sphinx-quickstart on Tue Jul 9 22:26:36 2013
