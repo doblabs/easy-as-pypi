@@ -219,6 +219,7 @@ install: depends-active-venv clean
 depends-active-venv:
 	@if [ -z "${VIRTUAL_ENV}" ]; then \
 		>&2 echo "ERROR: Run from a virtualenv!"; \
+		\
 		exit 1; \
 	fi
 .PHONY: depends-active-venv
