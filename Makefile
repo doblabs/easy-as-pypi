@@ -132,7 +132,7 @@ help-main:
 	@echo "   coverage        print coverage report after running pytest"
 	@echo "   coverage-html   generate line-by-line HTML coverage reports"
 	@echo "   docs            generate Sphinx HTML documentation, including API docs"
-	@echo "   servedocs       watches and regenerates docs as they're edited"
+	@echo "   docs-live       watches and regenerates docs as they're edited"
 	@echo "   help            print this message"
 	@echo "   isort           sort and group module imports using \`isort\`"
 	@echo "   lint            automatically make style fixes with \`flake8\`"
@@ -363,9 +363,9 @@ docs-html: depends-active-venv clean-docs
 	$(MAKE) -C docs html
 .PHONY: docs-html
 
-servedocs: docs
+docs-live: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
-.PHONY: servedocs
+.PHONY: docs-live
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
