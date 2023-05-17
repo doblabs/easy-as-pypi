@@ -240,8 +240,8 @@ lint: depends-active-venv
 
 isort: depends-active-venv
 	isort $(PACKAGE_NAME)/ tests/
-	# DX: End files with blank line.
-	git ls-files | while read file; do \
+	@# DX: End files with blank line.
+	@git ls-files | while read file; do \
 		if [ -n "$$(tail -n1 $$file)" ]; then \
 			echo "Blanking: $$file"; \
 			echo >> $$file; \
