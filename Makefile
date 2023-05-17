@@ -241,7 +241,7 @@ isort: venvforce
 #            ^^^^^                       Start pdb on error or KeyboardInterrupt
 
 test: venvforce
-	py.test $(TEST_ARGS) tests/
+	pytest $(TEST_ARGS) tests/
 .PHONY: test
 
 test-all: venvforce
@@ -254,7 +254,7 @@ test-debug: test-local quickfix
 # SAVVY: By default, a pipeline returns the exit code of the final command,
 # so if you pipe to `tee`, the pipeline always returns true, e.g.,
 #
-#   py.test ... | tee ...
+#   pytest ... | tee ...
 #
 # will always return true, regardless of py.text failing or not.
 #
@@ -265,7 +265,7 @@ test-debug: test-local quickfix
 #     ...
 #     test-local:
 #       set -o pipefail
-#       py.test ... | tee ...
+#       pytest ... | tee ...
 #
 #   But then pipefail (and bash) apply to all targets that shell-out.
 #
@@ -279,19 +279,19 @@ test-debug: test-local quickfix
 #     ...
 #     test-local:
 #       set -o pipefail; \
-#       py.test ... | tee ...
+#       pytest ... | tee ...
 #
 #   But, as mentioned above, then we're applying Bash to all shell-outs,
 #   and this author would prefer POSIX-compatible shell code when possible.
 test-local: venvforce
-	py.test $(TEST_ARGS) tests/ | tee .make.out
-	# Express the exit code of py.test, not the tee.
+	pytest $(TEST_ARGS) tests/ | tee .make.out
+	# Express the exit code of pytest, not the tee.
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
 
 # ALTLY: Use `TEST_ARGS=-x make test`
 test-one: venvforce
-	py.test $(TEST_ARGS) -x tests/
+	pytest $(TEST_ARGS) -x tests/
 .PHONY: test-one
 
 quickfix:

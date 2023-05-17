@@ -5,8 +5,8 @@
 [build-system]
 requires = ["setuptools", "wheel"]
 
-# py.test options
-# ===============
+# pytest options
+# ==============
 #
 # - pytest settings can be set in any of these files:
 #
