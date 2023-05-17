@@ -5,7 +5,9 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-PACKAGE_NAME = easy_as_pypi
+PACKAGE_NAME = easy-as-pypi
+
+SOURCE_DIR = easy_as_pypi
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -235,14 +237,14 @@ develop: depends-active-venv
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 lint: depends-active-venv
-	flake8 $(PACKAGE_NAME)/ tests/
+	flake8 $(SOURCE_DIR)/ tests/
 	doc8
 .PHONY: lint
 
 isort: depends-active-venv
-	isort $(PACKAGE_NAME)/ tests/
+	isort $(SOURCE_DIR)/ tests/
 	@# DX: End files with blank line.
-	@git ls-files -- :/$(PACKAGE_NAME)/ :/tests/ | while read file; do \
+	@git ls-files -- :/$(SOURCE_DIR)/ :/tests/ | while read file; do \
 		if [ -n "$$(tail -n1 $$file)" ]; then \
 			echo "Blanking: $$file"; \
 			echo >> $$file; \
@@ -349,7 +351,7 @@ view-coverage:
 
 clean-docs:
 	$(MAKE) -C docs clean BUILDDIR=$(DOCS_BUILDDIR)
-	/bin/rm -f docs/$(PACKAGE_NAME).*rst
+	/bin/rm -f docs/$(SOURCE_DIR).*rst
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-docs
 
@@ -363,21 +365,21 @@ docs: docs-html
 # so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
 # instead maintain a separate docs/<project-name>.rst, so that we can
 # include special method docs, such as those for and __new__ methods.
-# - I tried to disable the generation of modules.rst and easy_as_pypi.rst
+# - I tried to disable the generation of modules.rst and $(SOURCE_DIR).rst
 #   using options in conf.py, but failed. And I thought maybe one could
 #   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
 #   command.
 #   - Use -T to disable modules.rst creation, e.g.,
-#           sphinx-apidoc -T -o docs/ easy_as_pypi
+#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR)
 #   - Use appended exclude patterns to include command docs, e.g.,
-#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/commands/
-#     will stop docs/easy_as_pypi.commands.rst.
-#   - To not generate docs/easy_as_pypi.rst, just don't call sphinx-apidoc!
+#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/commands/
+#     will stop docs/$(SOURCE_DIR).commands.rst.
+#   - To not generate docs/$(SOURCE_DIR).rst, just don't call sphinx-apidoc!
 #     That is, neither of these calls that use exclude patterns will work:
-#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
-#           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
+#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/
+#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/__init__.py
 docs-html: depends-active-venv clean-docs
-	sphinx-apidoc --force -o docs/ $(PACKAGE_NAME)
+	sphinx-apidoc --force -o docs/ $(SOURCE_DIR)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 .PHONY: docs-html
