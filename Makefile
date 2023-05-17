@@ -11,7 +11,7 @@ PACKAGE_NAME = easy_as_pypi
 
 # `make docs` docs/ subdir HTML target, e.g.,
 #   ./docs/_build/html/index.html
-DOCS_BUILDDIR = _build
+DOCS_BUILDDIR ?= _build
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
