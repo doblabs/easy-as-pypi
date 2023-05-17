@@ -239,7 +239,7 @@ lint: depends-active-venv
 .PHONY: lint
 
 isort: depends-active-venv
-	isort --recursive $(PACKAGE_NAME)/ tests/
+	isort $(PACKAGE_NAME)/ tests/
 	# DX: End files with blank line.
 	git ls-files | while read file; do \
 		if [ -n "$$(tail -n1 $$file)" ]; then \
