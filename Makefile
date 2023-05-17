@@ -5,7 +5,7 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-PROJNAME = easy_as_pypi
+PACKAGE_NAME = easy_as_pypi
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -210,12 +210,12 @@ develop: venvforce
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 lint: venvforce
-	flake8 setup.py $(PROJNAME)/ tests/
+	flake8 setup.py $(PACKAGE_NAME)/ tests/
 	doc8
 .PHONY: lint
 
 isort: venvforce
-	isort --recursive setup.py $(PROJNAME)/ tests/
+	isort --recursive setup.py $(PACKAGE_NAME)/ tests/
 	# DX: End files with blank line.
 	git ls-files | while read file; do \
 		if [ -n "$$(tail -n1 $$file)" ]; then \
@@ -324,7 +324,7 @@ view-coverage:
 
 clean-docs:
 	$(MAKE) -C docs clean BUILDDIR=$(BUILDDIR)
-	/bin/rm -f docs/$(PROJNAME).*rst
+	/bin/rm -f docs/$(PACKAGE_NAME).*rst
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-docs
 
@@ -352,7 +352,7 @@ docs: docs-html
 #           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/
 #           sphinx-apidoc -T -o docs/ easy_as_pypi easy_as_pypi/__init__.py
 docs-html: venvforce clean-docs
-	sphinx-apidoc --force -o docs/ $(PROJNAME)
+	sphinx-apidoc --force -o docs/ $(PACKAGE_NAME)
 	$(MAKE) -C docs clean
 	$(MAKE) -C docs html
 .PHONY: docs-html
@@ -372,12 +372,12 @@ cloc:
 ifndef CLOC
 	$(error "Please install cloc from: https://github.com/AlDanial/cloc")
 endif
-	@cloc --exclude-dir=build,dist,docs,$(PROJNAME).egg-info,.eggs,.git,htmlcov,.pytest_cache,.tox .
+	@cloc --exclude-dir=build,dist,docs,$(PACKAGE_NAME).egg-info,.eggs,.git,htmlcov,.pytest_cache,.tox .
 .PHONY: cloc
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 whoami:
-	@echo $(PROJNAME)
+	@echo $(PACKAGE_NAME)
 .PHONY: whoami
 
