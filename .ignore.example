@@ -29,3 +29,7 @@
 # Localization file.
 /messages.pot
 
+# Bytecode.
+/*.py[cod]
+__pycache__/
+
