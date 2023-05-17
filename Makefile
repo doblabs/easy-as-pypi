@@ -118,6 +118,7 @@ help-main:
 	@echo "   install         install the package to the active Python's site-packages"
 	@echo "   develop         install (or update) all packages required for development"
 	@echo "   publish         package and upload release (bdist) to PyPI"
+	@echo "   dist-list       show sdist and bdist contents (from \`build\` target)"
 	@echo
 	@echo " Developing and Testing"
 	@echo " ----------------------"
@@ -182,10 +183,23 @@ clean-test:
 build: depends-active-venv clean-build
 	poetry build
 	ls -l dist
+	@echo 'HINT: Run `make dist-list` to bdist and sdist contents.'
 .PHONY: build
 
 dist: build
 .PHONY: dist
+
+# USAGE: Run `make build && make dist-list` to ensure that the
+# pyproject.toml 'include' and 'exclude' rules work as expected.
+
+dist-list:
+	@echo
+	@printf "$$ "
+	tar -tvzf dist/*.tar.gz
+	@echo
+	@printf "$$ "
+	unzip -l dist/*.whl
+.PHONY: dist-list
 
 # ***
 
