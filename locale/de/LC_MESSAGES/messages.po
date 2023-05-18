@@ -20,5 +20,5 @@ msgstr ""
 
 #: src/easy_as_pypi/commands/easy_as_pypi.py:37
 msgid "nom nom"
-msgstr "nom nom"
+msgstr "nom nom [German]"
 
