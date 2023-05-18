@@ -1,9 +1,119 @@
-# This file exists within 'easy-as-pypi':
-#
-#   https://github.com/pydob/easy-as-pypi#🥧
+# vim:tw=0:ts=4:sw=4:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
 
+# Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
+
+[tool.poetry]
+name = "easy-as-pypi"
+version = "1.0.0"
+description = "Bootstrapping your next Python CLI made easy as PyPI"
+
+authors = ["Landon Bouma <pydob@tallybark.com>"]
+maintainers = ["Tally Bark LLC <pydob@tallybark.com>"]
+
+license = "MIT"
+readme = "README.rst"
+
+# Note that Poetry looks for packages under src/ by default, but
+# we could specify it explicitly, e.g.,
+#
+#   packages = [{include = "the_package_name", from = "src"}]
+
+homepage = "https://github.com/pydob/easy-as-pypi"
+repository = "https://github.com/pydob/easy-as-pypi"
+documentation = "https://easy-as-pypi.readthedocs.io/en/latest"
+
+# REFER: https://pypi.org/classifiers/
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+]
+
+# Keywords for PyPI to display, and to use for search results.
+keywords = [
+    "python",
+    "boilerplate",
+    "pyoilerplate",
+    "scaffolding",
+    "framework",
+    "CLI",
+    "TUI",
+    "skeleton",
+    "cookiecutter",
+]
+
+# ***
+
+# The poetry build excludes __pycache__ folders and whatever is ignored
+# by git (.gitignore), and it honors the 'include' and 'exclude' attrs.
+#
+#   https://python-poetry.org/docs/pyproject/#include-and-exclude
+#
+# E.g.,
+#   include = [
+#       { path = "tests", format = "sdist" },
+#       { path = "for_wheel.txt", format = ["sdist", "wheel"] }
+#   ]
+
+include = [
+    # Included by default:
+    #  { path = "LICENSE", format = "sdist" },
+    #  { path = "README.rst", format = "sdist" },
+    #  { path = "pyproject.toml", format = "sdist" },
+    { path = "*.rst", format = "sdist" },
+    { path = "tests/", format = "sdist" },
+    # Omitting: Makefile, dotfiles, docs/, etc.
+]
+
+# ***
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/doblabs/easy-as-pypi/issues"
+"Documentation" = "https://easy-as-pypi.readthedocs.io/en/latest"
+"Source Code" = "https://github.com/doblabs/easy-as-pypi"
+
+# ***
+
+# The default Poetry build-system is these two lines:
+#   requires = ["poetry-core"]
+#   build-backend = "poetry.core.masonry.api"
+# But we use poetry-dynamic-versioning so we don't have to maintain
+# the `version` variable atop this file.
 [build-system]
-requires = ["setuptools", "wheel"]
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
+build-backend = "poetry_dynamic_versioning.backend"
+
+# ***
+
+# YOU: Disable this if your project derived from easy-as-pypi
+#      does not have a runnable script.
+#      - Otherwise set this to the package entry point.
+#
+[tool.poetry.scripts]
+    easy_as_pypi = "easy_as_pypi:cli"
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
+# - In the old days of setuptools and wheel, one could use setuptools_scm
+#   to have the build automatically detect the version from your VCS.
+#   - Here's the Poetry equivalent, as a plugin.
+#     https://github.com/mtkennerly/poetry-dynamic-versioning
+#     https://pypi.org/project/poetry-dynamic-versioning
+[tool.poetry-dynamic-versioning]
+enable = false
+# vcs = "git"
+# style = "semver"
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
 
 # pytest options
 # ==============
@@ -34,4 +144,128 @@ requires = ["setuptools", "wheel"]
 #
 [tool.pytest.ini_options]
 addopts = "--tb=short --strict-markers -ra"
+
+# ***
+
+# coverage options
+# ================
+
+# CXREF: https://coverage.readthedocs.io/en/latest/config.html
+
+# Note that if .coveragerc exists, these settings are ignored.
+
+[tool.coverage.report]
+
+precision = 0
+
+exclude_lines = [ "if __name__ == .__main__.:", ]
+
+[tool.coverage.run]
+
+branch = true
+
+source = [ "src/", ]
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
+# isort options
+# =============
+
+# CXREF: https://pycqa.github.io/isort/docs/configuration/options.html
+
+[tool.isort]
+
+# See: setup.cfg's [flake8] max-line-length = 89.
+line_length = 89
+
+# multi_line_output: 3 - Vertical Hanging Indent.
+multi_line_output = 3
+
+not_skip = ["__init__.py"]
+
+known_third_party = [
+    # USYNC: Keep synced with [tool.poetry(.*)?.dependencies], below.
+    #
+    # *** External packages
+    #
+    # YOU: List symbol names of packages included in setup.py here.
+    #
+    # *** Testing packages
+    "factory",
+    "faker",
+    "fauxfactory",
+    "freezegun",
+    "pytest",
+    "pytest_factoryboy",
+]
+
+# ***
+
+# doc8 options
+# ============
+
+[tool.doc8]
+
+ignore-path = [
+    ".tox/",
+    "docs/_build/",
+    # For `lint` GitHub Actions job run by .github/workflows/checks.yaml
+    "poetry-shell-lint/.venv/",
+]
+
+max-line-length = 89
+
+# Here's an old note: "Specify encoding lest doc8 think it's 'Windows-1254'
+#                      and raise UnicodeDecodeError."
+file-encoding = "utf-8"
+
+# If you need to ignore specific errors in a specific file:
+#  ignore-path-errors=/tmp/other_thing.rst;D001;D002
+# DEVs: Uncomment verbose for TMI.
+#  verbose = 1
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
+# Not using the special `dev` group:
+#
+#   [tool.poetry.group.dev.dependencies]
+#
+# but instead use multiple custom groups
+# to serve essentially the same purpose,
+# e.g., a developer might run:
+#
+#   poetry install --with dist,lint,test,docstyle,docs,extras
+
+# ***
+
+# **** Packages for preparing builds and releases.
+
+[tool.poetry.group.dist]
+optional = true
+
+[tool.poetry.group.dist.dependencies]
+
+# - "... enable dynamic versioning based on tags in your version control
+#    system, powered by Dunamai"
+#
+#   https://pypi.org/project/poetry-dynamic-versioning
+#   https://github.com/mtkennerly/poetry-dynamic-versioning
+#   https://github.com/mtkennerly/dunamai
+poetry-dynamic-versioning = ">=0.21.5"
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
+# **** Finally, the app dependencies.
+
+[tool.poetry.dependencies]
+
+# Python versions supported (required).
+# Because flake8, start at 3.8.1.
+python = "^3.8.1"
 
