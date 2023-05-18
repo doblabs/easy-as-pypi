@@ -410,14 +410,20 @@ texinfo_documents = [(
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 #texinfo_no_detailmenu = False
 
-# 2020-01-25: (lb): What project was this for? nark or dob? (Most projs. don't need this.)
+# -- Custom options for easy-as-pypi and related projects --------------
+
+# If `lintcheck` complains about your anchor links, add them below.
 #
-# # https://www.sphinx-doc.org/en/master/_modules/sphinx/builders/linkcheck.html
-# linkcheck_anchors_ignore = [
-#     # Default ignore entry is leading bang.
-#     "^!",
-#     # FIXME/2019-02-19: (lb): I'm having issues with `linkcheck`
-#     # not liking my anchors, which I swear are working for me!
-#     "get-started",
-# ]
+# - CXREF: Default is: linkcheck_anchors_ignore = ["^!"]
+#     https://www.sphinx-doc.org/en/master/usage/configuration.html
+# - CXREF: `lintcheck` source:
+#     https://www.sphinx-doc.org/en/master/_modules/sphinx/builders/linkcheck.html
+linkcheck_anchors_ignore = [
+    # Default ignore entry is leading bang.
+    "^!",
+    # `linkcheck` complains about these perfectly-working anchor links.
+    # - E.g.,
+    #   `<https://easy_as_pypi.readthedocs.io/en/latest/contributing.html#get-started>`__
+    "get-started",
+]
 
