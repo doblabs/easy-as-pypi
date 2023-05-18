@@ -46,10 +46,13 @@ sys.path.insert(0, project_root)
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
 project_ghuser = 'pydob'
+# See project_ghrepo, below.
 
 project_auth = 'Landon Bouma'
 project_copy = 'Landon Bouma.'
 project_orgn = 'Tally Bark LLC'
+
+# ***
 
 project_dist = 'easy-as-pypi'
 
@@ -63,10 +66,24 @@ exclude_patterns = [
     'README.rst',
 ]
 
+# ***
+
+# You can ignore these values unless you plan to generate other formats.
+
+# Used below by latex_documents, man_pages, and texinfo_documents,
+# none of which we generate from Sphinx sources.
 project_docinfo = '{} Documentation'.format(project_dist)
 
+# Option for HTMLHelp output, used by htmlhelp_basename below.
+# - This value seems like it'd be used for HTML output:
+#   - *Output file base name for HTML help builder. Default is 'pydoc'.*
+#     https://certik.github.io/sphinx/config.html
+#   But I don't see it used in the HTML docs under docs/_build, either
+#   as data, or as a "file base name". So, to me, looks unused.
+#   - See also: https://pypi.org/project/sphinxcontrib-htmlhelp/
 project_htmlhelp_basename = 'EasyAsPypidoc'
 
+# Used by texinfo_documents, below, for Texinfo output.
 project_texinfo = 'One line description of project.'
 
 # ┃                                                                     ┃
