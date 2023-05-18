@@ -20,7 +20,8 @@
 # Sphinx Docs — `make docs`.
 /docs/_build/
 # `make docs` generates at least two files for the API reference, an
-# index file (modules.rst), and an API reference (project-name.rst).
+# index file (modules.rst), and an API reference (project-name.rst),
+# e.g.,
 #   docs/modules.rst
 #   docs/easy_as_pypi.rst
 # We could exclude these from the repo, because generated, but don't, so
