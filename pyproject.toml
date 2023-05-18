@@ -299,6 +299,68 @@ optional = true
 #   https://github.com/mtkennerly/dunamai
 poetry-dynamic-versioning = ">=0.21.5"
 
+# ***
+
+# **** Packages for linting the documentation.
+
+[tool.poetry.group.docstyle]
+optional = true
+
+[tool.poetry.group.docstyle.dependencies]
+
+# - "Style checker for Sphinx (or other) RST documentation"
+#
+#   https://pypi.org/project/doc8
+#   https://launchpad.net/doc8
+doc8 = ">=1.1.1"
+
+# - Python docstring checker.
+#
+#   https://pypi.org/project/pydocstyle
+#   https://github.com/PyCQA/pydocstyle/
+pydocstyle = ">=6.3.0"
+
+# - "Python lib for TOML."
+#
+#   https://pypi.org/project/toml
+#   https://github.com/uiri/toml
+#
+# - We include `toml` so `pydocstyle` can validate `pyproject.toml` (this file).
+#   - And avoids warning on `pydocstyle`:
+#       WARNING: The /path/to/package/pyproject.toml configuration file was
+#                ignored, because the `toml` package is not installed.
+toml = ">=0.10.2"
+
+# ***
+
+# **** Packages for building the documentation.
+
+[tool.poetry.group.docs]
+optional = true
+
+# Specify packages required to build the documentation.
+[tool.poetry.group.docs.dependencies]
+# - "Python documentation generator"
+#
+#   https://pypi.org/project/Sphinx
+#   https://www.sphinx-doc.org/en/master/
+sphinx = "^6.2.1"
+# LATER/2023-05-14: Update to v7 once sphinx_rtd_theme supports
+#  Sphinx = ">=7.0.1"
+
+# - "Read the Docs theme for Sphinx"
+#
+#   https://pypi.org/project/sphinx-rtd-theme
+#   https://github.com/readthedocs/sphinx_rtd_theme
+sphinx-rtd-theme = ">=1.2.0"
+
+# - "Python API and shell utilities to monitor file system events."
+#
+#   https://pypi.org/project/watchdog
+#   https://github.com/gorakhargosh/watchdog
+watchdog = ">=3.0.0"
+
+# ***
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
