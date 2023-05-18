@@ -32,5 +32,5 @@ import click
 @click.command()
 def eat():
     """Eats."""
-    click.echo("nom nom")
+    click.echo(_("nom nom"))
 

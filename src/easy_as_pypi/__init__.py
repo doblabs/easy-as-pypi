@@ -24,6 +24,7 @@
 
 """Top-level package for this CLI-based application."""
 
+import gettext
 import os
 import sys
 
@@ -48,6 +49,16 @@ __author_link__ = 'https://tallybark.com'
 # the package name in text generated for the UX.
 __package_name__ = 'easy-as-pypi'
 __arg0name__ = os.path.basename(sys.argv[0])
+
+
+# Initialize translation engine.
+lang_en = gettext.translation('messages', localedir='locale', languages=['en'])
+
+# Set current locale to 'en'.
+# - Install will also wire `_`, akin to:
+#     from gettext import gettext as _
+#   (Which applies to all modules; no need to map `_` ourselves.)
+lang_en.install()
 
 
 @click.group()
