@@ -586,6 +586,39 @@ print-ours:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# CXREF/2023-05-18: Nice tutorial:
+#
+#   https://phrase.com/blog/posts/python-localization/
+
+# TRACK/2023-05-18: *Parse settings from pyproject.toml*
+#
+#   https://github.com/python-babel/babel/issues/777
+#
+# - Note that locale/babel.cfg is a *mapping* config file, *not*
+#   a config file akin to what Babel supports in the setup.cfg
+#   file (used by old setuptools builds).
+#
+# - Though even if/when Babel adds pyproject.toml support, what
+#   would we really put in there? These calls are pretty simple.
+
+babel-extract:
+	pybabel extract -F locale/babel.cfg --input-dirs=$(SOURCE_DIR) -o locale/messages.pot
+.PHONY: babel-extract
+
+# SAVVY: See list of languages:
+#   pybabel --list-locales
+babel-init:
+	@for lang in en de; do \
+		pybabel init -l $${lang} -i locale/messages.pot -d locale/; \
+	done
+.PHONY: babel-init
+
+babel-compile:
+	pybabel compile -d locale/
+.PHONY: babel-compile
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 lint: depends-active-venv
 	flake8 $(SOURCE_DIR)/ tests/
 	doc8
