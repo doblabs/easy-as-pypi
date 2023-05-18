@@ -311,3 +311,5 @@ poetry-dynamic-versioning = ">=0.21.5"
 # Because flake8, start at 3.8.1.
 python = "^3.8.1"
 
+click = "^8.0.0"
+
