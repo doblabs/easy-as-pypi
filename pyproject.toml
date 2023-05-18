@@ -299,6 +299,35 @@ optional = true
 #   https://github.com/mtkennerly/dunamai
 poetry-dynamic-versioning = ">=0.21.5"
 
+# - "Collection of utilities for publishing packages on PyPI"
+#   - We use Poetry to publish to PyPI, but we also run `twine check`
+#     (which might be redundant, because we also run `poetry check`).
+#
+#   https://pypi.org/project/twine
+#   https://twine.readthedocs.io/en/latest/
+twine = ">=4.0.2"
+
+# ***
+
+# **** Packages for linting.
+
+[tool.poetry.group.lint]
+optional = true
+
+[tool.poetry.group.lint.dependencies]
+
+# - "the modular source code checker: pep8, pyflakes and co"
+#
+#   https://pypi.org/project/flake8
+#   https://gitlab.com/pycqa/flake8
+flake8 = ">=6.0.0"
+
+# - "utility / library to sort Python imports"
+#
+#   https://pypi.org/project/isort
+#   https://github.com/timothycrosley/isort
+isort = ">=5.12.0"
+
 # ***
 
 # **** Packages for testing, either locally or via CI.
@@ -321,6 +350,12 @@ pytest = ">=7.3.1"
 #   https://pypi.org/project/pytest-mock
 #   https://github.com/pytest-dev/pytest-mock/
 pytest-mock = ">=3.10.0"
+
+# - "generic virtualenv management and test command line tool"
+#
+#   https://pypi.org/project/tox
+#   https://tox.readthedocs.io/en/latest/
+tox = ">=4.5.1"
 
 # ***** Coverage
 
@@ -443,6 +478,20 @@ sphinx-rtd-theme = ">=1.2.0"
 watchdog = ">=3.0.0"
 
 # ***
+
+# **** Additional packages, such as those developer may want to run from CLI.
+
+[tool.poetry.group.extras]
+optional = true
+
+[tool.poetry.group.extras.dependencies]
+# - "Render local readme files before sending off to GitHub"
+#   - For previewing docs/history-ci.md.
+#
+#   https://pypi.org/project/grip
+#   https://github.com/joeyespo/grip
+grip = ">=4.6.1"
+
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
