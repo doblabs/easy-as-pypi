@@ -1,10 +1,5 @@
 # Specifies packages required to develop and release, except test packages.
 
-# - "Check MANIFEST.in ... for completeness"
-#
-#   https://github.com/mgedmin/check-manifest
-check-manifest >= 0.40
-
 # - "the modular source code checker: pep8, pyflakes and co"
 #
 #   https://gitlab.com/pycqa/flake8
