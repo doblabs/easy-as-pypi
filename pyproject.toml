@@ -301,6 +301,88 @@ poetry-dynamic-versioning = ">=0.21.5"
 
 # ***
 
+# **** Packages for testing, either locally or via CI.
+
+[tool.poetry.group.test]
+optional = true
+
+[tool.poetry.group.test.dependencies]
+
+# ***** pytest Framework & Related
+
+# - "pytest: simple powerful testing with Python"
+#
+#   https://pypi.org/project/pytest
+#   https://docs.pytest.org/en/latest/
+pytest = ">=7.3.1"
+
+# - "Thin-wrapper around the mock package for easier use with pytest"
+#
+#   https://pypi.org/project/pytest-mock
+#   https://github.com/pytest-dev/pytest-mock/
+pytest-mock = ">=3.10.0"
+
+# ***** Coverage
+
+# - "Code coverage measurement for Python"
+#
+#   https://pypi.org/project/coverage
+#   https://coverage.readthedocs.io/en/latest/
+coverage = ">=7.2.5"
+
+# - "Pytest plugin for measuring coverage"
+#
+#   https://pypi.org/project/pytest-cov
+#   https://github.com/pytest-dev/pytest-cov
+pytest-cov = ">=4.0.0"
+
+# - Upload to codecov.io.
+#
+#   https://pypi.org/project/codecov
+#   https://github.com/codecov/codecov-python
+codecov = ">=2.1.13"
+
+# *** Datetime testing.
+
+# - "travel through time by mocking the datetime module"
+#
+#   https://github.com/spulec/freezegun
+#  freezegun = ">=0.3.14"
+
+# ***** Fakers and Factories.
+
+# - "package that generates fake data for you"
+#
+#   https://pypi.org/project/Faker
+#   https://github.com/joke2k/faker
+#  Faker = ">=18.7.0"
+
+# - "Faker integration with the pytest framework."
+#
+#   https://pypi.org/project/pytest-faker
+#   https://github.com/pytest-dev/pytest-faker
+#  pytest-faker >= 2.0.0
+
+# - "Generates random data for your tests"
+#
+#   https://pypi.org/project/fauxfactory
+#   https://github.com/omaciel/fauxfactory
+#  fauxfactory = ">=3.1.0"
+
+# - ORM record generator / "test fixtures replacement for Python".
+#
+#   https://pypi.org/project/factory-boy
+#   https://github.com/FactoryBoy/factory_boy
+#  factory-boy = ">=3.2.1"
+#
+# - "Factory Boy support for pytest"
+#
+#   https://pypi.org/project/pytest-factoryboy
+#   https://github.com/pytest-dev/pytest-factoryboy
+#  pytest-factoryboy = ">=2.5.1"
+
+# ***
+
 # **** Packages for linting the documentation.
 
 [tool.poetry.group.docstyle]
