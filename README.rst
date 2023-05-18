@@ -2,10 +2,6 @@
 easy-as-pypi
 @@@@@@@@@@@@
 
-.. .. image:: https://travis-ci.com/pydob/easy-as-pypi.svg?branch=develop
-..   :target: https://travis-ci.com/pydob/easy-as-pypi
-..   :alt: Build Status
-..
 .. .. image:: https://codecov.io/gh/pydob/easy-as-pypi/branch/develop/graph/badge.svg
 ..   :target: https://codecov.io/gh/pydob/easy-as-pypi
 ..   :alt: Coverage Status

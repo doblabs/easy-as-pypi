@@ -71,10 +71,6 @@ example_prepare_yourapp_boilerplate_envs () {
   #   docs/conf.py, docs/index.rst, docs/installation.rst, docs/make.bat
   export github_project="https://github.com/${project_ghuser}/${appname_train}"
 
-  # tox.ini, .travis.yml
-  export travis_user="${person_ghuser}"
-  export travis_url="https://travis-ci.com/${travis_user}/${appname_train}"
-
   # CONTRIBUTING.rst, setup.cfg
   export readthedocs_url="https://${appname_train}.readthedocs.io"
 
@@ -168,9 +164,6 @@ print_boilerplate_vars () {
     \
     github_project \
     \
-    travis_user \
-    travis_url \
-    \
     readthedocs_url \
     \
     setup_author \
@@ -259,10 +252,6 @@ setup_source_string_matching () {
   # CONTRIBUTING.rst, setup.cfg,
   #   docs/conf.py, docs/index.rst, docs/installation.rst, docs/make.bat
   source_github_project="https://github.com/${source_project_ghuser}/${source_appname_train}"
-
-  # tox.ini, .travis.yml
-  source_travis_user="${source_person_ghuser}"
-  source_travis_url="https://travis-ci.com/${source_travis_user}/${source_appname_train}"
 
   # CONTRIBUTING.rst, setup.cfg
   source_readthedocs_url="https://${source_appname_train}.readthedocs.io"
@@ -620,11 +609,6 @@ update_file_contents_first_specific_matches () {
   sed -i'' \
     "s/project_orgn = '${source_project_orgn}'/project_orgn = '${project_orgn}'/" \
     "docs/conf.py"
-  #
-  sed -i'' \
-    "s#${source_travis_url}#${travis_url}#" \
-    "tox.ini" \
-    ".travis.yml"
   #
   sed -i'' \
     "s#${source_readthedocs_url}#${readthedocs_url}#" \

@@ -63,10 +63,6 @@ prepare_yourapp_boilerplate_envs () {
   #   docs/conf.py, docs/index.rst, docs/installation.rst, docs/make.bat
   export github_project="https://github.com/${project_ghuser}/${appname_train}"
 
-  # tox.ini, .travis.yml
-  export travis_user="${entity_ghuser}"
-  export travis_url="https://travis-ci.com/${travis_user}/${appname_train}"
-
   # CONTRIBUTING.rst, setup.cfg
   export readthedocs_url="https://${appname_train}.readthedocs.io"
 
