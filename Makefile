@@ -727,8 +727,8 @@ docs: docs-html
 #       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/__init__.py
 docs-html: depends-active-venv clean-docs
 	sphinx-apidoc --force -o docs/ $(SOURCE_DIR)
-	$(MAKE) -C docs clean
-	$(MAKE) -C docs html
+	PROJNAME=$(PACKAGE_NAME) $(MAKE) -C docs clean
+	PROJNAME=$(PACKAGE_NAME) $(MAKE) -C docs html
 .PHONY: docs-html
 
 docs-live: docs
