@@ -6,7 +6,10 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-PACKAGE_NAME = easy-as-pypi
+# Suss the project name from the directory name. Assumes the project
+# directory *is* named like the project, e.g., this file might be:
+#   /path/to/my-project/Makefile
+PACKAGE_NAME ?= $(shell basename "$$(pwd)")
 
 SOURCE_DIR = easy_as_pypi
 
