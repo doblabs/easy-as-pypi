@@ -20,7 +20,7 @@ codecov:
 # Specify the GitHub project directory path prefix so that clicking source
 # files in codecov.io opens the coverage browser.
 fixes:
-  - "::easy_as_pypi/"
+  - "::src/easy_as_pypi/"
 
 coverage:
   # precision: 0 | 2

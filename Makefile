@@ -11,7 +11,7 @@
 #   /path/to/my-project/Makefile
 PACKAGE_NAME ?= $(shell basename "$$(pwd)")
 
-SOURCE_DIR = easy_as_pypi
+SOURCE_DIR = src
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 

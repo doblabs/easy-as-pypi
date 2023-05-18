@@ -1,5 +1,5 @@
-easy_as_pypi
-============
+src
+===
 
 .. toctree::
    :maxdepth: 4

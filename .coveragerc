@@ -5,5 +5,5 @@
 # License: MIT
 
 [run]
-source=easy_as_pypi
+source=src
 
