@@ -45,22 +45,29 @@ sys.path.insert(0, project_root)
 # ┃                                                                     ┃
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
-project_dist = 'easy-as-pypi'
-package_name = 'easy_as_pypi'
 project_ghuser = 'pydob'
-project_ghrepo = project_dist
-project_texinfo = 'One line description of project.'
-project_docinfo = '{} Documentation'.format(project_dist)
-project_htmlhelp_basename = 'EasyAsPypidoc'
-project_copy = 'Landon Bouma.'
+
 project_auth = 'Landon Bouma'
+project_copy = 'Landon Bouma.'
 project_orgn = 'Tally Bark LLC'
+
+project_dist = 'easy-as-pypi'
+
+package_name = 'easy_as_pypi'
+
+project_ghrepo = project_dist
 
 exclude_patterns = [
     'CODE-OF-CONDUCT.rst',
     'CONTRIBUTING.rst',
     'README.rst',
 ]
+
+project_docinfo = '{} Documentation'.format(project_dist)
+
+project_htmlhelp_basename = 'EasyAsPypidoc'
+
+project_texinfo = 'One line description of project.'
 
 # ┃                                                                     ┃
 # ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
