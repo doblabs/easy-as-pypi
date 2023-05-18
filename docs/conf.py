@@ -54,9 +54,18 @@ project_orgn = 'Tally Bark LLC'
 
 # ***
 
-project_dist = 'easy-as-pypi'
+# Usually the distributable name is the same name as the directory.
+# - If that's not the case for you, change this, e.g.,
+#
+#     project_dist = 'pip-install-name'
+project_dist = os.path.basename(project_root)
 
-package_name = 'easy_as_pypi'
+# Usually the installable package name is the same name as the
+# kebab-case directory name converted to snake_case.
+# - If that's not the case for you, change this, e.g.,
+#
+#     package_name = 'python_import_name'
+package_name = project_dist.replace('-', '_')
 
 project_ghrepo = project_dist
 
@@ -81,7 +90,14 @@ project_docinfo = '{} Documentation'.format(project_dist)
 #   But I don't see it used in the HTML docs under docs/_build, either
 #   as data, or as a "file base name". So, to me, looks unused.
 #   - See also: https://pypi.org/project/sphinxcontrib-htmlhelp/
-project_htmlhelp_basename = 'EasyAsPypidoc'
+# - This value is usually (or at least what I've seen in examples)
+#   the PascalCase of the project (or package) name with "doc"
+#   appended, e.g., for a project named "my-python-project", then:
+#
+#     project_htmlhelp_basename = 'MyPythonProjectdoc'
+project_htmlhelp_basename = ''.join(
+    [word.capitalize() for word in project_dist.split('-')]
+) + 'doc'
 
 # Used by texinfo_documents, below, for Texinfo output.
 project_texinfo = 'One line description of project.'
