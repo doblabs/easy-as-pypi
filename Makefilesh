@@ -26,6 +26,24 @@ make_develop () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+make_doc8 () {
+	local VENV_DOC8="$1"
+	local VENV_PYVER="$2"
+	local VENV_NAME="$3"
+
+	_pyenv_prepare_shell "${VENV_PYVER}"
+
+	# local venv_created=false
+	_venv_manage_and_activate "${VENV_DOC8}" "" "${VENV_NAME}"
+
+	python -c "import doc8" 2> /dev/null \
+		|| pip install -U pip doc8>="1.1.1"
+
+	python -m doc8 *.rst docs/
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 _pyenv_prepare_shell () {
 	local venv_pyver="$1"
 

@@ -253,7 +253,8 @@ ignore-path = [
     "docs/_build/",
     # For `lint` GitHub Actions job run by .github/workflows/checks.yaml
     "poetry-shell-lint/.venv/",
-    # For the `make develop` target from Makefile.
+    # For Makefile targets that create virtualenvs, e.g.,
+    # `make develop`, `make doc8`, etc.
     ".venv*/",
 ]
 
@@ -435,7 +436,21 @@ optional = true
 #
 #   https://pypi.org/project/doc8
 #   https://launchpad.net/doc8
-doc8 = ">=1.1.1"
+#
+# ISOFF/2023-05-18: Latest sphinx-rtd-theme (1.2.0) and doc8 (1.1.1)
+# cannot coexist — theme wants old docutils (<0.19), and doc8 wants
+# more recent docutils (>=0.19,<0.21).
+# - So this will not work, regardless of if you install --with docstyle,
+#   because Poetry always checks dependencies *across groups*.
+#
+#    doc8 = ">=1.1.1"
+#
+# - Instead, we'll leave `doc8` uninstalled via Poetry, and we'll manage
+#   `doc8` independently using pip-install in its own virtualenv.
+#
+#   - CXREF: See `make doc8`.
+
+# ***
 
 # - Python docstring checker.
 #
@@ -483,6 +498,9 @@ sphinx = "^6.2.1"
 #
 #   https://pypi.org/project/sphinx-rtd-theme
 #   https://github.com/readthedocs/sphinx_rtd_theme
+#
+# ALERT/2023-05-18: See comments above: This package requires older
+# docutils than doc8 v1, so never the two shall coexist.
 sphinx-rtd-theme = ">=1.2.0"
 
 # - "Python API and shell utilities to monitor file system events."

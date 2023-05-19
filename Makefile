@@ -50,6 +50,12 @@ DOCS_BUILDDIR ?= _build
 # Task oursourcer.
 MAKEFILESH = ./Makefilesh
 
+# ***
+
+# `make doc8` virtualenv.
+
+VENV_DOC8 ?= .venv-doc8
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # USAGE: Set BROWSER environ to pick your browser, otherwise webbrowser
@@ -616,7 +622,6 @@ babel-compile:
 
 lint: depends-active-venv
 	flake8 $(SOURCE_DIR)/ tests/
-	doc8
 .PHONY: lint
 
 isort: depends-active-venv
@@ -632,6 +637,31 @@ isort: depends-active-venv
 	done
 	@echo "ça va"
 .PHONY: isort
+
+# ***
+
+# See comments in pyproject.toml: Latest doc8 and sphinx-rtd-theme conflict,
+# because latter requires older docutils.
+# - So here we install and run `doc8` in its own virtualenv, outside the
+#   purview of Poetry.
+# - Essentially, we have to pick one or the other (or neither) package to
+#   install in the `make develop` virtualenv; we can't have them both.
+#   - Furthermore, because Poetry checks dependencies across groups, we
+#     need to omit one or the other (or both) from the pyproject.toml
+#     Poetry config, lest Poetry still complain about the conflict
+#     (i.e., we cannot use different --with options to poetry-install).
+# - For simplicity, we choose to omit doc8 from pyproject.toml.
+#   - It's just the one package, whereas sphinx is more than one package.
+#     So if we leave the sphinx packages in pyproject.toml, then Poetry
+#     will check for dependency conflicts between the sphinx packages.
+#   - Also because we `pip install doc8` in the dedicated virtualenv, we
+#     know there won't be any conflicts, as it's the only package installed.
+# - Alternatively, we could manage another pyproject.toml for doc8,
+#   but that's way more overhead and doesn't afford us any gains.
+
+doc8:
+	@. "$(MAKEFILESH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
+.PHONY: doc8
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
