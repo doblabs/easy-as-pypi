@@ -763,9 +763,12 @@ clean-docs:
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-docs
 
-docs: docs-html
-	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html
+docs: docs-html docs-browse
 .PHONY: docs
+
+docs-browse:
+	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html
+.PHONY: docs-browse
 
 # Docstrings ref:
 #   https://www.python.org/dev/peps/pep-0257/
