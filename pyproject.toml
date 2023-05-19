@@ -156,15 +156,56 @@ addopts = "--tb=short --strict-markers -ra"
 
 [tool.coverage.report]
 
+# Use 'precision' to adjust the HTML coverage value, e.g.,
+#   precision = 3
+# might show
+#   94.737%
+# Whereas (the default)
+#   precision = 0
+# would instead show
+#   95%
 precision = 0
 
-exclude_lines = [ "if __name__ == .__main__.:", ]
+# The 'exclude_lines' option might be useful if want to exclude
+# the main entry point, which might not be easily testable.
+#
+# - E.g., if the main __init__.py contains the lines:
+#
+#       if __name__ == '__main__':
+#           main()  # <-- This line is missed
+#
+#   You could exclude the block using the config:
+#
+#       exclude_lines = [ "if __name__ == .__main__.:", ]
+#
+# - For the easy-as-pypi reference project, we don't currently
+#   test the Click group command:
+#
+#       @click.group()
+#       def cli():
+#           pass  # <-- This line is missed
+#
+#   Which we could skip (not count as missed) using the config:
+#
+#       exclude_lines = [ "def cli\\(\\):", ]
+#
+#   but really we should add coverage (because I don't think
+#   it's that difficult, but at least missing it has provided
+#   a good example of how 'exclude_lines' values are regex).
 
 [tool.coverage.run]
 
+# Tabulate branch coverage, too.
 branch = true
 
-source = [ "src/", ]
+# Specifying 'source' is unnecessary, e.g.,
+#   source = [ "src/", "tests/", ]
+# is the same as either:
+#   coverage run -m pytest tests/
+#   # Or:
+#   coverage run -m pytest tests/ src/
+# However if you wanted to omit tests/ coverage, you could do this:
+#   source = [ "src/", ]
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
