@@ -632,6 +632,9 @@ lint: depends-active-venv
 	flake8 $(SOURCE_DIR)/ tests/
 .PHONY: lint
 
+# If you want additional blather, try --verbose:
+#   @isort --verbose $(SOURCE_DIR)/ tests/
+
 isort: depends-active-venv
 	isort $(SOURCE_DIR)/ tests/
 	@# DX: End files with blank line.
@@ -785,6 +788,9 @@ quickfix:
 .PHONY: quickfix
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# Note: `tox -e coverage` is different:
+#   pytest --cov=./src tests/
 
 coverage: depends-active-venv
 	coverage run -m pytest $(TEST_ARGS) tests
