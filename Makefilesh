@@ -21,7 +21,7 @@ make_develop () {
 	pip install poetry
 	poetry self add "poetry-dynamic-versioning[plugin]"
 
-	poetry -C ${EDITABLE_DIR} install --with dist,lint,test,docstyle,docs,extras
+	poetry -C ${EDITABLE_DIR} install --with dist,i18n,lint,test,docstyle,docs,extras
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
