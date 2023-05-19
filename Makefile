@@ -45,6 +45,11 @@ VENV_ARGS =
 #   ./docs/_build/html/index.html
 DOCS_BUILDDIR ?= _build
 
+# ***
+
+# Task oursourcer.
+MAKEFILESH = ./Makefilesh
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # USAGE: Set BROWSER environ to pick your browser, otherwise webbrowser
@@ -397,18 +402,8 @@ depends-active-venv:
 #             EDITABLES_ROOT=~/.kit/py make develop
 
 develop: editables editable
-	eval "$$(~/.local/bin/pyenv init -)"; \
-	pyenv install -s $(VENV_PYVER); \
-	pyenv shell $(VENV_PYVER); \
-	if [ ! -d "$(VENV_NAME)" ]; then \
-		python3 -m venv $(VENV_ARGS) "$(VENV_NAME)"; \
-	fi; \
-	. "$(VENV_NAME)/bin/activate"; \
-	pip install -U pip setuptools; \
-	pip install poetry; \
-	poetry self add "poetry-dynamic-versioning[plugin]"; \
-	poetry -C $(EDITABLE_DIR) install --with dist,lint,test,docstyle,docs,extras; \
-
+	@. "$(MAKEFILESH)" && \
+		make_develop "$(VENV_NAME)" "$(VENV_PYVER)" "$(VENV_ARGS)" "$(EDITABLE_DIR)"
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop
