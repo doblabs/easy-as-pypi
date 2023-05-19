@@ -665,6 +665,20 @@ doc8:
 	@. "$(MAKEFILESH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
 .PHONY: doc8
 
+# ***
+
+# Verify build artifacts (incl. that README.* will render on PyPI).
+
+# For parity with `tox -e twine_check`.
+twine-check: depends-active-venv clean-build
+	poetry build
+	twine check dist/*
+.PHONY: twine-check
+
+# For parity with `tox -e twine_check`.
+twine_check: twine-check
+.PHONY: twine_check
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # *** Collection of pytest runners.

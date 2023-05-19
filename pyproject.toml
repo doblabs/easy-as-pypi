@@ -307,11 +307,18 @@ babel = "^2.12.1"
 poetry-dynamic-versioning = ">=0.21.5"
 
 # - "Collection of utilities for publishing packages on PyPI"
-#   - We use Poetry to publish to PyPI, but we also run `twine check`
-#     (which might be redundant, because we also run `poetry check`).
 #
 #   https://pypi.org/project/twine
 #   https://twine.readthedocs.io/en/latest/
+#
+# - We use Poetry to publish to PyPI, but we also run `twine check`
+#   to validate the sdist and bdist (especially useful is verifying
+#   that your README.(md|rst) is valid for PyPI).
+# - TRACK/2023-05-18: Perhaps Poetry will bake this someday:
+#   - *check dist like twine check*
+#       https://github.com/python-poetry/poetry/issues/2517
+#   - Suggests exactly what our Makefile and tox.ini does:
+#       poetry build && twine check dist/*
 twine = ">=4.0.2"
 
 # ***
