@@ -52,9 +52,11 @@ MAKEFILESH = ./Makefilesh
 
 # ***
 
-# `make doc8` virtualenv.
+# `make doc8` and `make docs` virtualenvs.
 
 VENV_DOC8 ?= .venv-doc8
+
+VENV_DOCS ?= .venv-docs
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -757,6 +759,24 @@ view-coverage:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# As mentioned alongside doc8 target, doc8 conflicts with sphinx-rtd-theme.
+# - 2023-05-18: doc8 v1.1.1 depends on recent docutils (>=0.19,<0.21) but
+#               sphinx-rtd-theme v1.2.0 requires older docutils (<0.19).
+# - So those two packages cannot coexist in the same virtualenv, e.g.,
+#   we cannot install them both in the `make develop` virtualenv.
+#   - Furthermore, then cannot both be listed in pyproject.toml, because
+#     Poetry checks dependencies across groups, regardless of what's being
+#     installed.
+#   - So we decided to boot doc8 from pyproject.toml, because it has no
+#     other dependencies, whereas sphinx-rtd-theme works with Sphinx.
+#     - Meaning, Poetry will check that sphinx-rtd-theme and sphinx don't
+#       conflict. But there will be no conflicts with doc8 given that it'll
+#       be the only package installed in its virtualenv.
+# - All that said, we could build docs in the `make develop` virtualenv,
+#   but we'll use a dediciated virtualenv like we do for doc8. (It's not
+#   bad practice to isolate some tools, either, and this code was a gimme
+#   considering we isolated the doc8 task, so we'll just use the same code.)
+
 clean-docs:
 	$(MAKE) -C docs clean BUILDDIR=$(DOCS_BUILDDIR)
 	/bin/rm -f docs/$(SOURCE_DIR).*rst
@@ -770,29 +790,10 @@ docs-browse:
 	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html
 .PHONY: docs-browse
 
-# Docstrings ref:
-#   https://www.python.org/dev/peps/pep-0257/
-# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
-# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
-# instead maintain a separate docs/<project-name>.rst, so that we can
-# include special method docs, such as those for and __new__ methods.
-# - I tried to disable the generation of modules.rst and $(SOURCE_DIR).rst
-#   using options in conf.py, but failed. And I thought maybe one could
-#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
-#   command.
-#   - Use -T to disable modules.rst creation, e.g.,
-#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR)
-#   - Use appended exclude patterns to include command docs, e.g.,
-#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/commands/
-#     will stop docs/$(SOURCE_DIR).commands.rst.
-#   - To not generate docs/$(SOURCE_DIR).rst, just don't call sphinx-apidoc!
-#     That is, neither of these calls that use exclude patterns will work:
-#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/
-#       sphinx-apidoc -T -o docs/ $(SOURCE_DIR) $(SOURCE_DIR)/__init__.py
-docs-html: depends-active-venv clean-docs
-	sphinx-apidoc --force -o docs/ $(SOURCE_DIR)
-	PROJNAME=$(PACKAGE_NAME) $(MAKE) -C docs clean
-	PROJNAME=$(PACKAGE_NAME) $(MAKE) -C docs html
+docs-html: clean-docs
+	@. "$(MAKEFILESH)" && \
+		make_docs_html "$(VENV_DOCS)" "$(VENV_PYVER)" "$(VENV_NAME)" \
+			"$(EDITABLE_DIR)" "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)"
 .PHONY: docs-html
 
 docs-live: docs

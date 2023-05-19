@@ -254,7 +254,7 @@ ignore-path = [
     # For `lint` GitHub Actions job run by .github/workflows/checks.yaml
     "poetry-shell-lint/.venv/",
     # For Makefile targets that create virtualenvs, e.g.,
-    # `make develop`, `make doc8`, etc.
+    # `make develop`, `make doc8`, `make docs`, etc.
     ".venv*/",
 ]
 
