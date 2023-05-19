@@ -648,6 +648,12 @@ isort: depends-active-venv
 
 # ***
 
+pydocstyle: depends-active-venv
+	@pydocstyle $(SOURCE_DIR)/ tests/
+.PHONY: pydocstyle
+
+# ***
+
 # See comments in pyproject.toml: Latest doc8 and sphinx-rtd-theme conflict,
 # because latter requires older docutils.
 # - So here we install and run `doc8` in its own virtualenv, outside the
