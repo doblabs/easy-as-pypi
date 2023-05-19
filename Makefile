@@ -679,6 +679,12 @@ twine-check: depends-active-venv clean-build
 twine_check: twine-check
 .PHONY: twine_check
 
+# ***
+
+linkcheck: depends-active-venv
+	@make --directory=docs linkcheck
+.PHONY: linkcheck
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # *** Collection of pytest runners.
