@@ -58,6 +58,12 @@ VENV_DOC8 ?= .venv-doc8
 
 VENV_DOCS ?= .venv-docs
 
+# ***
+
+# For Vim devs: Quickfix file name
+
+VIM_QUICKFIX_PYTEST ?= .vimquickfix.pytest
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # USAGE: Set BROWSER environ to pick your browser, otherwise webbrowser
@@ -741,7 +747,7 @@ test-debug: test-local quickfix
 #   But, as mentioned above, then we're applying Bash to all shell-outs,
 #   and this author would prefer POSIX-compatible shell code when possible.
 test-local: depends-active-venv
-	pytest $(TEST_ARGS) tests/ | tee .make.out
+	pytest $(TEST_ARGS) tests/ | tee $(VIM_QUICKFIX_PYTEST)
 	# Express the exit code of pytest, not the tee.
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
@@ -753,10 +759,10 @@ test-one: depends-active-venv
 
 quickfix:
 	# Convert partial paths to full paths, for Vim quickfix.
-	sed -r "s#^([^ ]+:[0-9]+:)#$(shell pwd)/\1#" -i .make.out
+	sed -r "s#^([^ ]+:[0-9]+:)#$(shell pwd)/\1#" -i $(VIM_QUICKFIX_PYTEST)
 	# Convert double-colons in messages (not file:line:s) -- at least
 	# those we can identify -- to avoid quickfix errorformat hits.
-	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i .make.out
+	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i $(VIM_QUICKFIX_PYTEST)
 .PHONY: quickfix
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

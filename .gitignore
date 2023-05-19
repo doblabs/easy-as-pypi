@@ -32,9 +32,6 @@
 # to, say, tweak the TOC. For an example, see:
 #   docs/easy-as-pypi.rst
 
-# Test output for Vim quickfix — `make test-local`.
-/.make.out
-
 # Translations files.
 *.mo
 
@@ -51,4 +48,9 @@ __pycache__/
 
 # Optional private DEV Makefile.
 /Makefile.local
+
+# DX artifacts.
+# - USYNC: Matches VIM_QUICKFIX_PYTEST from `make test-local`.
+#   - If you use a different path, add yours to .git/info/exclude
+.vimquickfix.pytest
 
