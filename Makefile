@@ -628,9 +628,21 @@ babel-compile:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-lint: depends-active-venv
-	flake8 $(SOURCE_DIR)/ tests/
+# USYNC: The lint target dependency list should match tox.ini's envlist.
+
+lint: depends-active-venv lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-docs-linkcheck lint-poetry-check lint-twine-check
 .PHONY: lint
+
+# ***
+
+flake8: depends-active-venv
+	flake8 $(SOURCE_DIR)/ tests/
+.PHONY: flake8
+
+lint-flake8: flake8
+.PHONY: lint-flake8
+
+# ***
 
 # If you want additional blather, try --verbose:
 #   @isort --verbose $(SOURCE_DIR)/ tests/
@@ -649,11 +661,17 @@ isort: depends-active-venv
 	@echo "ça va"
 .PHONY: isort
 
+lint-isort: isort
+.PHONY: lint-isort
+
 # ***
 
 pydocstyle: depends-active-venv
 	@pydocstyle $(SOURCE_DIR)/ tests/
 .PHONY: pydocstyle
+
+lint-pydocstyle: pydocstyle
+.PHONY: lint-pydocstyle
 
 # ***
 
@@ -680,6 +698,9 @@ doc8:
 	@. "$(MAKEFILESH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
 .PHONY: doc8
 
+lint-doc8: doc8
+.PHONY: lint-doc8
+
 # ***
 
 # Verify pyproject.toml.
@@ -692,6 +713,9 @@ poetry-check: depends-active-venv
 # can also be executed via `make <cmd>`).
 poetry_check: poetry-check
 .PHONY: poetry_check
+
+lint-poetry-check: poetry-check
+.PHONY: lint-poetry-check
 
 # ***
 
@@ -707,11 +731,17 @@ twine-check: depends-active-venv clean-build
 twine_check: twine-check
 .PHONY: twine_check
 
+lint-twine-check: twine-check
+.PHONY: lint-twine-check
+
 # ***
 
 linkcheck: depends-active-venv
 	@make --directory=docs linkcheck
 .PHONY: linkcheck
+
+lint-docs-linkcheck: linkcheck
+.PHONY: lint-docs-linkcheck
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
