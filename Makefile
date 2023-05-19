@@ -673,6 +673,19 @@ doc8:
 
 # ***
 
+# Verify pyproject.toml.
+
+poetry-check: depends-active-venv
+	poetry check
+.PHONY: poetry-check
+
+# For parity with `tox -e poetry_check` (i.e., so most `tox -e <cmd>`
+# can also be executed via `make <cmd>`).
+poetry_check: poetry-check
+.PHONY: poetry_check
+
+# ***
+
 # Verify build artifacts (incl. that README.* will render on PyPI).
 
 # For parity with `tox -e twine_check`.
