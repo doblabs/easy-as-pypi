@@ -639,6 +639,19 @@ babel-compile:
 lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-poetry-check lint-twine-check lint-docs-linkcheck
 .PHONY: lint
 
+# *Make linty!* Call `make linty` to lint and see full lint report.
+# - `make lint` will stop of first failed lint task, which is sometimes
+#   what you want (to fix the failure), though other times you want the
+#   full lint report (see all tasks that failed).
+# - The `tox` 'lint' label lets you run all lint tasks, but tox doesn't
+#   run `black`, it runs `isort` in no-touchy mode, and its `flake8`
+#   won't prepare the quickfix file.
+# - So here we present a `make lint` + `tox run -m lint`.
+
+linty: depends-active-venv lint-black lint-flake8 lint-isort
+	tox run -m lint
+.PHONY: linty
+
 # ***
 
 black: depends-active-venv
