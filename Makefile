@@ -636,7 +636,7 @@ babel-compile:
 # we can check that flake8 doesn't counteract black. Also, tox uses
 # flake8 but not black.
 
-lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-docs-linkcheck lint-poetry-check lint-twine-check
+lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-poetry-check lint-twine-check lint-docs-linkcheck
 .PHONY: lint
 
 # ***
