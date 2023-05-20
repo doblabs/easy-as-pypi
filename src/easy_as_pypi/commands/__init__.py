@@ -41,7 +41,4 @@ Root sub-module convenience references/aliases.
 
 from . import easy_as_pypi
 
-__all__ = (
-    'easy_as_pypi',
-)
-
+__all__ = ("easy_as_pypi",)

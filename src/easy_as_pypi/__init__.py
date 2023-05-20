@@ -33,26 +33,26 @@ import click
 from easy_as_pypi import commands
 
 __all__ = (
-    '__arg0name__',
-    '__author_name__',
-    '__author_link__',
-    '__package_name__',
+    "__arg0name__",
+    "__author_name__",
+    "__author_link__",
+    "__package_name__",
 )
 
 # NOT_DRY: (lb): These strings also found in setup.cfg, but I'm not sure how best
 # to DRY. Fortunately, they're not likely to change. Useful for UX copyright text.
-__author_name__ = 'Landon Bouma'
-__author_link__ = 'https://tallybark.com'
+__author_name__ = "Landon Bouma"
+__author_link__ = "https://tallybark.com"
 
 # (lb): Not sure if the package name is available at runtime. Seems kinda meta,
 # like, Who am I? Useful for calling get_distribution, or to avoid hardcoding
 # the package name in text generated for the UX.
-__package_name__ = 'easy-as-pypi'
+__package_name__ = "easy-as-pypi"
 __arg0name__ = os.path.basename(sys.argv[0])
 
 
 # Initialize translation engine.
-lang_en = gettext.translation('messages', localedir='locale', languages=['en'])
+lang_en = gettext.translation("messages", localedir="locale", languages=["en"])
 
 # Set current locale to 'en'.
 # - Install will also wire `_`, akin to:
@@ -69,4 +69,3 @@ def cli():
 # Add commands
 # YOU: Change as appropriate.
 cli.add_command(commands.easy_as_pypi.eat)
-

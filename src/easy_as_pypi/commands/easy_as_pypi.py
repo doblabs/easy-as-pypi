@@ -33,4 +33,3 @@ import click
 def eat():
     """Eats."""
     click.echo(_("nom nom"))
-
