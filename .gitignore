@@ -50,6 +50,9 @@ __pycache__/
 /Makefile.local
 
 # DX artifacts.
+# - USYNC: Matches VIM_QUICKFIX_FLAKE8 from `make flake8`.
+#   - If you use a different path, add yours to .git/info/exclude
+.vimquickfix.flake8
 # - USYNC: Matches VIM_QUICKFIX_PYTEST from `make test-local`.
 #   - If you use a different path, add yours to .git/info/exclude
 .vimquickfix.pytest

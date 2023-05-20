@@ -60,7 +60,9 @@ VENV_DOCS ?= .venv-docs
 
 # ***
 
-# For Vim devs: Quickfix file name
+# For Vim devs: Quickfix file names
+
+VIM_QUICKFIX_FLAKE8 ?= .vimquickfix.flake8
 
 VIM_QUICKFIX_PYTEST ?= .vimquickfix.pytest
 
@@ -635,8 +637,43 @@ lint: depends-active-venv lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-
 
 # ***
 
+# Run flake8, and collect and send errors to Vim quickfix.
+
+# CXREF: See [tool.flake8] `format` option in pyproject.toml.
+# - This format should match the sed command pattern, below.
+#
+# Re: flake8 output:
+# - It'd be nice to find something like `tag` for `flake8`
+#     https://github.com/aykamko/tag
+#   E.g., where `e1` from the shell opens the first lint error in your editor,
+#   `e2` opens the second, etc. (While `black` is great, it doesn't fix
+#    everything; it would be convenient to open lint errors from the term.)
+# - Another option is using Vim quickfix, e.g., from the terminal:
+#     flake8 | tee >(sed "s@^./@$(pwd)/@" > .flake8.out)
+#   And then within Vim:
+#     set errorformat=%f\ %l:%m
+#     cgetfile /path/to/project/.flake8.out
+#   Or what we do below using --remote-send.
+#   - Note that 'SAMPI' is the default GVim server name
+#     used by Depoxy: https://github.com/depoxy/depoxy
+#     which the author uses to setup and orchestrate
+#     their development machines.
+#     - Personalize GVIM_OPEN_SERVERNAME as necessary for yours.
+
 flake8: depends-active-venv
-	flake8 $(SOURCE_DIR)/ tests/
+	@/bin/bash -c "flake8 $(SOURCE_DIR)/ tests/ | tee >(sed -E \"s@^(\./)?@$$(pwd)/@\" > $(VIM_QUICKFIX_FLAKE8))"
+	@servername=""; \
+	if [ -n "$${GVIM_OPEN_SERVERNAME}" ] || [ -z "$${GVIM_OPEN_SERVERNAME+x}" ]; then \
+		servername="--servername $${GVIM_OPEN_SERVERNAME:-SAMPI}"; \
+	fi; \
+	if [ -s "$(VIM_QUICKFIX_FLAKE8)" ]; then \
+		gvim $${servername} \
+			--remote-send "<ESC>:set errorformat=%f\ %l:%m<CR>" \
+		&& gvim $${servername} \
+			--remote-send "<ESC>:cgetfile $$(pwd)/$(VIM_QUICKFIX_FLAKE8)<CR>"; \
+	else \
+		command rm "$(VIM_QUICKFIX_FLAKE8)"; \
+	fi
 .PHONY: flake8
 
 lint-flake8: flake8
