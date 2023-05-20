@@ -245,7 +245,7 @@ format = "%(path)s %(row)d:%(col)d: %(code)s %(text)s"
 # - Tl;dr This allows user to run simply `flake8`.
 # - Use 'extend_exclude' vs. 'exclude' so we don't override --exclude from
 #   command line.
-exclude = [
+extend_exclude = [
     # The build directory, if not ignored, has 50 or so lintable files.
     "build/",
     # Docs' conf.py is modified Sphinx boilerplate. That does not lint.
@@ -308,7 +308,7 @@ max_line_length = 89
 #         - (lb): SQLAlchemy filter function honors `== None`, not `is None`, e.g.,
 #                   query = query.filter(AlchemyFact.activity == None)
 #
-ignore = [
+extend_ignore = [
     # blank line at end of file
     "W391",
     # line break before binary operator
