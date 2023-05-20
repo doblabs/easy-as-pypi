@@ -547,6 +547,12 @@ pytest-mock = ">=3.10.0"
 #   https://tox.readthedocs.io/en/latest/
 tox = ">=4.5.1"
 
+# DUNNO/2022-09-30: I thought we might need a pyenv plugin (tox-pyenv)
+# but `tox` is working great. Perhaps because I ran `pyenv install`
+# on all the Python versions previously (separate from this project
+# setup).
+# - SAVVY: If tox fails on you, perhaps ensure pyenv versions installed.
+
 # ***** Coverage
 
 # - "Code coverage measurement for Python"
