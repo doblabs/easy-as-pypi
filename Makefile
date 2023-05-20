@@ -632,8 +632,21 @@ babel-compile:
 
 # USYNC: The lint target dependency list should match tox.ini's envlist.
 
-lint: depends-active-venv lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-docs-linkcheck lint-poetry-check lint-twine-check
+# Note that `black` and `flake8` sorta redundant, but by including both,
+# we can check that flake8 doesn't counteract black. Also, tox uses
+# flake8 but not black.
+
+lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-docs-linkcheck lint-poetry-check lint-twine-check
 .PHONY: lint
+
+# ***
+
+black: depends-active-venv
+	@black $(SOURCE_DIR)
+.PHONY: black
+
+lint-black: black
+.PHONY: lint-black
 
 # ***
 
@@ -685,21 +698,31 @@ lint-flake8: flake8
 #   @isort --verbose $(SOURCE_DIR)/ tests/
 
 isort: depends-active-venv
-	isort $(SOURCE_DIR)/ tests/
-	@# DX: End files with blank line.
-	@git ls-files -- :/$(SOURCE_DIR)/ :/tests/ | while read file; do \
-		if [ -n "$$(tail -n1 $$file)" ]; then \
-			echo "Blanking: $$file"; \
-			echo >> $$file; \
-		else \
-			echo "DecentOk: $$file"; \
-		fi \
-	done
-	@echo "ça va"
+	@isort $(SOURCE_DIR)/ tests/
 .PHONY: isort
 
 lint-isort: isort
 .PHONY: lint-isort
+
+# ISOFF/2023-05-18: In a previous life (because in my current life I
+# don't want to fight `black` or have style debates), I'd add a blank
+# line to the ends of files. (I like this so that <Ctrl-End> always
+# puts the cursor in the first column, just like <Ctrl-Home>.)
+# - But black trims blank lines, and there's no option not to, so
+#   adding blanks is no longer an option. But here's the code for
+#   posterity:
+#
+# end-files-with-blank-line:
+#   @git ls-files -- :/$(SOURCE_DIR)/ :/tests/ | while read file; do \
+#     if [ -n "$$(tail -n1 $$file)" ]; then \
+#       echo "Blanking: $$file"; \
+#       echo >> $$file; \
+#     else \
+#       echo "DecentOk: $$file"; \
+#     fi \
+#   done
+#   @echo "ça va"
+# .PHONY: end-files-with-blank-line
 
 # ***
 
