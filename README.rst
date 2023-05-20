@@ -32,18 +32,40 @@ One dev's boilerplate PyPI project.
 Overview
 ########
 
-This project contains Python project boilerplate
-for your next CLI project.
+Boilerplate for modern, bathroom-tub-included Python projects.
 
-.. FIXME/2020-12-13: Enumerate contents, and add links.
-Includes Click, config-decorator, app_dirs, etc.
+The boilerplate itself is installable and includes minimalist Click CLI.
 
-See ``bin/clone-and-rebrand-easy-as-pypi.sh`` for automatically
-generating a new PyPI-ready project from this repository.
+But most of the gold is buried within:
 
-You'll need to diff some files against this project to stay current
-with some of the boilerplate (like setup.py, tox.ini, etc.), but
-those files rarely change, and most functionality is included by
-way of PyPI dependencies, which you can easily keep up to date with
-CI tools (like requires.io).
+- Modern Poetry and ``pyproject.toml`` setup.
+
+- Supports cascading editable installs (install current project in
+  editable mode, as well as any dependencies you might have source
+  for locally; boilerplate manages alternative ``pyproject.toml``
+  automatically).
+
+- All the lints: ``black``, ``flake8``, ``isort``, ``pydocstyle``,
+  ``doc8``, ``linkcheck``, ``poetry check``, and ``twine check``.
+
+- Test against all active Python versions and lint using ``tox``.
+
+- Run tasks, tests, and setup virtualenvs quickly using ``make``
+  commands in your active virtualenv.
+
+- Make commands to generate docs for *ReadTheDocs*.
+
+- Make commands to localize user messages using ``Babel``.
+
+- Make commands to setup and install to separate virtualenvs
+  for various scenarios.
+
+Most of the files are designed to be hard linked from the derived
+projects themselves, as they won't need to be customized (such as
+``Makefile``).
+
+- That way when the boilerplate changes, you can just commit the
+  changes in the derived project, call them "dependency updates"
+  or something, and not have to worry about merging changes manually
+  (and running ``meld`` or something).
 
