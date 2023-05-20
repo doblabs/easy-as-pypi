@@ -588,12 +588,6 @@ codecov = ">=2.1.13"
 #   https://github.com/joke2k/faker
 #  Faker = ">=18.7.0"
 
-# - "Faker integration with the pytest framework."
-#
-#   https://pypi.org/project/pytest-faker
-#   https://github.com/pytest-dev/pytest-faker
-#  pytest-faker >= 2.0.0
-
 # - "Generates random data for your tests"
 #
 #   https://pypi.org/project/fauxfactory
