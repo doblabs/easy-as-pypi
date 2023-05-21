@@ -35,16 +35,13 @@
 # Translations files.
 *.mo
 
-# Byte code.
+# Bytecode.
 *.py[cod]
 __pycache__/
 
 # Editable pyproject.toml and .venv-<project> — `make develop`.
 /.editable/
 /.venv*/
-
-# User's personal .ignore (see .ignore.example).
-/.ignore
 
 # DX artifacts.
 # - USYNC: Matches VIM_QUICKFIX_FLAKE8 from `make flake8`.
@@ -53,4 +50,7 @@ __pycache__/
 # - USYNC: Matches VIM_QUICKFIX_PYTEST from `make test-local`.
 #   - If you use a different path, add yours to .git/info/exclude
 /.vimquickfix.pytest
+
+# User's personal .ignore (see .ignore.example).
+/.ignore
 
