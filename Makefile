@@ -788,6 +788,10 @@ isort: _depends_active_venv
 	@isort $(SOURCE_DIR)/ tests/
 .PHONY: isort
 
+isort-check-only: _depends_active_venv
+	@isort --check-only --verbose $(SOURCE_DIR)/ tests/
+.PHONY: isort-check-only
+
 # ISOFF/2023-05-18: In a previous life (because in my current life I
 # don't want to fight `black` or have style debates), I'd add a blank
 # line to the ends of files. (I like this so that <Ctrl-End> always
