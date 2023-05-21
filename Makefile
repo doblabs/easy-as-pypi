@@ -214,6 +214,7 @@ _help_main:
 	@echo "   print-ours      print list of \"our\" projects — those we control"
 	@echo "                     and those \`develop\` will make editable if found"
 	@echo "   pydocstyle      lint: PEP 257 Docstring conventions"
+	@echo "   pyenv-install-pys  install latest of each supported Python version"
 	@echo "   release         'publish' alias"
 	@echo "   test            pytest against active virtualenv or Python"
 	@echo "   test-all        pytest all supported Python versions using \`tox\`"
@@ -433,6 +434,30 @@ _warn_unless_virtualenvwrapper:
 		echo; \
 	fi;
 .PHONY: _warn_unless_virtualenvwrapper
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# - CPYST: To see list of available Python versions, try:
+#     pyenv install -l
+#     pyenv install -l | grep '^ \+3\.'
+#	- REFER: Try `pyenv versions` to see what you've got installed.
+#	- Note the `tail` below assumes the version list is sorted correctly,
+#	  e.g., 3.x.9 is sorted before 3.x.10.
+#	  - Otherwise we could print the PATCH number first and `sort -n`,
+#	    but that's some spectacular magic:
+#	      sed 's/^ \+\([0-9]\+\.[0-9]\+\.\([0-9]\+\)\)/\2 \1/'
+
+# USYNC: Keep synced with tox.ini [testenv:py*] jobs.
+# - -s: --skip-existing
+pyenv-install-pys:
+	@pyenv install -s 3.8
+	@pyenv install -s 3.9
+	@pyenv install -s 3.10
+	@pyenv install -s 3.11
+	@# Pre-release Python only installable by full version.
+	@# This installs the non-dev version, e.g., '3.12.0a5', not '3.12-dev'.
+	@pyenv install -s $$(pyenv install -l | grep '^ \+3\.12\.' | tail -1)
+.PHONY: pyenv-install-pys
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
