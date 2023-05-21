@@ -386,7 +386,7 @@ install: _warn_unless_virtualenvwrapper
 	\
 	echo; \
 	echo "Ready to rock:"; \
-	echo "  . $${workon_home}/bin/activate"; \
+	echo "  . $${workon_home}/$(PACKAGE_NAME)/bin/activate"; \
 	echo "Or if using virtualenvwrapper:"; \
 	echo "  workon $(PACKAGE_NAME)";
 .PHONY: install
