@@ -636,7 +636,7 @@ babel-compile:
 # we can check that flake8 doesn't counteract black. Also, tox uses
 # flake8 but not black.
 
-lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint-doc8 lint-poetry-check lint-twine-check lint-docs-linkcheck
+lint: _depends_active_venv black flake8 isort pydocstyle doc8 poetry-check twine-check linkcheck
 .PHONY: lint
 
 # *Make linty!* Call `make linty` to lint and see full lint report.
@@ -648,7 +648,7 @@ lint: depends-active-venv lint-black lint-flake8 lint-isort lint-pydocstyle lint
 #   won't prepare the quickfix file.
 # - So here we present a `make lint` + `tox run -m lint`.
 
-linty: depends-active-venv lint-black lint-flake8 lint-isort
+linty: _depends_active_venv black flake8 isort
 	tox run -m lint
 .PHONY: linty
 
@@ -657,9 +657,6 @@ linty: depends-active-venv lint-black lint-flake8 lint-isort
 black: depends-active-venv
 	@black $(SOURCE_DIR)
 .PHONY: black
-
-lint-black: black
-.PHONY: lint-black
 
 # ***
 
@@ -702,9 +699,6 @@ flake8: depends-active-venv
 	fi
 .PHONY: flake8
 
-lint-flake8: flake8
-.PHONY: lint-flake8
-
 # ***
 
 # If you want additional blather, try --verbose:
@@ -713,9 +707,6 @@ lint-flake8: flake8
 isort: depends-active-venv
 	@isort $(SOURCE_DIR)/ tests/
 .PHONY: isort
-
-lint-isort: isort
-.PHONY: lint-isort
 
 # ISOFF/2023-05-18: In a previous life (because in my current life I
 # don't want to fight `black` or have style debates), I'd add a blank
@@ -743,9 +734,6 @@ pydocstyle: depends-active-venv
 	@pydocstyle $(SOURCE_DIR)/ tests/
 .PHONY: pydocstyle
 
-lint-pydocstyle: pydocstyle
-.PHONY: lint-pydocstyle
-
 # ***
 
 # See comments in pyproject.toml: Latest doc8 and sphinx-rtd-theme conflict,
@@ -771,9 +759,6 @@ doc8:
 	@. "$(MAKEFILESH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
 .PHONY: doc8
 
-lint-doc8: doc8
-.PHONY: lint-doc8
-
 # ***
 
 # Verify pyproject.toml.
@@ -786,9 +771,6 @@ poetry-check: depends-active-venv
 # can also be executed via `make <cmd>`).
 poetry_check: poetry-check
 .PHONY: poetry_check
-
-lint-poetry-check: poetry-check
-.PHONY: lint-poetry-check
 
 # ***
 
@@ -804,17 +786,11 @@ twine-check: depends-active-venv clean-build
 twine_check: twine-check
 .PHONY: twine_check
 
-lint-twine-check: twine-check
-.PHONY: lint-twine-check
-
 # ***
 
 linkcheck: depends-active-venv
 	@make --directory=docs linkcheck
 .PHONY: linkcheck
-
-lint-docs-linkcheck: linkcheck
-.PHONY: lint-docs-linkcheck
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
