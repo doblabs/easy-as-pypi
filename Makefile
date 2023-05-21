@@ -361,6 +361,23 @@ release: publish
 #   install: _warn_unless_virtualenvwrapper clean
 #     ...
 
+# MAYBE/2023-05-21: Perhaps switch to *Using One Shell*:
+#
+#   https://www.gnu.org/software/make/manual/html_node/One-Shell.html
+#
+# - A `.ONESHELL:` on any line enables this feature.
+#   It applies globally. You can not restrict to single recipe.
+# - If I had known about this sooner, or thought to read the docs to
+#   see if something like this was available, I probably would've
+#   explored using it.
+#   - Though with the new Makeout.sh companion library, my latest
+#     advice is that if you need line continuations in Makefile,
+#     the recipe is probably too complex, and should be moved to
+#     the shell-out. The added benefit is function reusability
+#     (with parameter pasasing) and proper syntax highlighting.
+#
+#  .ONESHELL:
+
 install: _warn_unless_virtualenvwrapper
 	eval "$$($$(which pyenv) init -)"; \
 	pyenv shell --unset; \
