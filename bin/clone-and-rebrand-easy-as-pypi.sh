@@ -364,6 +364,14 @@ cloned_project_reset_git () {
   # Remove the copy of this script, and its helper(s).
   command rm -rf "bin/"
 
+  # Remove project-specific Makefile.local and Maketasks.local.sh
+  # - USYNC: MAKEFILE_LOCAL in Makefile
+  MAKEFILE_LOCAL="${MAKEFILE_LOCAL:-Makefile.local}"
+  command rm -f "${MAKEFILE_LOCAL}"
+  # - USYNC: MAKETASKS_LOCAL_SH in Maketasks.sh
+  MAKETASKS_LOCAL_SH="${MAKETASKS_LOCAL_SH:-Maketasks.local.sh}"
+  command rm -f "${MAKETASKS_LOCAL_SH}"
+
   git init .
 
   git_commit_initial_clone
