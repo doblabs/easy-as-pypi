@@ -681,28 +681,18 @@ black: _depends_active_venv
 #   And then within Vim:
 #     set errorformat=%f\ %l:%m
 #     cgetfile /path/to/project/.flake8.out
-#   Or what we do below using --remote-send.
-#   - Note that 'SAMPI' is the default GVim server name
-#     used by Depoxy: https://github.com/depoxy/depoxy
-#     which the author uses to setup and orchestrate
-#     their development machines.
-#     - Personalize GVIM_OPEN_SERVERNAME as necessary for yours.
+#   Which is automated by the gvim_load_quickfix shell-out.
 
-flake8: _depends_active_venv
-	@/bin/bash -c "flake8 $(SOURCE_DIR)/ tests/ | tee >(sed -E \"s@^(\./)?@$$(pwd)/@\" > $(VIM_QUICKFIX_FLAKE8))"
-	@servername=""; \
-	if [ -n "$${GVIM_OPEN_SERVERNAME}" ] || [ -z "$${GVIM_OPEN_SERVERNAME+x}" ]; then \
-		servername="--servername $${GVIM_OPEN_SERVERNAME:-SAMPI}"; \
-	fi; \
-	if [ -s "$(VIM_QUICKFIX_FLAKE8)" ]; then \
-		gvim $${servername} \
-			--remote-send "<ESC>:set errorformat=%f\ %l:%m<CR>" \
-		&& gvim $${servername} \
-			--remote-send "<ESC>:cgetfile $$(pwd)/$(VIM_QUICKFIX_FLAKE8)<CR>"; \
-	else \
-		command rm "$(VIM_QUICKFIX_FLAKE8)"; \
-	fi
+flake8: _depends_active_venv _run_flake8 _gvim_load_quickfix_flake8
 .PHONY: flake8
+
+_run_flake8: _depends_active_venv
+	@/bin/bash -c "flake8 $(SOURCE_DIR)/ tests/ | tee >(sed -E \"s@^(\./)?@$$(pwd)/@\" > $(VIM_QUICKFIX_FLAKE8))"
+.PHONY: _run_flake8
+
+_gvim_load_quickfix_flake8:
+	@. "$(MAKEFILESH)" && gvim_load_quickfix "$(VIM_QUICKFIX_FLAKE8)"
+.PHONY: _gvim_load_quickfix_flake8
 
 # ***
 

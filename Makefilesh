@@ -93,6 +93,33 @@ make_docs_html () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# - Note that 'SAMPI' is the default GVim server name
+#   used by Depoxy: https://github.com/depoxy/depoxy
+#   which the author uses to setup and orchestrate
+#   their development machines.
+#   - Personalize GVIM_OPEN_SERVERNAME as necessary for yours.
+
+gvim_load_quickfix () {
+	local quickfix_file="$1"
+
+	local servername=""
+
+	if [ -n "${GVIM_OPEN_SERVERNAME}" ] || [ -z "${GVIM_OPEN_SERVERNAME+x}" ]; then
+		servername="--servername ${GVIM_OPEN_SERVERNAME:-SAMPI}"
+	fi
+
+	if [ -s "${gvim_load_quickfix}" ]; then
+		gvim ${servername} \
+			--remote-send "<ESC>:set errorformat=%f\ %l:%m<CR>" \
+		&& gvim ${servername} \
+			--remote-send "<ESC>:cgetfile $(pwd)/${gvim_load_quickfix}<CR>"
+	else
+		command rm "${gvim_load_quickfix}"
+	fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 _pyenv_prepare_shell () {
 	local venv_pyver="$1"
 
