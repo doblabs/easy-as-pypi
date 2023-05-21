@@ -20,8 +20,8 @@ SOURCE_DIR = src
 EDITABLES_ROOT ?= $(shell echo ~/.kit/py)
 
 # Local dir wherein to place editable pyproject.toml,
-#   e.g., `.editable/pyproject.toml`.
-EDITABLE_DIR ?= .editable
+#   e.g., `.pyproject-editable/pyproject.toml`.
+EDITABLE_DIR ?= .pyproject-editable
 
 # Local "editable" virtualenv directory (`make develop`).
 VENV_NAME ?= .venv-$(PACKAGE_NAME)
@@ -547,13 +547,13 @@ EDITABLE_PJS = \
 # ***
 
 # USAGE: Run `EDITABLES_ROOT=<path> make editable` to create dev-friendly
-# `.editable/pyproject.toml` that'll install the project in editable mode.
+# `.pyproject-editable/pyproject.toml` that installs project in editable mode.
 #
 # - E.g., after you've cloned EDITABLE_PJS projects to ~/.kit/py, run:
 #
 #     EDITABLES_ROOT=~/.kit/py make editable
 #
-# to create `.editable/pyproject.toml` with the correct local paths.
+# to create `.pyproject-editable/pyproject.toml` with the correct local paths.
 #
 # - You wouldn't normally run this task: `make develop` runs it.
 #
@@ -588,7 +588,7 @@ EDITABLE_PJS = \
 
 # - The second sed simply strips the trailing '|' the for-loop might leave.
 
-# - The third sed adds "../" prefixes to the new .editable/pyproject.toml,
+# - The third sed adds "../" prefixes to new .pyproject-editable/pyproject.toml,
 #   so it references the README.rst and pacakge from its parent directory.
 #
 #   - Note the sed expects a specific pyproject format:
@@ -662,8 +662,8 @@ editable:
 	command ln -s "../$(SOURCE_DIR)" "$${editable_link}";
 .PHONY: editable
 
-# USAGE: Call `make editables` to call `make editable` on each of "our"
-# projects (EDITABLE_PJS), which creates all dependencies' ".editable/"
+# USAGE: Call `make editables` to call `make editable` on each of "our" projects
+# (EDITABLE_PJS), which creates all dependencies' ".pyproject-editable/"
 # dirs. and the assets therein (currently just a symlink to source dir).
 #
 # - This is called by `make develop` to prep all the dependencies, but
