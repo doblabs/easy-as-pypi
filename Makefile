@@ -285,6 +285,20 @@ dist-list:
 
 # ***
 
+# - Interesting poetry-publish options:
+#     -r/--repository pypi
+#     -u/--username user
+#     -p/--password pass
+#     --cert
+#     --client-cert
+#     --dry-run
+
+# Note there's a `poetry publish --build` option that calls `poetry build`.
+# But if you like to test your builds, and then only upload what you
+# tested, and not a new build, then don't use it.
+# - But you may want to ensure the dist being published has been tested.
+#   And we do not provide that.
+
 publish: _depends_active_venv clean-build
 	poetry publish
 .PHONY: publish
