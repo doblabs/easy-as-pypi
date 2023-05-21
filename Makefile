@@ -854,12 +854,13 @@ test-one: _depends_active_venv
 	pytest $(TEST_ARGS) -x tests/
 .PHONY: test-one
 
+# Prepares the pytest output for Vim quickfix.
 _quickfix:
-	# Convert partial paths to full paths, for Vim quickfix.
-	sed -r "s#^([^ ]+:[0-9]+:)#$(shell pwd)/\1#" -i $(VIM_QUICKFIX_PYTEST)
-	# Convert double-colons in messages (not file:line:s) -- at least
-	# those we can identify -- to avoid quickfix errorformat hits.
-	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i $(VIM_QUICKFIX_PYTEST)
+	@# Convert partial paths to full paths, for Vim quickfix.
+	@sed -r "s#^([^ ]+:[0-9]+:)#$(shell pwd)/\1#" -i $(VIM_QUICKFIX_PYTEST)
+	@# Convert double-colons in messages (not file:line:s) -- at least
+	@# those we can identify -- to avoid quickfix errorformat hits.
+	@sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i $(VIM_QUICKFIX_PYTEST)
 .PHONY: _quickfix
 
 _gvim_load_quickfix_pytest:
