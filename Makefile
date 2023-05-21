@@ -274,10 +274,13 @@ dist: build
 dist-list:
 	@echo
 	@printf "$$ "
-	tar -tvzf dist/*.tar.gz
+	ls -l dist | tail -n -2
 	@echo
 	@printf "$$ "
 	unzip -l dist/*.whl
+	@echo
+	@printf "$$ "
+	tar -tvzf dist/*.tar.gz
 .PHONY: dist-list
 
 # ***
