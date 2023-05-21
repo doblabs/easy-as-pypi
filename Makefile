@@ -150,7 +150,9 @@ PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
 #
 #   $ echo -e "_help_local::\n\t@echo 'More help!'" > Makefile.local
 
--include Makefile.local
+MAKEFILE_LOCAL ?= Makefile.local
+
+-include $(MAKEFILE_LOCAL)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
