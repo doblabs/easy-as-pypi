@@ -908,11 +908,14 @@ view-coverage:
 #   bad practice to isolate some tools, either, and this code was a gimme
 #   considering we isolated the doc8 task, so we'll just use the same code.)
 
-clean-docs:
+clean-docs: clean-apidocs
 	$(MAKE) -C docs clean BUILDDIR=$(DOCS_BUILDDIR)
+.PHONY: clean-docs
+
+clean-apidocs:
 	/bin/rm -f docs/$(SOURCE_DIR).*rst
 	/bin/rm -f docs/modules.rst
-.PHONY: clean-docs
+.PHONY: clean-apidocs
 
 docs: _docs_html _docs_browse
 .PHONY: docs
