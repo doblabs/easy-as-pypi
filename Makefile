@@ -842,11 +842,15 @@ test-debug: _test_local _quickfix
 #
 #   But, as mentioned above, then we're applying Bash to all shell-outs,
 #   and this author would prefer POSIX-compatible shell code when possible.
-test-local: _depends_active_venv
+
+_test_local: _depends_active_venv _run_pytest _gvim_load_quickfix_pytest
+.PHONY: _test_local
+
+_run_pytest:
 	pytest $(TEST_ARGS) tests/ | tee $(VIM_QUICKFIX_PYTEST)
 	# Express the exit code of pytest, not the tee.
 	exit ${PIPESTATUS[0]}
-.PHONY: test-local
+.PHONY: _run_pytest
 
 # ALTLY: Use `TEST_ARGS=-x make test`
 test-one: _depends_active_venv
@@ -860,6 +864,10 @@ _quickfix:
 	# those we can identify -- to avoid quickfix errorformat hits.
 	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i $(VIM_QUICKFIX_PYTEST)
 .PHONY: _quickfix
+
+_gvim_load_quickfix_pytest:
+	@. "$(MAKEFILESH)" && gvim_load_quickfix "$(VIM_QUICKFIX_PYTEST)"
+.PHONY: _gvim_load_quickfix_pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
