@@ -232,21 +232,28 @@ clean: clean-build clean-pyc clean-test
 .PHONY: clean
 
 clean-build:
-	/bin/rm -rf dist/
+	@echo "clean-build"
+	@/bin/rm -rf dist/
 .PHONY: clean-build
 
 clean-pyc:
-	find . -name '*.pyc' -exec /bin/rm -f {} +
-	find . -name '*.pyo' -exec /bin/rm -f {} +
-	find . -name '*~' -exec /bin/rm -f {} +
-	find . -name '__pycache__' -exec /bin/rm -fr {} +
+	@echo "clean-pyc"
+	@find . -name '*.pyc' -exec /bin/rm -f {} +
+	@find . -name '*.pyo' -exec /bin/rm -f {} +
+	@find . -name '*~' -exec /bin/rm -f {} +
+	@find . -name '__pycache__' -exec /bin/rm -rf {} +
 .PHONY: clean-pyc
 
 clean-test:
+	@echo "clean-test"
 	@# Keep ".tox/", because expensive startup time.
 	@#  /bin/rm -rf .tox/
-	/bin/rm -f .coverage
-	/bin/rm -fr htmlcov/
+	@/bin/rm -f ".coverage"
+	@/bin/rm -rf "htmlcov/"
+	@/bin/rm -rf ".pytest_cache/"
+	@/bin/rm -f "$(VIM_QUICKFIX_PYTEST)"
+	@# Might as well include flake8.
+	@/bin/rm -f "$(VIM_QUICKFIX_FLAKE8)"
 .PHONY: clean-test
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
