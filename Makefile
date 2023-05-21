@@ -148,19 +148,19 @@ PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
 #
 # You could e.g., define a help task extension thusly:
 #
-#   $ echo -e "help-local::\n\t@echo 'More help!'" > Makefile.local
+#   $ echo -e "_help_local::\n\t@echo 'More help!'" > Makefile.local
 
 -include Makefile.local
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-help: help-main help-local
+help: _help_main _help_local
 .PHONY: help
 
-help-local::
-.PHONY: help-local
+_help_local::
+.PHONY: _help_local
 
-help-main:
+_help_main:
 	@echo "Please choose a target for make:"
 	@echo
 	@echo " Installing and Packaging"
@@ -208,18 +208,9 @@ help-main:
 	@echo "   test-one        run pytest until first test fails"
 	@echo "   view-coverage   open coverage docs in browser (using BROWSER browser)"
 	@echo "   whoami          print project package name [$(PACKAGE_NAME)]"
-.PHONY: help-main
+.PHONY: _help_main
 
-# Not documented (internal):
-#           coverage-to-html  converts completed coverage run results to HTML
-#           depends-active-venv  fails make command unless virtualenv active
-#           depends-cloc    fails make command unless \`cloc\` installed
-#           docs-html       called by \`docs\` to generate HTML docs
-#           quickfix        called by \`test-debug\` to prepare .make.out for Vim quickfix
-#           test-local      called by \`test-debug\` to generate .make.out from pytest
-#           warn-unless-virtualenvwrapper  prints message if virtualenvwrapper not wired
-#           CLOC            set to \`cloc \` if cloc installed
-#           WORKON          set to \`workon \` if workon (virtualenvwrapper) installed
+# Not documented (internal): Targets that start with "_" (or "." also works).
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -245,7 +236,7 @@ clean-test:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-build: depends-active-venv clean-build
+build: _depends_active_venv clean-build
 	poetry build
 	ls -l dist
 	@echo 'HINT: Run `make dist-list` to bdist and sdist contents.'
@@ -268,7 +259,7 @@ dist-list:
 
 # ***
 
-publish: depends-active-venv clean-build
+publish: _depends_active_venv clean-build
 	poetry publish
 .PHONY: publish
 
@@ -345,10 +336,10 @@ release: publish
 # - So just don't worry about it (if you see that ERROR and corresponding red text).
 
 # INERT/2023-05-16: This used to `clean`, but I don't see any reason.
-#   install: warn-unless-virtualenvwrapper clean
+#   install: _warn_unless_virtualenvwrapper clean
 #     ...
 
-install: warn-unless-virtualenvwrapper
+install: _warn_unless_virtualenvwrapper
 	eval "$$($$(which pyenv) init -)"; \
 	pyenv shell --unset; \
 	\
@@ -390,22 +381,22 @@ install: warn-unless-virtualenvwrapper
 
 # SAVVY: virtualenvwrapper.sh defines VIRTUALENVWRAPPER_HOOK_DIR, and
 #        virtualenvwrapper_lazy.sh defines _VIRTUALENVWRAPPER_API.
-warn-unless-virtualenvwrapper:
+_warn_unless_virtualenvwrapper:
 	@if [ -z "$${_VIRTUALENVWRAPPER_API}" ] && [ -z "$${VIRTUALENVWRAPPER_HOOK_DIR}" ]; then \
 		echo "ALERT: Please install workon from: https://github.com/landonb/virtualenvwrapper"; \
 		echo; \
 	fi;
-.PHONY: warn-unless-virtualenvwrapper
+.PHONY: _warn_unless_virtualenvwrapper
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-depends-active-venv:
+_depends_active_venv:
 	@if [ -z "${VIRTUAL_ENV}" ]; then \
 		>&2 echo "ERROR: Run from a virtualenv!"; \
 		\
 		exit 1; \
 	fi
-.PHONY: depends-active-venv
+.PHONY: _depends_active_venv
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -654,7 +645,7 @@ linty: _depends_active_venv black flake8 isort
 
 # ***
 
-black: depends-active-venv
+black: _depends_active_venv
 	@black $(SOURCE_DIR)
 .PHONY: black
 
@@ -683,7 +674,7 @@ black: depends-active-venv
 #     their development machines.
 #     - Personalize GVIM_OPEN_SERVERNAME as necessary for yours.
 
-flake8: depends-active-venv
+flake8: _depends_active_venv
 	@/bin/bash -c "flake8 $(SOURCE_DIR)/ tests/ | tee >(sed -E \"s@^(\./)?@$$(pwd)/@\" > $(VIM_QUICKFIX_FLAKE8))"
 	@servername=""; \
 	if [ -n "$${GVIM_OPEN_SERVERNAME}" ] || [ -z "$${GVIM_OPEN_SERVERNAME+x}" ]; then \
@@ -704,7 +695,7 @@ flake8: depends-active-venv
 # If you want additional blather, try --verbose:
 #   @isort --verbose $(SOURCE_DIR)/ tests/
 
-isort: depends-active-venv
+isort: _depends_active_venv
 	@isort $(SOURCE_DIR)/ tests/
 .PHONY: isort
 
@@ -730,7 +721,7 @@ isort: depends-active-venv
 
 # ***
 
-pydocstyle: depends-active-venv
+pydocstyle: _depends_active_venv
 	@pydocstyle $(SOURCE_DIR)/ tests/
 .PHONY: pydocstyle
 
@@ -763,7 +754,7 @@ doc8:
 
 # Verify pyproject.toml.
 
-poetry-check: depends-active-venv
+poetry-check: _depends_active_venv
 	poetry check
 .PHONY: poetry-check
 
@@ -777,7 +768,7 @@ poetry_check: poetry-check
 # Verify build artifacts (incl. that README.* will render on PyPI).
 
 # For parity with `tox -e twine_check`.
-twine-check: depends-active-venv clean-build
+twine-check: _depends_active_venv clean-build
 	poetry build
 	twine check dist/*
 .PHONY: twine-check
@@ -788,7 +779,7 @@ twine_check: twine-check
 
 # ***
 
-linkcheck: depends-active-venv
+linkcheck: _depends_active_venv
 	@make --directory=docs linkcheck
 .PHONY: linkcheck
 
@@ -804,15 +795,15 @@ linkcheck: depends-active-venv
 #                  ^^^                   Increase verbosity
 #            ^^^^^                       Start pdb on error or KeyboardInterrupt
 
-test: depends-active-venv
+test: _depends_active_venv
 	pytest $(TEST_ARGS) tests/
 .PHONY: test
 
-test-all: depends-active-venv
+test-all: _depends_active_venv
 	tox
 .PHONY: test-all
 
-test-debug: test-local quickfix
+test-debug: _test_local _quickfix
 .PHONY: test-debug
 
 # SAVVY: By default, a pipeline returns the exit code of the final command,
@@ -827,7 +818,7 @@ test-debug: test-local quickfix
 #
 #     SHELL = /bin/bash -o pipefail
 #     ...
-#     test-local:
+#     _test_local:
 #       set -o pipefail
 #       pytest ... | tee ...
 #
@@ -841,46 +832,46 @@ test-debug: test-local quickfix
 #
 #     SHELL = /bin/bash
 #     ...
-#     test-local:
+#     _test_local:
 #       set -o pipefail; \
 #       pytest ... | tee ...
 #
 #   But, as mentioned above, then we're applying Bash to all shell-outs,
 #   and this author would prefer POSIX-compatible shell code when possible.
-test-local: depends-active-venv
+test-local: _depends_active_venv
 	pytest $(TEST_ARGS) tests/ | tee $(VIM_QUICKFIX_PYTEST)
 	# Express the exit code of pytest, not the tee.
 	exit ${PIPESTATUS[0]}
 .PHONY: test-local
 
 # ALTLY: Use `TEST_ARGS=-x make test`
-test-one: depends-active-venv
+test-one: _depends_active_venv
 	pytest $(TEST_ARGS) -x tests/
 .PHONY: test-one
 
-quickfix:
+_quickfix:
 	# Convert partial paths to full paths, for Vim quickfix.
 	sed -r "s#^([^ ]+:[0-9]+:)#$(shell pwd)/\1#" -i $(VIM_QUICKFIX_PYTEST)
 	# Convert double-colons in messages (not file:line:s) -- at least
 	# those we can identify -- to avoid quickfix errorformat hits.
 	sed -r "s#^(.* .*):([0-9]+):#\1∷\2:#" -i $(VIM_QUICKFIX_PYTEST)
-.PHONY: quickfix
+.PHONY: _quickfix
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # Note: `tox -e coverage` is different:
 #   pytest --cov=./src tests/
 
-coverage: depends-active-venv
+coverage: _depends_active_venv
 	coverage run -m pytest $(TEST_ARGS) tests
 	coverage report
 .PHONY: coverage
 
-coverage-to-html:
+_coverage_to_html:
 	coverage html
-.PHONY: coverage-html
+.PHONY: _coverage_to_html
 
-coverage-html: coverage coverage-to-html view-coverage
+coverage-html: coverage _coverage_to_html view-coverage
 .PHONY: coverage-html
 
 view-coverage:
@@ -913,18 +904,18 @@ clean-docs:
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-docs
 
-docs: docs-html docs-browse
+docs: _docs_html _docs_browse
 .PHONY: docs
 
-docs-browse:
+_docs_browse:
 	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html
-.PHONY: docs-browse
+.PHONY: _docs_browse
 
-docs-html: clean-docs
+_docs_html: clean-docs
 	@. "$(MAKEFILESH)" && \
 		make_docs_html "$(VENV_DOCS)" "$(VENV_PYVER)" "$(VENV_NAME)" \
 			"$(EDITABLE_DIR)" "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)"
-.PHONY: docs-html
+.PHONY: _docs_html
 
 docs-live: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
@@ -933,7 +924,7 @@ docs-live: docs
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # Depends: The following code tested against cloc v1.81.
-# - See `depends-cloc` below for verifying cloc version.
+# - See `_depends_cloc` below for verifying cloc version.
 
 CLOC := $(shell command -v cloc 2> /dev/null)
 .PHONY: CLOC
@@ -950,13 +941,13 @@ docs/conf.py
 endef
 export CLOC_IGNORE_FILES
 
-cloc-digest: depends-cloc
+cloc-digest: _depends_cloc
 	@cloc \
 		--exclude-dir=sphinx_rtd_theme \
 		$$(git ls-files | grep -v -x -F "$${CLOC_IGNORE_FILES}")
 .PHONY: cloc-digest
 
-cloc-complete: depends-cloc
+cloc-complete: _depends_cloc
 	@cloc \
 		--by-file \
 		--exclude-dir=sphinx_rtd_theme \
@@ -977,7 +968,7 @@ cloc-sources:
 # Show results for each file, like `cloc --by-file`, except cloc doesn't
 # sort the results. So use SQL pipeline to sort it ourselves, then feed
 # the results back to cloc's sqlite_formatter to pretty-print.
-cloc-file-sort: depends-cloc
+cloc-file-sort: _depends_cloc
 	@( \
 		( \
 			cloc \
@@ -1000,7 +991,7 @@ cloc-file-sort: depends-cloc
 
 # ***
 
-depends-cloc:
+_depends_cloc:
 ifndef CLOC
 	$(error "ERROR: Please install `cloc` from: https://github.com/AlDanial/cloc")
 endif
@@ -1009,7 +1000,7 @@ endif
 		echo "ALERT: Unsupported cloc version?: $$(cloc --version) (or update Makefile)"; \
 		echo; \
 	fi
-.PHONY: depends-cloc
+.PHONY: _depends_cloc
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
