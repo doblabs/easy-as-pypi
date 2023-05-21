@@ -275,3 +275,13 @@ _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# USAGE: If the derived project has its own custom code, add it to
+#   Maketasks.local.sh
+
+MAKETASKS_LOCAL_SH="${MAKETASKS_LOCAL_SH:-Maketasks.local.sh}"
+export MAKETASKS_LOCAL_SH
+
+if [ -s "${MAKETASKS_LOCAL_SH}" ]; then
+  . "${MAKETASKS_LOCAL_SH}"
+fi
+
