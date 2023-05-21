@@ -792,6 +792,10 @@ isort-check-only: _depends_active_venv
 	@isort --check-only --verbose $(SOURCE_DIR)/ tests/
 .PHONY: isort-check-only
 
+# For parity with `tox -e isort_check_only`.
+isort_check_only: isort-check-only
+.PHONY: isort_check_only
+
 # ISOFF/2023-05-18: In a previous life (because in my current life I
 # don't want to fight `black` or have style debates), I'd add a blank
 # line to the ends of files. (I like this so that <Ctrl-End> always
