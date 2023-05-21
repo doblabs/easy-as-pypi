@@ -359,10 +359,10 @@ cloned_project_reset_git () {
   echo "Git: Initializing Git repo..."
   echo
 
-  /bin/rm -rf ".git/"
+  command rm -rf ".git/"
 
   # Remove the copy of this script, and its helper(s).
-  /bin/rm -rf bin/
+  command rm -rf "bin/"
 
   git init .
 
