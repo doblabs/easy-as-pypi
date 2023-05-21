@@ -623,6 +623,10 @@ babel-extract:
 
 # SAVVY: See list of languages:
 #   pybabel --list-locales
+# - The 'en' and 'de' and just an example, obviously.
+# - LATER/2023-05-20: If I start using this feature, I'll move
+#   the language list to another file, to keep business logic
+#   out of this Makefile.
 babel-init:
 	@for lang in en de; do \
 		pybabel init -l $${lang} -i locale/messages.pot -d locale/; \
