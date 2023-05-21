@@ -17,9 +17,7 @@ make_develop () {
   # local venv_created=false
   _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "${VENV_NAME}"
 
-  pip install -U pip setuptools
-  pip install poetry
-  poetry self add "poetry-dynamic-versioning[plugin]"
+  _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
   poetry -C ${EDITABLE_DIR} install --with dist,i18n,lint,test,docstyle,docs,extras
 }
@@ -79,9 +77,7 @@ make_docs_html () {
   _venv_manage_and_activate "${VENV_DOCS}" "" "${VENV_NAME}"
 
   if ${venv_created} || ${VENV_FORCE:-false} ; then
-    pip install -U pip setuptools
-    pip install poetry
-    poetry self add "poetry-dynamic-versioning[plugin]"
+    _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
     poetry -C ${EDITABLE_DIR} install --with docs
   fi
@@ -147,6 +143,12 @@ _venv_manage_and_activate () {
   fi
 
   . "${venv_name}/bin/activate"
+}
+
+_venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin () {
+  pip install -U pip setuptools
+  pip install poetry
+  poetry self add "poetry-dynamic-versioning[plugin]"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
