@@ -48,7 +48,7 @@ DOCS_BUILDDIR ?= _build
 # ***
 
 # Task oursourcer.
-MAKEFILESH = ./Maketasks.sh
+MAKETASKS_SH = ./Maketasks.sh
 
 # ***
 
@@ -455,7 +455,7 @@ _depends_active_venv:
 #             EDITABLES_ROOT=~/.kit/py make develop
 
 develop: editables editable
-	@. "$(MAKEFILESH)" && \
+	@. "$(MAKETASKS_SH)" && \
 		make_develop "$(VENV_NAME)" "$(VENV_PYVER)" "$(VENV_ARGS)" "$(EDITABLE_DIR)"
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
@@ -734,7 +734,7 @@ _run_flake8: _depends_active_venv
 .PHONY: _run_flake8
 
 _gvim_load_quickfix_flake8:
-	@. "$(MAKEFILESH)" && gvim_load_quickfix "$(VIM_QUICKFIX_FLAKE8)"
+	@. "$(MAKETASKS_SH)" && gvim_load_quickfix "$(VIM_QUICKFIX_FLAKE8)"
 .PHONY: _gvim_load_quickfix_flake8
 
 # ***
@@ -794,7 +794,7 @@ pydocstyle: _depends_active_venv
 #   but that's way more overhead and doesn't afford us any gains.
 
 doc8:
-	@. "$(MAKEFILESH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
+	@. "$(MAKETASKS_SH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
 .PHONY: doc8
 
 # ***
@@ -903,7 +903,7 @@ _quickfix:
 .PHONY: _quickfix
 
 _gvim_load_quickfix_pytest:
-	@. "$(MAKEFILESH)" && gvim_load_quickfix "$(VIM_QUICKFIX_PYTEST)"
+	@. "$(MAKETASKS_SH)" && gvim_load_quickfix "$(VIM_QUICKFIX_PYTEST)"
 .PHONY: _gvim_load_quickfix_pytest
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -964,7 +964,7 @@ _docs_browse:
 .PHONY: _docs_browse
 
 _docs_html: clean-docs
-	@. "$(MAKEFILESH)" && \
+	@. "$(MAKETASKS_SH)" && \
 		make_docs_html "$(VENV_DOCS)" "$(VENV_PYVER)" "$(VENV_NAME)" \
 			"$(EDITABLE_DIR)" "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)"
 .PHONY: _docs_html
