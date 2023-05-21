@@ -1,4 +1,4 @@
-# vim:tw=0:ts=2:sw=2:noet:ft=sh
+# vim:tw=0:ts=2:sw=2:et:ft=sh
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/pydob/ <varies>
 # Pattern: https://github.com/pydob/easy-as-pypi#🥧

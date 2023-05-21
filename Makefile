@@ -48,7 +48,7 @@ DOCS_BUILDDIR ?= _build
 # ***
 
 # Task oursourcer.
-MAKEFILESH = ./Makefilesh
+MAKEFILESH = ./Makeout.sh
 
 # ***
 
