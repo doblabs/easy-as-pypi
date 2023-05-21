@@ -187,7 +187,7 @@ _help_main:
 	@echo "   clean-build     remove build artifacts (dist/)"
 	@echo "   clean-docs      remove RTD build dir (docs/$(DOCS_BUILDDIR)) and generated .rst"
 	@echo "   clean-pyc       remove Python bytecode (*.pyc)"
-	@echo "   clean-test      remove pytest, tox, and coverage artifacts"
+	@echo "   clean-test      remove pytest and coverage artifacts"
 	@echo "   cloc            \"count lines of code\" summary (\`cloc-digest\` alias)"
 	@echo "   cloc-complete   print cloc results for each file, sorted by count"
 	@echo "   cloc-digest     print cloc project summary"
@@ -243,7 +243,8 @@ clean-pyc:
 .PHONY: clean-pyc
 
 clean-test:
-	/bin/rm -fr .tox/
+	@# Keep ".tox/", because expensive startup time.
+	@#  /bin/rm -rf .tox/
 	/bin/rm -f .coverage
 	/bin/rm -fr htmlcov/
 .PHONY: clean-test
