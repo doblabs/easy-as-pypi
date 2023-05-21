@@ -416,6 +416,13 @@ install: _warn_unless_virtualenvwrapper
 	echo "  workon $(PACKAGE_NAME)";
 .PHONY: install
 
+# Aka uninstall, sorta.
+# - MEH: Missing `deactivate` if deleting active virtualenv...
+clean-install:
+	@echo "clean-install"
+	@/bin/rm -rf "$${WORKON_HOME:-$${HOME}/.virtualenvs}/$(PACKAGE_NAME)"
+.PHONY: clean-install
+
 # ***
 
 # SAVVY: virtualenvwrapper.sh defines VIRTUALENVWRAPPER_HOOK_DIR, and
@@ -453,6 +460,13 @@ develop: editables editable
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop
+
+# - MEH: Missing `deactivate` if deleting active virtualenv...
+clean-develop:
+	@echo "clean-develop"
+	@/bin/rm -rf "$(EDITABLE_DIR)"
+	@/bin/rm -rf "$(VENV_NAME)"
+.PHONY: clean-develop
 
 # ***
 
