@@ -814,46 +814,39 @@ test-all: _depends_active_venv
 test-debug: _test_local _quickfix
 .PHONY: test-debug
 
-# SAVVY: By default, a pipeline returns the exit code of the final command,
-# so if you pipe to `tee`, the pipeline always returns true, e.g.,
+# SAVVY: By default, pipeline returns exit value from final command, e.g.,
 #
-#   pytest ... | tee ...
+#   pytest ... | tee ...  # Always true
 #
-# will always return true, regardless of py.text failing or not.
+# - If you want the pipeline to fail on any component, there are two options.
 #
-# - One work-around is the pipefail option,
-#   e.g., put this at the top of the Makefile:
+#   - Use pipefail:
 #
-#     SHELL = /bin/bash -o pipefail
-#     ...
-#     _test_local:
-#       set -o pipefail
-#       pytest ... | tee ...
+#     _run_pytest: SHELL:=/bin/bash
+#     _run_pytest:
+#     	set -o pipefail; \
+#     	pytest ... | tee ...
+#     .PHONY: _run_pytest
 #
-#   But then pipefail (and bash) apply to all targets that shell-out.
+#   - Or use PIPESTATUS:
 #
-# - A better approach is to use the PIPESTATUS environ.
+#     _run_pytest: SHELL:=/bin/bash
+#     _run_pytest:
+#     	pytest ... | tee ...; \
+#     	exit ${PIPESTATUS[0]}
+#     .PHONY: _run_pytest
 #
-# - Another approach that I didn't care to test — I like the PIPESTATUS
-#   approach — but that might work would be to combine the operation in-
-#   to one command, e.g.,
-#
-#     SHELL = /bin/bash
-#     ...
-#     _test_local:
-#       set -o pipefail; \
-#       pytest ... | tee ...
-#
-#   But, as mentioned above, then we're applying Bash to all shell-outs,
-#   and this author would prefer POSIX-compatible shell code when possible.
+#   - At least in this example, using PIPESTATUS feels more deliberate
+#     and readable.
 
 _test_local: _depends_active_venv _run_pytest _gvim_load_quickfix_pytest
 .PHONY: _test_local
 
+# Use Bash's PIPESTATUS to express the exit code of pytest, not the tee.
+_run_pytest: SHELL:=/bin/bash
 _run_pytest:
-	pytest $(TEST_ARGS) tests/ | tee $(VIM_QUICKFIX_PYTEST)
-	# Express the exit code of pytest, not the tee.
-	exit ${PIPESTATUS[0]}
+	@pytest $(TEST_ARGS) tests/ | tee $(VIM_QUICKFIX_PYTEST); \
+	exit $${PIPESTATUS[0]}
 .PHONY: _run_pytest
 
 # ALTLY: Use `TEST_ARGS=-x make test`
