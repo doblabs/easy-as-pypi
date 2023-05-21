@@ -421,27 +421,27 @@ will print a control character sequence to the terminal, rather than
 showing the last command you ran.)
 
 * If you want to interact with the code at runtime,
-  run ``py.test`` directly (see next).
+  run ``pytest`` directly (see next).
 
 If you'd like to break into a debugger when a test fails, run ``pytest``
 directly and have it start the interactive Python debugger on errors::
 
-    $ py.test --pdb tests/
+    $ pytest --pdb tests/
 
 If you'd like a more complete stack trace when a test fails, add verbosity::
 
-    $ py.test -v tests/
+    $ pytest -v tests/
 
     # Or, better yet, two vees!
-    $ py.test -vv tests/
+    $ pytest -vv tests/
 
 If you'd like to run a specific test, use ``-k``, as mentioned above. E.g.,::
 
-    $ py.test -k test__repr__no_start_no_end tests/
+    $ pytest -k test__repr__no_start_no_end tests/
 
 Put it all together to quickly debug a broken test. ::
 
-    $ py.test --pdb -vv -k <test_name> tests/
+    $ pytest --pdb -vv -k <test_name> tests/
 
 You can also set breakpoints in the code with |pdb|_.
 Simply add a line like this:
