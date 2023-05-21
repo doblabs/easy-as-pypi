@@ -803,17 +803,6 @@ linkcheck: _depends_active_venv
 #                  ^^^                   Increase verbosity
 #            ^^^^^                       Start pdb on error or KeyboardInterrupt
 
-test: _depends_active_venv
-	pytest $(TEST_ARGS) tests/
-.PHONY: test
-
-test-all: _depends_active_venv
-	tox
-.PHONY: test-all
-
-test-debug: _test_local _quickfix
-.PHONY: test-debug
-
 # SAVVY: By default, pipeline returns exit value from final command, e.g.,
 #
 #   pytest ... | tee ...  # Always true
@@ -838,6 +827,17 @@ test-debug: _test_local _quickfix
 #
 #   - At least in this example, using PIPESTATUS feels more deliberate
 #     and readable.
+
+test: _depends_active_venv
+	pytest $(TEST_ARGS) tests/
+.PHONY: test
+
+test-all: _depends_active_venv
+	tox
+.PHONY: test-all
+
+test-debug: _test_local _quickfix
+.PHONY: test-debug
 
 _test_local: _depends_active_venv _run_pytest _gvim_load_quickfix_pytest
 .PHONY: _test_local
