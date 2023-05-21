@@ -134,13 +134,13 @@ gvim_load_quickfix () {
     servername="--servername ${GVIM_OPEN_SERVERNAME:-SAMPI}"
   fi
 
-  if [ -s "${gvim_load_quickfix}" ]; then
+  if [ -s "${quickfix_file}" ]; then
     gvim ${servername} \
       --remote-send "<ESC>:set errorformat=%f\ %l:%m<CR>" \
     && gvim ${servername} \
-      --remote-send "<ESC>:cgetfile $(pwd)/${gvim_load_quickfix}<CR>"
+      --remote-send "<ESC>:cgetfile $(pwd)/${quickfix_file}<CR>"
   else
-    command rm "${gvim_load_quickfix}"
+    command rm "${quickfix_file}"
   fi
 }
 
