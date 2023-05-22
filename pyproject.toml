@@ -420,8 +420,6 @@ ignore-path = [
     ".tox/",
     # From `sphinx-apidoc` called by `make docs` from Makefile.
     "docs/_build/",
-    # For `lint` GitHub Actions job run by .github/workflows/checks.yaml
-    "poetry-shell-lint/.venv/",
     # For Makefile targets that create virtualenvs, e.g.,
     # `make develop`, `make doc8`, `make docs`, etc.
     ".venv*/",

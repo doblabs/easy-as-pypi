@@ -24,7 +24,7 @@ make_develop () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-make_doc8 () {
+make_doc8_pip () {
   local VENV_DOC8="$1"
   local VENV_PYVER="$2"
   local VENV_NAME="$3"
@@ -36,6 +36,34 @@ make_doc8 () {
 
   python -c "import doc8" 2> /dev/null \
     || pip install -U pip doc8>="1.1.1"
+
+  python -m doc8 *.rst docs/
+}
+
+# ***
+
+make_doc8_poetry () {
+  local PYPROJECT_DOC8_DIR="$1"
+  local VENV_PYVER="$2"
+
+  local before_cd="$(pwd -L)"
+
+  # E.g.,
+  #   cd ".pyproject-doc8/"
+  cd "${PYPROJECT_DOC8_DIR}"
+
+  _pyenv_prepare_shell "${VENV_PYVER}"
+
+  local VENV_DOC8=".venv"
+
+  # local venv_created=false
+  _venv_manage_and_activate "${VENV_DOC8}" "" ""
+
+  _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
+
+  poetry install --no-interaction --no-root
+
+  cd "${before_cd}"
 
   python -m doc8 *.rst docs/
 }

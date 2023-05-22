@@ -41,6 +41,17 @@ VENV_ARGS =
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Example pseudo sub-project with its own pyproject.toml you can
+# use if you find unresolvable package conflicts between disparate
+# toolsets (e.g., if some package from `poetry install --with foo`
+# conflicts with some package from `poetry install --with bar`,
+# and the only recourse you find yourself with is moving the 'bar'
+# dependencies to their own pyproject.toml).
+
+PYPROJECT_DOC8_DIR = .pyproject-doc8
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # `make docs` docs/ subdir HTML target, e.g.,
 #   ./docs/_build/html/index.html
 DOCS_BUILDDIR ?= _build
@@ -198,7 +209,9 @@ _help_main:
 	@echo "   coverage        print coverage report after running pytest"
 	@echo "   coverage-html   generate line-by-line HTML coverage reports"
 	@echo "   dist            'build' alias"
-	@echo "   doc8            lint: reST and Sphinx style check"
+	@echo "   doc8            lint: reST and Sphinx style check (\`doc8-pip\` alias)"
+	@echo "   doc8-pip        - installs \`doc8\` to its own venv using pip"
+	@echo "   doc8-poetry     - installs \`doc8\` to its own venv using Poetry"
 	@echo "   docs            generate Sphinx HTML documentation, including API docs"
 	@echo "   docs-live       watches and regenerates docs as they're edited"
 	@echo "   editable        create custom pyproject.toml for \`develop\` command"
@@ -209,8 +222,8 @@ _help_main:
 	@echo "   help            print this message"
 	@echo "   isort           lint: sort and group module imports using \`isort\`"
 	@echo "   linkcheck       lint: reST docs HTTP link validation"
-	@echo "   lint            lint: runs black, flake8, isort, pydocstyle, doc8,"
-	@echo "                     poetry-check, twine-check, and linkcheck"
+	@echo "   lint            lint: runs black, flake8, isort, pydocstyle, doc8-pip,"
+	@echo "                     doc8-poetry, poetry-check, twine-check, and linkcheck"
 	@echo "   linty           lint: like 'lint' target but won't stop on failure"
 	@echo "   poetry-check    lint: pyproject.toml check"
 	@echo "   print-ours      print list of \"our\" projects — those we control"
@@ -730,7 +743,7 @@ babel-compile:
 # we can check that flake8 doesn't counteract black. Also, tox uses
 # flake8 but not black.
 
-lint: _depends_active_venv black flake8 isort pydocstyle doc8 poetry-check twine-check linkcheck
+lint: _depends_active_venv black flake8 isort pydocstyle doc8-pip doc8-poetry poetry-check twine-check linkcheck
 .PHONY: lint
 
 # *Make linty!* Call `make linty` to lint and see full lint report.
@@ -854,9 +867,16 @@ pydocstyle: _depends_active_venv
 # - Alternatively, we could manage another pyproject.toml for doc8,
 #   but that's way more overhead and doesn't afford us any gains.
 
-doc8:
-	@. "$(MAKETASKS_SH)" && make_doc8 "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
+doc8: doc8-pip
 .PHONY: doc8
+
+doc8-pip:
+	@. "$(MAKETASKS_SH)" && make_doc8_pip "$(VENV_DOC8)" "$(VENV_PYVER)" "$(VENV_NAME)"
+.PHONY: doc8-pip
+
+doc8-poetry:
+	@. "$(MAKETASKS_SH)" && make_doc8_poetry "$(PYPROJECT_DOC8_DIR)" "$(VENV_PYVER)"
+.PHONY: doc8-poetry
 
 # ***
 
