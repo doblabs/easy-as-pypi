@@ -372,6 +372,9 @@ cloned_project_reset_git () {
   MAKETASKS_LOCAL_SH="${MAKETASKS_LOCAL_SH:-Maketasks.local.sh}"
   command rm -f "${MAKETASKS_LOCAL_SH}"
 
+  # Don't need this doc in derived projects.
+  command rm -f ".github/README--github-variable-dump--example.rst"
+
   git init .
 
   git_commit_initial_clone
