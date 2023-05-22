@@ -649,16 +649,16 @@ optional = true
 #   https://github.com/PyCQA/pydocstyle/
 pydocstyle = ">=6.3.0"
 
-# - "Python lib for TOML."
+# - "A lil' TOML parser"
 #
-#   https://pypi.org/project/toml
+#   https://pypi.org/project/tomli
 #   https://github.com/uiri/toml
 #
-# - We include `toml` so `pydocstyle` can validate `pyproject.toml` (this file).
+# - We include `tomli` so `pydocstyle` can validate `pyproject.toml` (this file).
 #   - And avoids warning on `pydocstyle`:
 #       WARNING: The /path/to/package/pyproject.toml configuration file was
-#                ignored, because the `toml` package is not installed.
-toml = ">=0.10.2"
+#                ignored, because the `tomli` package is not installed.
+tomli = ">=2.0.1"
 
 # ***
 
