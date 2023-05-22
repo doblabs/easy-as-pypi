@@ -992,8 +992,15 @@ _gvim_load_quickfix_pytest:
 # Note: `tox -e coverage` is different:
 #   pytest --cov=./src tests/
 
-coverage: _depends_active_venv
+coverage: _coverage_sqlite _coverage_report
+.PHONY: coverage
+
+# Create '.coverage' file.
+_coverage_sqlite: _depends_active_venv
 	coverage run -m pytest $(TEST_ARGS) tests
+.PHONY: _coverage_sqlite
+
+_coverage_report: _depends_active_venv
 	coverage report
 .PHONY: coverage
 
@@ -1007,6 +1014,11 @@ coverage-html: coverage _coverage_to_html view-coverage
 view-coverage:
 	$(PYBROWSER) htmlcov/index.html
 .PHONY: view-coverage
+
+# Create 'coverage.xml' file.
+_coverage_xml: _depends_active_venv _coverage_sqlite
+	coverage xml
+.PHONY: _coverage_xml
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
