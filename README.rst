@@ -75,6 +75,8 @@ But most of the gold is buried within:
 - Make commands to setup and install to separate virtualenvs
   for various scenarios.
 
+- GitHub Actions linting, testing, and coverage upload.
+
 Most of the files are designed to be hard linked from the derived
 projects themselves, as they won't need to be customized (such as
 ``Makefile``).
