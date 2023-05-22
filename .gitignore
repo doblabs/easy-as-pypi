@@ -32,9 +32,6 @@
 # to, say, tweak the TOC. For an example, see:
 #   docs/easy-as-pypi.rst
 
-# Translations files.
-*.mo
-
 # Bytecode.
 *.py[cod]
 __pycache__/
