@@ -368,6 +368,16 @@ extend_ignore = [
     #  "B950".
 ]
 
+# CXREF: https://docs.python.org/3/library/gettext.html#gettext.install
+#   gettext.install "installs the function _() in Python’s builtins namespace..."
+# which means we *need* to omit the typical import:
+#   from gettext import gettext as _
+# (otherwise breaks localization (unlocalized strings are used)).
+# - We also need to tell flake8 to avoid: F821 undefined name '_'
+builtins = [
+    "_",
+]
+
 # ***
 
 # isort options

@@ -24,9 +24,6 @@
 
 """A simple Click command for YOU: to replace."""
 
-# Although `lang_en.install()` wires `_`, flake8 complains, so:
-from gettext import gettext as _
-
 import click
 
 
