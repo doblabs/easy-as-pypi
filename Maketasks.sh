@@ -54,6 +54,7 @@ make_doc8 () {
 #       "Maketasks.local.sh" file (MAKETASKS_LOCAL_SH).
 #   - And I checked: It does not seem possible to specify those directives
 #     otherwise, at least not docs/conf.py or any `sphinx-apidoc` options.
+#     - CXREF: See autodoc_default_options and autoclass_content in docs/conf.py.
 
 make_docs_html () {
   local VENV_DOCS="$1"
