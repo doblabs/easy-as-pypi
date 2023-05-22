@@ -183,7 +183,7 @@ author = project_auth
 # the built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = get_distribution(project_dist).version
+release = get_distribution(package_name).version
 # The short X.Y version.
 # - (lb): One place I see `release` used -- to name the browser page.
 version = '.'.join(release.split('.')[:2])
