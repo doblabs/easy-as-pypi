@@ -858,7 +858,7 @@ doc8:
 
 # Verify pyproject.toml.
 
-poetry-check: _depends_active_venv
+poetry-check:
 	poetry check
 .PHONY: poetry-check
 
