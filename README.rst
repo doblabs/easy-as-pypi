@@ -68,12 +68,11 @@ But most of the gold is buried within:
 - Run tasks, tests, and setup virtualenvs quickly using ``make``
   commands in your active virtualenv.
 
-- Make commands to generate docs for *ReadTheDocs*.
+  - Generate docs for *ReadTheDocs*.
 
-- Make commands to localize user messages using ``Babel``.
+  - Localize user messages using ``Babel``.
 
-- Make commands to setup and install to separate virtualenvs
-  for various scenarios.
+  - Setup and install to separate virtualenvs for various scenarios.
 
 - GitHub Actions linting, testing, and coverage upload.
 
