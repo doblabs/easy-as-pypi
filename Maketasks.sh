@@ -76,9 +76,17 @@ make_docs_html () {
     poetry -C ${EDITABLE_DIR} install --with docs
   fi
 
+  make_docs_html_with_inject "${SOURCE_DIR}" "${PACKAGE_NAME}" "${MAKE}"
+}
+
+make_docs_html_with_inject () {
+  local SOURCE_DIR="$1"
+  local PACKAGE_NAME="$2"
+  local MAKE="$3"
+
   local module_name="$(echo ${PACKAGE_NAME} | sed 's/-/_/g')"
 
-  sphinx-apidoc --force -o docs/ ${SOURCE_DIR}
+  sphinx-apidoc --force -o docs/ "${SOURCE_DIR}"
   sphinx_docs_inject "${module_name}"
   make_docs_html_make_docs "${PACKAGE_NAME}" "${MAKE}"
 }

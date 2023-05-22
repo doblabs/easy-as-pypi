@@ -1024,6 +1024,11 @@ _docs_html: clean-docs
 			"$(EDITABLE_DIR)" "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)"
 .PHONY: _docs_html
 
+_docs_html_skip_venv: clean-docs
+	@. "$(MAKETASKS_SH)" && \
+		make_docs_html_with_inject "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)"
+.PHONY: _docs_html_skip_venv
+
 docs-live: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 .PHONY: docs-live
