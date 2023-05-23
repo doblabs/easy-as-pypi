@@ -700,8 +700,10 @@ print-ours:
 # - Though even if/when Babel adds pyproject.toml support, what
 #   would we really put in there? These calls are pretty simple.
 
+LOCALE_DIR = $(SOURCE_DIR)/$(PACKAGE_NAME)/locale
+
 babel-extract:
-	pybabel extract -F locale/babel.cfg --input-dirs=$(SOURCE_DIR) -o locale/messages.pot
+	pybabel extract -F $(LOCALE_DIR)/babel.cfg --input-dirs=$(SOURCE_DIR) -o $(LOCALE_DIR)/messages.pot
 .PHONY: babel-extract
 
 # SAVVY: See list of languages:
@@ -712,12 +714,12 @@ babel-extract:
 #   out of this Makefile.
 babel-init:
 	@for lang in en de; do \
-		pybabel init -l $${lang} -i locale/messages.pot -d locale/; \
+		pybabel init -l $${lang} -i $(LOCALE_DIR)/messages.pot -d $(LOCALE_DIR)/; \
 	done
 .PHONY: babel-init
 
 babel-compile:
-	pybabel compile -d locale/
+	pybabel compile -d $(LOCALE_DIR)/
 .PHONY: babel-compile
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

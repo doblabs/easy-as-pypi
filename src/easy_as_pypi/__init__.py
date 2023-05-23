@@ -29,6 +29,7 @@ import os
 import sys
 
 import click
+import pkg_resources
 
 from easy_as_pypi import commands
 
@@ -50,9 +51,12 @@ __author_link__ = "https://tallybark.com"
 __package_name__ = "easy-as-pypi"
 __arg0name__ = os.path.basename(sys.argv[0])
 
+locale_path = pkg_resources.resource_filename(
+    __package_name__.replace("-", "_"), "locale"
+)
 
 # Initialize translation engine.
-lang_en = gettext.translation("messages", localedir="locale", languages=["en"])
+lang_en = gettext.translation("messages", localedir=locale_path, languages=["en"])
 
 # Set current locale to 'en'.
 # - Install will also wire `_`, akin to:
