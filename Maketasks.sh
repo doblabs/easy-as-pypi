@@ -158,8 +158,8 @@ _pyenv_prepare_shell () {
 
 _venv_manage_and_activate () {
   local venv_name="$1"
-  local venv_args="$3"
-  local venv_default="$2"
+  local venv_args="$2"
+  local venv_default="$3"
 
   if [ ! -d "${venv_name}" ]; then
     python3 -m venv ${venv_args} "${venv_name}"
