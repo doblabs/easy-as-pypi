@@ -768,6 +768,9 @@ isort: _depends_active_venv
 
 # ***
 
+# - CXREF: *PEP 257 - Docstring Conventions*:
+#     https://www.python.org/dev/peps/pep-0257/
+
 pydocstyle: _depends_active_venv
 	@pydocstyle $(SOURCE_DIR)/ tests/
 .PHONY: pydocstyle
@@ -972,6 +975,20 @@ _docs_html: clean-docs
 docs-live: docs
 	watchmedo shell-command -p '*.rst' -c '$(MAKE) -C docs html' -R -D .
 .PHONY: docs-live
+
+# ***
+
+# Without `sphinx_docs_inject`, i.e., don't edit docs/<package_name>.rst.
+
+_docs_raw: _docs_html_raw _docs_browse
+.PHONY: _docs_raw
+
+_docs_html_raw: clean-docs
+	@. "$(MAKETASKS_SH)" && \
+		make_docs_html "$(VENV_DOCS)" "$(VENV_PYVER)" "$(VENV_NAME)" \
+			"$(EDITABLE_DIR)" "$(SOURCE_DIR)" "$(PACKAGE_NAME)" "$(MAKE)" \
+			"false"
+.PHONY: _docs_html_raw
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 

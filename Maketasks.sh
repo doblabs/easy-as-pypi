@@ -42,25 +42,18 @@ make_doc8 () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# Docstrings ref:
-#   https://www.python.org/dev/peps/pep-0257/
-# (lb): We auto-generate docs/modules.rst and docs/<package_name>.rst
-# so that :ref:`genindex` and :ref:`modindex`, etc., work, but we might
-# instead maintain a separate docs/<project-name>.rst, so that we can
-# include special method docs, such as those for and __new__ methods.
-# - I tried to disable the generation of modules.rst and ${SOURCE_DIR}.rst
-#   using options in conf.py, but failed. And I thought maybe one could
-#   comment-off 'sphinx.ext.autodoc' to stop them, but no. It's all in the
-#   command.
-#   - Use -T to disable modules.rst creation, e.g.,
-#       sphinx-apidoc -T -o docs/ ${SOURCE_DIR}
-#   - Use appended exclude patterns to include command docs, e.g.,
-#       sphinx-apidoc -T -o docs/ ${SOURCE_DIR} ${SOURCE_DIR}/commands/
-#     will stop docs/${SOURCE_DIR}.commands.rst.
-#   - To not generate docs/${SOURCE_DIR}.rst, just don't call sphinx-apidoc!
-#     That is, neither of these calls that use exclude patterns will work:
-#       sphinx-apidoc -T -o docs/ ${SOURCE_DIR} ${SOURCE_DIR}/
-#       sphinx-apidoc -T -o docs/ ${SOURCE_DIR} ${SOURCE_DIR}/__init__.py
+# - Note that `sphinx-apidoc` generates two files, docs/modules.rst and
+#   docs/<package_name>.rst, the latter of which lists all the Submodule
+#   names and the top-level package, and specifies `automodule` directives.
+#   - You can edit the `automodule` directives in the generated reST before
+#     generating the HTML to tweak different options.
+#   - But to keep `sphinx-apidoc` a part of CI, you'd want to automate this:
+#     - Call sphinx-apidoc, edit the reST, and then generate the HTML.
+#     The example below shows how to do this.
+#     - You could copy and customize the example, using a project-specific
+#       "Maketasks.local.sh" file (MAKETASKS_LOCAL_SH).
+#   - And I checked: It does not seem possible to specify those directives
+#     otherwise, at least not docs/conf.py or any `sphinx-apidoc` options.
 
 make_docs_html () {
   local VENV_DOCS="$1"
@@ -82,18 +75,55 @@ make_docs_html () {
     poetry -C ${EDITABLE_DIR} install --with docs
   fi
 
+  local module_name="$(echo ${PACKAGE_NAME} | sed 's/-/_/g')"
+
   sphinx-apidoc --force -o docs/ ${SOURCE_DIR}
+  sphinx_docs_inject "${module_name}"
+  make_docs_html_make_docs "${PACKAGE_NAME}" "${MAKE}"
+}
+
+make_docs_html_make_docs () {
+  local PACKAGE_NAME="$1"
+  local MAKE="$2"
+
   PROJNAME=${PACKAGE_NAME} ${MAKE} -C docs clean
   PROJNAME=${PACKAGE_NAME} ${MAKE} -C docs html
 }
 
-# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# USAGE: Copy `sphinx_docs_inject` to "Maketasks.local.sh" file
+#        (MAKETASKS_LOCAL_SH) and customize for your project.
+#
+# - This example only adds two options to the final package `automodule`,
+#   but you could easily craft a `sed` or `awk` script to craft a more
+#   interesting injection.
+#
+# - To see what changes in the generated HTML when you inject changes,
+#   you could generate two sets of docs, e.g.,
+#
+#     $ make docs
+#     $ mv docs/_build docs/_build_cmp
+#     $ sensible-open docs/_build_cmp/html/index.html
+#
+#     # Skip `sphinx_docs_inject` and open index.html.
+#     $ make _docs_raw
 
-# - Note that 'SAMPI' is the default GVim server name
-#   used by Depoxy: https://github.com/depoxy/depoxy
-#   which the author uses to setup and orchestrate
-#   their development machines.
-#   - Personalize GVIM_OPEN_SERVERNAME as necessary for yours.
+# Example injector.
+sphinx_docs_inject () {
+  local module_name="$1"
+
+cat << EOF >> docs/${module_name}.rst
+   :special-members: __new__
+   :noindex:
+EOF
+}
+
+# For the easy-as-pypi reference project, not injecting.
+# - Linting: Yes, this replaces the previous definition.
+sphinx_docs_inject () {
+  :
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 gvim_load_quickfix () {
   local quickfix_file="$1"
