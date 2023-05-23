@@ -210,6 +210,37 @@ jobs:
   #        types:
   #          - completed
 
+  # *** BLACK
+
+  black:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root --with lint
+
+      - name: Run black
+        run: poetry run black $SOURCE_DIR --check
+        env:
+          SOURCE_DIR: src/
+
   # *** FLAKE8
 
   flake8:
