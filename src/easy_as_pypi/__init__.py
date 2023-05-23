@@ -25,12 +25,13 @@
 """Top-level package for this CLI-based application."""
 
 import gettext
+import inspect
 import os
 import sys
 
 import click
-import pkg_resources
 
+import easy_as_pypi
 from easy_as_pypi import commands
 
 __all__ = (
@@ -51,8 +52,13 @@ __author_link__ = "https://tallybark.com"
 __package_name__ = "easy-as-pypi"
 __arg0name__ = os.path.basename(sys.argv[0])
 
-locale_path = pkg_resources.resource_filename(
-    __package_name__.replace("-", "_"), "locale"
+# Determine path to localization files, which are installed alongside
+# sources (i.e., under site-packages).
+# - We call `inspect.getfile` to be pedantic, but you could as easily:
+#     os.path.dirname(easy_as_pypi.__file__),
+locale_path = os.path.join(
+    os.path.dirname(inspect.getfile(easy_as_pypi)),
+    "locale",
 )
 
 # Initialize translation engine.
