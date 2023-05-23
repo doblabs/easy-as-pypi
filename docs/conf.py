@@ -18,13 +18,13 @@
 # All configuration values have a default; values that are commented out
 # serve to show the default.
 
-import datetime
+# import datetime
 import os
-import shlex
+# import shlex
 import sys
 from pkg_resources import get_distribution
 
-import sphinx_rtd_theme
+# import sphinx_rtd_theme
 
 # If extensions (or modules to document with autodoc) are in another
 # directory, add these directories to sys.path here. If the directory is
@@ -70,6 +70,8 @@ project_orgn = 'Tally Bark LLC'
 #       /home/docs/checkouts/readthedocs.org/user_builds/easy-as-pypi/checkouts/latest/docs
 #   - So we need to walk up until we spot the pyproject.toml,
 #     then we can read the directory name.
+
+
 def _determine_project_dist():
     currdir = project_root
     lookfor = 'pyproject.toml'
@@ -161,7 +163,8 @@ extensions = [
     # ISOFF/2023-05-22: I don't see any diff with this option on or off,
     # when when autosectionlabel enabled, if the same reST header title
     # is used in two separate files, you'll see warnings, e.g.,:
-    #   WARNING: duplicate label "title", other instance in /path/to/easy-as-pypi/docs/<file>.rst
+    #   WARNING: duplicate label "title", other instance
+    #     in /path/to/easy-as-pypi/docs/<file>.rst
     #
     #  'sphinx.ext.autosectionlabel',
     #
@@ -298,8 +301,9 @@ html_theme = 'sphinx_rtd_theme'
 # but the Sphinx package has not been released to PyPI since Feb, 2019.
 # Here's the error:
 #   writing additional pages...  search/<path>/.tox/docs/lib/python3.8/site-packages/
-#       sphinx_rtd_theme/search.html:21: RemovedInSphinx30Warning: To modify script_files in
-#       the theme is deprecated. Please insert a <script> tag directly in your theme instead.
+#     sphinx_rtd_theme/search.html:21: RemovedInSphinx30Warning: To modify
+#     script_files in the theme is deprecated. Please insert a <script> tag
+#     directly in your theme instead.
 html_theme_path = ["_themes", ]
 
 # Theme options are theme-specific and customize the look and feel of a
@@ -344,7 +348,8 @@ html_context = {
 }
 
 # File-wide metadata.
-# (lb): I found this documented somewhere but it did not fix "Edit on GitHub" broken link.
+# (lb): I found this documented somewhere but it did not fix the
+# "Edit on GitHub" broken link.
 #   github_url = 'https://github.com/pydob/easy-as-pypi'
 
 # Add any paths that contain custom themes here, relative to this directory.

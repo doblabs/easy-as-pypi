@@ -280,8 +280,7 @@ format = "%(path)s %(row)d:%(col)d: %(code)s %(text)s"
 extend_exclude = [
     # The build directory, if not ignored, has 50 or so lintable files.
     "build/",
-    # Docs' conf.py is modified Sphinx boilerplate. That does not lint.
-    "docs/conf.py",
+    # Not our code.
     "docs/_themes/sphinx_rtd_theme/",
     # Not ignoring .tox adds tens of Ks files.
     ".tox/",
@@ -293,6 +292,15 @@ extend_exclude = [
     ".pytest_cache/",
     "__pycache__",
     ".venv*/",
+]
+
+per_file_ignores = [
+    # Ignore "E265 block comment should start with '# '" because
+    # `sphinx-quickstart` generates disabled options like "#this"
+    # rather than "# this" or "#  this". And we want to keep the
+    # file diffable against `sphinx-quickstart`, so rather than
+    # make the file lint, tell flake8 to skip just that check.
+    "docs/conf.py:E265",
 ]
 
 # USYNC: (max) line length shared among: black, flake8, isort, and doc8.
