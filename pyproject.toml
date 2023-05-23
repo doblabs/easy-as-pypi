@@ -226,7 +226,7 @@ branch = true
 
 # black recommends 88 llen.
 # CXREF: https://black.readthedocs.io/en/stable/the_black_code_style/current_style.html#line-length
-# USYNC: (max) line length shared among: black, flake8, isort, and doc8.
+# USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
 line-length = 88
 
 # Default: Sussed from pyproject.toml
@@ -308,7 +308,7 @@ per_file_ignores = [
     "docs/conf.py:E265",
 ]
 
-# USYNC: (max) line length shared among: black, flake8, isort, and doc8.
+# USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
 max_line_length = 88
 
 # See list of error codes (we can list here to ignore):
@@ -392,7 +392,7 @@ builtins = [
 
 [tool.isort]
 
-# USYNC: (max) line length shared among: black, flake8, isort, and doc8.
+# USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
 line_length = 88
 
 # multi_line_output: 3 - Vertical Hanging Indent.
@@ -430,7 +430,7 @@ ignore-path = [
     ".venv*/",
 ]
 
-# USYNC: (max) line length shared among: black, flake8, isort, and doc8.
+# USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
 max-line-length = 88
 
 # Here's an old note: "Specify encoding lest doc8 think it's 'Windows-1254'
@@ -538,6 +538,12 @@ Flake8-pyproject = ">=1.2.3"
 #   https://pypi.org/project/isort
 #   https://github.com/timothycrosley/isort
 isort = ">=5.12.0"
+
+#   https://pypi.org/project/yamllint/
+#   https://github.com/adrienverge/yamllint
+#   https://yamllint.readthedocs.io/en/stable/
+#   https://www.yamllint.com/
+yamllint = ">=1.32.0"
 
 # ***
 

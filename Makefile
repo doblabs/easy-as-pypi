@@ -238,6 +238,7 @@ _help_main:
 	@echo "   twine-check     lint: dist check and PyPI validation"
 	@echo "   view-coverage   open coverage docs in browser (using BROWSER browser)"
 	@echo "   whoami          print project package name [$(PACKAGE_NAME)]"
+	@echo "   yamllint        lint: runs yamllint"
 .PHONY: _help_main
 
 # Not documented (internal): Targets that start with "_" (or "." also works).
@@ -743,7 +744,7 @@ babel-compile:
 # we can check that flake8 doesn't counteract black. Also, tox uses
 # flake8 but not black.
 
-lint: _depends_active_venv black flake8 isort pydocstyle doc8-pip doc8-poetry poetry-check twine-check linkcheck
+lint: _depends_active_venv black flake8 isort pydocstyle yamllint doc8-pip doc8-poetry poetry-check twine-check linkcheck
 .PHONY: lint
 
 # *Make linty!* Call `make linty` to lint and see full lint report.
@@ -845,6 +846,12 @@ isort_check_only:
 pydocstyle: _depends_active_venv
 	@pydocstyle $(SOURCE_DIR)/ tests/
 .PHONY: pydocstyle
+
+# ***
+
+yamllint: _depends_active_venv
+	@yamllint -f parsable .
+.PHONY: yamllint
 
 # ***
 
