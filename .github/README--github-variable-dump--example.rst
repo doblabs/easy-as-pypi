@@ -1,11 +1,11 @@
 
 To generate a ``github`` variable dump, add this job under ``steps``::
 
-    - name: Dump github context
-      run: echo "${GITHUB_CONTEXT}"
-      shell: bash
-      env:
-        GITHUB_CONTEXT: ${{ toJson(github) }}
+      - name: Dump github context
+        run: echo "${GITHUB_CONTEXT}"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
 
 -------
 

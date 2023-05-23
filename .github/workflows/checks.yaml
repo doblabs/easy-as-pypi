@@ -88,109 +88,109 @@ jobs:
         shell: bash
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    # CXREF: https://github.com/actions/checkout
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # CXREF: https://github.com/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # CXREF: https://github.com/actions/setup-python
-    - name: Set up Python ${{ matrix.python-version }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-        # FIXME/2023-05-21: See comments elsewhere: Consider replacing
-        # or complementing USYNC_PIP_CACHE mechanism with setup-python
-        # cache.
-        # - CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
+      # CXREF: https://github.com/actions/setup-python
+      - name: Set up Python ${{ matrix.python-version }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          # FIXME/2023-05-21: See comments elsewhere: Consider replacing
+          # or complementing USYNC_PIP_CACHE mechanism with setup-python
+          # cache.
+          # - CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
+          #
+          #  cache: 'poetry' # cache virtualenv dir
+
+      # Cache the pip wheels (avoid re-downloading from PyPI), and give
+      # install-poetry a boost. Shaves ~10s off step time, from 15s to 5s.
+      # - Enable `virtualenvs-in-project` so local .venv/ is used and cached.
+      # - With or without caches, Windows takes a longer time.
+      #   - 2022-10-04: This test job took 4m. The install-poetry took 2m.
+      #     With the cache ready on the next run, install-poetry took 54s.
+      #     And with both caches used, the 4m job run was reduced to 1m 38s.
+      #     Still a lot longer than Ubuntu, but also a decent improvement.
+      #   - 2023-05-21: easy-as-pypi test job v3.8 took 44s (cached).
+      # - Note the cache key: It invalidates cache whenever this Yaml changed.
+      # CXREF:
+      #   https://www.peterbe.com/plog/install-python-poetry-github-actions-faster
+      #   https://github.com/snok/install-poetry/
+      #   https://github.com/actions/cache
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      # 2022-10-04: Cache the virtualenv, avoid re-installing packages.
+      # Saves ~35s from step time, from 35s to 0s (b/c skips step, because `if:`).
+      # - The install-poetry doc says that, for ubuntu-latest and macos-latest,
+      #   the path is:
+      #     path: .venv
+      #   But the the windows-latest example uses a different path.
+      #     path: {cache-dir}/virtualenvs
+      #   (Though the cached-pip-wheels example shows `path: ~/.cache`.)
+      #   And they suggest caching pip wheels, not the venv (which saves
+      #   downloading from PyPI, but not from installing).
+      #   - REFER: https://github.com/snok/install-poetry/#running-on-windows
+      # - The Peterbe article adds the Yaml hash to the key, which seems legit.
+      #   The causes a cache miss if you edit this file, causing a fresh install...
+      #   though maybe we don't need to be that aggressive?
+      #   - REFER: https://www.peterbe.com/plog/install-python-poetry-github-actions-faster
+      # - BWARE: install-poetry warns that Windows sometimes hangs on this step.
+      #     https://github.com/snok/install-poetry/#caching-on-windows-runners
+      #   So they recommend caching pip wheels instead of .venv.
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --with test
+
+      - name: Test
+        run: |
+          poetry run make test
+          # DEVs: If you need to test a specific function or class, try, e.g.,:
+          #   poetry run python -m pytest -k test_function tests/
+
+        # If you wanted to send an environ to the run task, you could set one,
+        # e.g.,
         #
-        #  cache: 'poetry' # cache virtualenv dir
-
-    # Cache the pip wheels (avoid re-downloading from PyPI), and give
-    # install-poetry a boost. Shaves ~10s off step time, from 15s to 5s.
-    # - Enable `virtualenvs-in-project` so local .venv/ is used and cached.
-    # - With or without caches, Windows takes a longer time.
-    #   - 2022-10-04: This test job took 4m. The install-poetry took 2m.
-    #     With the cache ready on the next run, install-poetry took 54s.
-    #     And with both caches used, the 4m job run was reduced to 1m 38s.
-    #     Still a lot longer than Ubuntu, but also a decent improvement.
-    #   - 2023-05-21: easy-as-pypi test job v3.8 took 44s (cached).
-    # - Note the cache key: It invalidates cache whenever this Yaml changed.
-    # CXREF:
-    #   https://www.peterbe.com/plog/install-python-poetry-github-actions-faster
-    #   https://github.com/snok/install-poetry/
-    #   https://github.com/actions/cache
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
-
-    # 2022-10-04: Cache the virtualenv, avoid re-installing packages.
-    # Saves ~35s from step time, from 35s to 0s (b/c skips step, because `if:`).
-    # - The install-poetry doc says that, for ubuntu-latest and macos-latest,
-    #   the path is:
-    #     path: .venv
-    #   But the the windows-latest example uses a different path.
-    #     path: {cache-dir}/virtualenvs
-    #   (Though the cached-pip-wheels example shows `path: ~/.cache`.)
-    #   And they suggest caching pip wheels, not the venv (which saves
-    #   downloading from PyPI, but not from installing).
-    #   - REFER: https://github.com/snok/install-poetry/#running-on-windows
-    # - The Peterbe article adds the Yaml hash to the key, which seems legit.
-    #   The causes a cache miss if you edit this file, causing a fresh install...
-    #   though maybe we don't need to be that aggressive?
-    #   - REFER: https://www.peterbe.com/plog/install-python-poetry-github-actions-faster
-    # - BWARE: install-poetry warns that Windows sometimes hangs on this step.
-    #     https://github.com/snok/install-poetry/#caching-on-windows-runners
-    #   So they recommend caching pip wheels instead of .venv.
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --with test
-
-    - name: Test
-      run: |
-        poetry run make test
-        # DEVs: If you need to test a specific function or class, try, e.g.,:
-        #   poetry run python -m pytest -k test_function tests/
-
-      # If you wanted to send an environ to the run task, you could set one,
-      # e.g.,
-      #
-      #   env:
-      #     PLATFORM: ${{ matrix.platform }}
+        #   env:
+        #     PLATFORM: ${{ matrix.platform }}
 
   # *** SAVVY
 
@@ -207,76 +207,75 @@ jobs:
   #        types:
   #          - completed
 
-
   # *** FLAKE8
 
   flake8:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    - name: Suss pseudo subproject directory name
-      run: echo "PYPROJECT_DOC8_DIR=$(echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')")" >> $GITHUB_ENV
-      shell: bash
+      - name: Suss pseudo subproject directory name
+        run: echo "PYPROJECT_DOC8_DIR=$(echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')")" >> $GITHUB_ENV
+        shell: bash
 
-    # USYNC: The cache path is different for this job, because the pseudo
-    #        subproject is used, so we use the subproject's `.venv/`.
-    #        - CXREF: .pyproject-doc8/pyproject.toml
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        # Because the pseudo subproject is used, use subproject's `.venv/`.
-        #  path: .venv
-        path: ${{ env.PYPROJECT_DOC8_DIR }}/.venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root --with lint
+      # USYNC: The cache path is different for this job, because the pseudo
+      #        subproject is used, so we use the subproject's `.venv/`.
+      #        - CXREF: .pyproject-doc8/pyproject.toml
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          # Because the pseudo subproject is used, use subproject's `.venv/`.
+          #  path: .venv
+          path: ${{ env.PYPROJECT_DOC8_DIR }}/.venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --with lint
 
-    - name: Run flake8
-      run: poetry run make flake8
+      - name: Run flake8
+        run: poetry run make flake8
 
   # *** ISORT
 
@@ -291,28 +290,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install poetry
-      run: pipx install poetry
+      - name: Install poetry
+        run: pipx install poetry
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'poetry'
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
 
-    - name: Install dependencies
-      run: poetry install --no-interaction --no-root --with lint
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root --with lint
 
-    - name: Run isort
-      run: poetry run make isort_check_only
+      - name: Run isort
+        run: poetry run make isort_check_only
 
   # *** DOC8-PIP
 
@@ -320,34 +319,34 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    # CXREF: https://github.com/actions/checkout
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # CXREF: https://github.com/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    # CXREF: https://github.com/actions/setup-python
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        # "cache the global cache directory"
-        # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
-        #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
-        cache: 'pip'
-        # DUNNO/2023-05-22: Need cache-dependency-path for a pyproject.toml project?
-        #  cache-dependency-path: '**/requirements-dev.txt'
+      # CXREF: https://github.com/actions/setup-python
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # "cache the global cache directory"
+          # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
+          #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+          cache: 'pip'
+          # DUNNO/2023-05-22: Need cache-dependency-path for a pyproject.toml project?
+          #  cache-dependency-path: '**/requirements-dev.txt'
 
-    # USYNC: Similar to `make_doc8_pip` in 'Maketasks.sh'.
+      # USYNC: Similar to `make_doc8_pip` in 'Maketasks.sh'.
 
-    - name: Install dependencies
-      run: pip install -U pip doc8>="1.1.1"
+      - name: Install dependencies
+        run: pip install -U pip doc8>="1.1.1"
 
-    - name: Run doc8
-      run: python -m doc8 *.rst docs/
+      - name: Run doc8
+        run: python -m doc8 *.rst docs/
 
   # *** DOC8-POETRY
 
@@ -355,53 +354,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    # CXREF: https://github.com/actions/checkout
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      # CXREF: https://github.com/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install poetry
-      run: pipx install poetry
+      - name: Install poetry
+        run: pipx install poetry
 
-    # CXREF: https://github.com/actions/setup-python
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        # "cache the global cache directory"
-        # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
-        #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
-        cache: 'poetry'
+      # CXREF: https://github.com/actions/setup-python
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # "cache the global cache directory"
+          # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
+          #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
+          cache: 'poetry'
 
-    # Example how to avoid hardcoding paths defined elsewhere.
-    - name: Suss pseudo subproject directory name
-      run: echo "PYPROJECT_DOC8_DIR=$(echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')")" >> $GITHUB_ENV
-      shell: bash
+      # Example how to avoid hardcoding paths defined elsewhere.
+      - name: Suss pseudo subproject directory name
+        run: echo "PYPROJECT_DOC8_DIR=$(echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')")" >> $GITHUB_ENV
+        shell: bash
 
-    # # Prints, e.g., ".pyproject-doc8".
-    #
-    # - name: Dump PYPROJECT_DOC8_DIR (Bash)
-    #   run: echo "${{ env.PYPROJECT_DOC8_DIR }}"
-    #   shell: bash
+      # # Prints, e.g., ".pyproject-doc8".
+      #
+      # - name: Dump PYPROJECT_DOC8_DIR (Bash)
+      #   run: echo "${{ env.PYPROJECT_DOC8_DIR }}"
+      #   shell: bash
 
-    # USYNC: Similar to `make_doc8_poetry` in 'Maketasks.sh'.
+      # USYNC: Similar to `make_doc8_poetry` in 'Maketasks.sh'.
 
-    # Use poetry -C option, and not, e.g., `cd <dir> && poetry install`
-    # lest various issues, including wrong Python version detected, and
-    # weird Poetry failure:
-    #   virtualenv: error: argument --prompt: expected one argument
-    - name: Install dependencies
-      # E.g.,
-      #   run: poetry install -C ".pyproject-doc8/" --no-interaction --no-root --with dev
-      run: poetry install -C "${{ env.PYPROJECT_DOC8_DIR }}" --no-interaction --no-root --with dev
-      #shell: bash
+      # Use poetry -C option, and not, e.g., `cd <dir> && poetry install`
+      # lest various issues, including wrong Python version detected, and
+      # weird Poetry failure:
+      #   virtualenv: error: argument --prompt: expected one argument
+      - name: Install dependencies
+        # E.g.,
+        #   run: poetry install -C ".pyproject-doc8/" --no-interaction --no-root --with dev
+        run: poetry install -C "${{ env.PYPROJECT_DOC8_DIR }}" --no-interaction --no-root --with dev
+        #shell: bash
 
-    - name: Run doc8
-      run: poetry run -C "${{ env.PYPROJECT_DOC8_DIR }}" python -m doc8 *.rst docs/
+      - name: Run doc8
+        run: poetry run -C "${{ env.PYPROJECT_DOC8_DIR }}" python -m doc8 *.rst docs/
 
   # *** DOCS
 
@@ -409,60 +408,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --with docs --extras readthedocs
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --with docs --extras readthedocs
 
-    - name: Docs build
-      run: poetry run make _docs_html_skip_venv
+      - name: Docs build
+        run: poetry run make _docs_html_skip_venv
 
   # *** TWINE-CHECK
 
@@ -470,61 +469,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root --with dist
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --with dist
 
-    # Verifies bdist and sdist archives.
-    - name: Dist check
-      run: poetry run make twine-check
+      # Verifies bdist and sdist archives.
+      - name: Dist check
+        run: poetry run make twine-check
 
   # *** POETRY-CHECK
 
@@ -532,46 +531,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      # Not necessary, because we're not caching .venv/:
-      #  with:
-      #    virtualenvs-create: true
-      #    virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        # Not necessary, because we're not caching .venv/:
+        #  with:
+        #    virtualenvs-create: true
+        #    virtualenvs-in-project: true
 
-    # Verifies pyproject.toml.
-    - name: Poetry check
-      run: make poetry-check
+      # Verifies pyproject.toml.
+      - name: Poetry check
+        run: make poetry-check
 
   # *** PYDOCSTYLE
 
@@ -585,60 +584,60 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --no-root --with docstyle
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root --with docstyle
 
-    - name: Docstring check
-      run: poetry run make pydocstyle
+      - name: Docstring check
+        run: poetry run make pydocstyle
 
   # *** COVERAGE
 
@@ -654,79 +653,79 @@ jobs:
     # all works.
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
 
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
-    - name: Set pip wheels path (Ubuntu/macOS)
-      run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
-      shell: bash
-      if: (runner.os == 'Linux') || (runner.os == 'macOS')
-    - name: Set pip wheels path (Windows)
-      run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-      shell: bash
-      if: runner.os == 'Windows'
-    - name: Load cached $HOME/.local
-      uses: actions/cache@v3
-      with:
-        path: ${{ env.PIP_CACHE }}
-        key: dotlocal-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install Poetry
-      uses: snok/install-poetry@v1
-      with:
-        virtualenvs-create: true
-        virtualenvs-in-project: true
+      # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+      - name: Set pip wheels path (Ubuntu/macOS)
+        run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+        shell: bash
+        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+      - name: Set pip wheels path (Windows)
+        run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
+        shell: bash
+        if: runner.os == 'Windows'
+      - name: Load cached $HOME/.local
+        uses: actions/cache@v3
+        with:
+          path: ${{ env.PIP_CACHE }}
+          key: dotlocal-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
 
-    # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
-    - name: Load cached venv
-      id: cached-poetry-dependencies
-      uses: actions/cache@v3
-      with:
-        path: .venv
-        key: venv-${{ runner.os
-          }}-${{ steps.setup-python.outputs.python-version
-          }}-${{ github.job
-          }}-${{ hashFiles('**/poetry.lock')
-          }}-${{ hashFiles('.github/workflows/checks.yaml')
-          }}
-    - name: Install dependencies
-      if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --with test
+      # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v3
+        with:
+          path: .venv
+          key: venv-${{ runner.os
+            }}-${{ steps.setup-python.outputs.python-version
+            }}-${{ github.job
+            }}-${{ hashFiles('**/poetry.lock')
+            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --with test
 
-    - name: Coverage compute
-      run: poetry run make _coverage_xml
+      - name: Coverage compute
+        run: poetry run make _coverage_xml
 
-    # Wired to CODECOV_TOKEN repository or organization secret.
-    # CXREF: https://app.codecov.io/gh/pydob/easy-as-pypi/new
-    #   https://github.com/codecov/codecov-action
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        # Multiple files allowed, e.g.,
-        #  files: ./coverage1.xml,./coverage2.xml # optional
-        files: ./coverage.xml
-        # COPYD: Remaining are from Action README:
-        #  flags: unittests # optional
-        #  name: codecov-umbrella # optional
-        # - fail_ci_if_error: "Specify if CI pipeline should fail when
-        #   Codecov runs into errors during upload"
-        #   - Though unsure if fails just this job, or the whole workflow.
-        fail_ci_if_error: true # optional (default = false)
-        #  verbose: true # optional (default = false)
+      # Wired to CODECOV_TOKEN repository or organization secret.
+      # CXREF: https://app.codecov.io/gh/pydob/easy-as-pypi/new
+      #   https://github.com/codecov/codecov-action
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          # Multiple files allowed, e.g.,
+          #  files: ./coverage1.xml,./coverage2.xml # optional
+          files: ./coverage.xml
+          # COPYD: Remaining are from Action README:
+          #  flags: unittests # optional
+          #  name: codecov-umbrella # optional
+          # - fail_ci_if_error: "Specify if CI pipeline should fail when
+          #   Codecov runs into errors during upload"
+          #   - Though unsure if fails just this job, or the whole workflow.
+          fail_ci_if_error: true # optional (default = false)
+          #  verbose: true # optional (default = false)
 
   # *** YAMLLINT
 
@@ -734,25 +733,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Fail if RUN_ONLYing another job
-      run: exit 1
-      if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+      - name: Fail if RUN_ONLYing another job
+        run: exit 1
+        if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install poetry
-      run: pipx install poetry
+      - name: Install poetry
+        run: pipx install poetry
 
-    - name: Set up Python ${{ env.PYTHON_VERSION }}
-      id: setup-python
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ env.PYTHON_VERSION }}
-        cache: 'poetry'
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
 
-    - name: Install dependencies
-      run: poetry install --no-interaction --no-root --with lint
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root --with lint
 
-    - name: Run yamllint
-      run: poetry run yamllint .
+      - name: Run yamllint
+        run: poetry run yamllint .
