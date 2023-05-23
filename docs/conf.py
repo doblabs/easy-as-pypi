@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# This file exists within 'easy-as-pypi-termio':
+# vim:tw=0:ts=4:sw=4:et:norl:ft=python:nospell
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/pydob/ <varies>
 # Pattern: https://github.com/pydob/easy-as-pypi#🥧
