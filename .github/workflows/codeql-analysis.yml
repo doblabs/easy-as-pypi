@@ -3,18 +3,18 @@
 # Project: https://github.com/pydob/easy-as-pypi#🥧
 # License: MIT
 
-# COPYD/2023-05-22: Copied from Vim:
-#
-#   https://github.com/vim/vim/blob/master/.github/workflows/codeql-analysis.yml
+# CXREF: https://github.com/github/codeql-action
+# https://github.com/github/codeql-action/blob/main/.github/workflows/codeql.yml
+
+# SAVVY: Note this is generally the workflow that takes the longest
+# (it takes ~3m for the easy-as-pypi reference project).
+# - You might want to disable the pull_request check if you don't find
+#   much value in this scan and it's blocking your PR flow. (And then
+#   it'll just run on schedule, so you'll still benefit, eventually.)
 
 ---
 
-# For most projects, this workflow file will not need changing; you simply need
-# to commit it to your repository.
-#
-# You may wish to alter this file to override the set of languages analyzed,
-# or to provide custom queries or build logic.
-name: "CodeQL"
+name: "CodeQL Code Scanning"
 
 on:
   push:
@@ -25,6 +25,7 @@ on:
     #         be a subset of 'push' branches.
     branches: [release]
   schedule:
+    # 6p every Monday.
     - cron: '0 18 * * 1'
 
 # Cancels all previous workflow runs for pull requests that have not completed.
@@ -41,49 +42,50 @@ permissions:
   contents: read  # to fetch code (actions/checkout)
 
 jobs:
-  analyze:
-    permissions:
-      contents: read  # to fetch code (actions/checkout)
-      security-events: write  #  (github/codeql-action/autobuild)
-
-    name: Analyze
+  CodeQL-Build:
+    # CodeQL runs on ubuntu-latest, windows-latest, and macos-latest
     runs-on: ubuntu-latest
 
-    strategy:
-      fail-fast: false
-      matrix:
-        # Override automatic language detection by changing the below list
-        # Supported options are ['csharp', 'cpp', 'go', 'java', 'javascript', 'python']
-        #  language: ['cpp', 'python']
-        language: ['python']
-        # Learn more...
-        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
+    permissions:
+      # required for all workflows
+      #  (github/codeql-action/autobuild)
+      security-events: write
+
+      # only required for workflows in private repositories
+      #  actions: read
+      #  # to fetch code (actions/checkout)
+      #  contents: read
 
     steps:
-      - name: Checkout repository from github
+      - name: Checkout repository
         uses: actions/checkout@v3
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
+        # Override language selection by uncommenting this and choosing your languages
+        # with:
+        #   languages: go, javascript, csharp, python, cpp, java, ruby
+        #
+        # CXREF:
+        # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
         with:
-          languages: ${{ matrix.language }}
-          # If you wish to specify custom queries, do so here or in a config file.
-          # By default, queries here will override any specified in a config file.
-          # Prefix the list with "+" to use these queries and those in the config file.
-          # queries: ./path/to/local/query, your-org/your-repo/queries@main
+          languages: python
 
-      # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
-      # If this step fails, remove it and run the build manually (see below)
+      # Autobuild attempts to build any compiled languages (C/C++, C#, Go, or
+      # Java). If this step fails, then you should remove it and run the build
+      # manually (see below).
       - name: Autobuild
         uses: github/codeql-action/autobuild@v2
 
       # ℹ️ Command-line programs to run using the OS shell.
-      # 📚 https://git.io/JvXDl
+      # 📚 See
+      # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
+      # Aka 📚 https://git.io/JvXDl
 
       # ✏️ If the Autobuild fails above, remove it and uncomment the following
-      #   three lines and modify them (or add more) to build your code if your
-      #   project uses a compiled language
+      #    three lines and modify them (or add more) to build your code if your
+      #    project uses a compiled language
 
       # - run: |
       #   make bootstrap
