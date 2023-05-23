@@ -3,6 +3,8 @@
 # Project: https://github.com/pydob/easy-as-pypi#🥧
 # License: MIT
 
+---
+
 # # ISOFF/2023-05-22: No longer necessary (or perhaps was never necessary
 # # to explicitly specify branch).
 # codecov:
@@ -39,4 +41,3 @@ coverage:
   precision: 0
   # round: [down] | up | nearest
   range: 70...100
-
