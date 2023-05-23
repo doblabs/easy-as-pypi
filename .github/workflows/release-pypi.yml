@@ -1,0 +1,144 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+# yamllint disable rule:line-length
+
+---
+
+name: Release next to PyPI
+
+# The 'release' event sets:
+# - GITHUB_SHA — Last commit in the tagged release
+# - GITHUB_REF — Tag ref of release refs/tags/<tag_name>
+# CXREF:
+#   https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#using-event-activity-types
+#   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+# There are a few types that seem like candidates for the hook:
+#   'created', 'published', and 'released'.
+# - Per the docs: The 'created' type does not trigger for draft releases
+#   (which the author doesn't use anyway). The 'published' type triggers
+#   "for pre-releases published from draft releases" (whatever that means).
+#   Finally, "If you want a workflow to run when stable and pre-releases
+#   publish, subscribe to published instead of released and prereleased."
+#   - CXREF:
+#     https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+# - So we'll do the last thing.
+#   - CXREF: More specific details on what each type means:
+#     https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads#release
+#     - 'created':   "A draft was saved, or a release or pre-release was published
+#                     without previously being saved as a draft."
+#     - 'published': "A release, pre-release, or draft of a release was published."
+#     - 'released':  "A release was published, or a pre-release was changed to a release."
+# - Note, too, I've seen simpler syntax, e.g.,:
+#     on:
+#       release:
+#         - created
+#   but the docs use more verbose and elicited syntax.
+
+on:
+  release:
+    types: [published]
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
+jobs:
+
+  poetry-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Curious about ubuntu-latest PI
+        run: |
+          type -a python || true
+          python --version || true
+          type -a poetry || true
+          poetry --version || true
+        shell: bash
+
+      # CXREF: https://github.com/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        # Checkout the default branch and ensure it's what was released.
+        # - (Either an edge case, or shouldn't happen, but prevents at
+        #   least two weird states: User tags a commit that was previously
+        #   released; or user starts a new release while previous release
+        #   still running. In either case, probably being too paranoid.)
+        ref: ${{ github.event.repository.default_branch }}
+
+      - name: Print vars and environs
+        run: |
+          echo "GITHUB_SHA: $GITHUB_SHA"
+          echo "GITHUB_REF: $GITHUB_REF"
+          echo "github.ref: ${{ github.ref }}"
+
+      # Compare default branch HEAD and workflow event GITHUB_SHA.
+      - name: Verify default branch HEAD is what was released
+        run: '[ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] || exit 1'
+        # if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+        # shell: bash
+
+      # Print release tag, mostly out of curiosity.
+      # - MEH: Is there anything about the tag to verify?
+      #   - The author assumes the SHA for the tag is GITHUB_SHA.
+      - name: Announcement
+        run: echo "Pushing version ${GITHUB_REF#refs/tags/} to PyPI"
+        shell: bash
+
+      # FIXME/2023-05-23: Copied from isort job: How does pipx work
+      #                   before installing Python? (I copied the pipx
+      #                   from third-party and I think it came before
+      #                   Python setup, too...)
+      # - It might by that ubuntu-latest includes Python and pipx,
+      #   and that, oh, pipx uses its own environment to install
+      #   systemwide. Then setup-python creates a virtualenv...
+      #   and then we're probably running system poetry later,
+      #   too...
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Curious about ubuntu-latest PII
+        run: |
+          type -a python || true
+          python --version || true
+          type -a poetry || true
+          poetry --version || true
+        shell: bash
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Curious about ubuntu-latest PIII
+        run: |
+          type -a python || true
+          python --version || true
+          type -a poetry || true
+          poetry --version || true
+        shell: bash
+
+      # # Do I need to build or install?
+      #
+      # - name: Install package
+      #   run: poetry install --no-interaction
+      #
+      # - name: Build distributable
+      #   run: poetry build
+
+      # CXREF: https://python-poetry.org/docs/repositories/
+      - name: Poetry build and publish package
+        env:
+          # 2 ways to token: Use config setting, or use their environ.
+          #  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          #  poetry config pypi-token.pypi $PYPI_TOKEN
+          poetry publish --build
+        # FIXME/2023-05-23: Unblock this eventually...
+        if: false
