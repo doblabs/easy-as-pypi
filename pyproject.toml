@@ -98,7 +98,6 @@ build-backend = "poetry_dynamic_versioning.backend"
 # YOU: Disable this if your project derived from easy-as-pypi
 #      does not have a runnable script.
 #      - Otherwise set this to the package entry point.
-#
 [tool.poetry.scripts]
     easy_as_pypi = "easy_as_pypi:cli"
 
