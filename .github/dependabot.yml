@@ -1,5 +1,13 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+# yamllint disable rule:line-length
+
 # CXREF:
 #  https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+---
 
 version: 2
 updates:
@@ -8,4 +16,3 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-
