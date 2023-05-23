@@ -68,25 +68,11 @@ project_orgn = 'Tally Bark LLC'
 #       /home/runner/work/easy-as-pypi/easy-as-pypi/docs
 #   - But on RTD, the package name is further up the ancestry:
 #       /home/docs/checkouts/readthedocs.org/user_builds/easy-as-pypi/checkouts/latest/docs
-#   - So we need to walk up until we spot the pyproject.toml,
-#     then we can read the directory name.
-
-
-def _determine_project_dist():
-    currdir = project_root
-    lookfor = 'pyproject.toml'
-
-    while True:
-        if os.path.isfile(os.path.join(currdir, lookfor)):
-            return os.path.basename(currdir)
-        else:
-            currdir = os.path.dirname(currdir)
-            if currdir == os.path.sep:
-                print('ERROR: Could not determine project name!')
-                sys.exit(1)
-
-
-project_dist = _determine_project_dist()
+#     - Fortunately RTD declares an environ we can use.
+try:
+    project_dist = os.environ['READTHEDOCS_PROJECT']
+except KeyError:
+    project_dist = os.path.basename(project_root)
 
 # Usually the installable package name is the same name as the
 # kebab-case directory name converted to snake_case.

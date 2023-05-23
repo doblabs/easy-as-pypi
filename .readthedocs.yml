@@ -41,4 +41,15 @@ sphinx:
 #  python:
 #     install:
 #     - requirements: docs/requirements.txt
+#
+# (lb): Poetry wiring.
+# - RTD doesn't support Poetry, but `pip install .` supports
+#   pyproject.toml per PEP 517.
+# - CXREF:
+#   https://peps.python.org/pep-0517/
+#   https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
+python:
+  install:
+    - method: pip
+      path: .
 
