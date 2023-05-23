@@ -72,6 +72,11 @@ include = [
 
 # ***
 
+[tool.easy-as-pypi]
+copyright_years = "2020-2023"
+
+# ***
+
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/doblabs/easy-as-pypi/issues"
 "Documentation" = "https://easy-as-pypi.readthedocs.io/en/latest"

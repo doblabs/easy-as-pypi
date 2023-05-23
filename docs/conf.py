@@ -108,13 +108,16 @@ package_name = project_dist.replace('-', '_')
 # ┃                                                                     ┃
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
-project_ghuser = 'pydob'
+# Pull the GH org from the repository URL.
+# E.g., project_ghuser = 'pydob'
+project_ghuser = os.path.basename(os.path.dirname(meta["tool"]["poetry"]["repository"]))
 project_ghrepo = project_dist
 
-# project_auth = 'Landon Bouma'
+# E.g., project_auth = 'Landon Bouma <email>'
 project_auth = ",".join(meta["tool"]["poetry"]["authors"])
-# project_copy = 'Landon Bouma.'
-project_copy = f"2020-2023, {project_auth}"
+# E.g., project_copy = '2020-2023, Landon Bouma <email>'
+project_copy = f"{meta['tool']['easy-as-pypi']['copyright_years']}, {project_auth}"
+
 # project_orgn = 'Tally Bark LLC'
 project_orgn = meta["tool"]["poetry"]["maintainers"]
 
