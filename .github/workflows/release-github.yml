@@ -1,0 +1,60 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release first to GitHub
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+
+    # steps:
+    #   - name: Checkout repository
+    #     uses: actions/checkout@v3
+    #
+    #   # - name: Build and publish to pypi
+    #   #   uses: JRubics/poetry-publish@v1.17
+    #   #   with:
+    #   #     pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+    env:
+      TOKENTEST: ${{ secrets.TEST_TOKEN }}
+
+    steps:
+      # FIXME/2023-05-22 14:09: Testing:
+      - name: Print {{ secrets.TEST_TOKEN }}
+        run: echo "${{ secrets.TEST_TOKEN }}"
+        # shell: bash
+      - name: Print {{ env.TEST_TOKEN }}
+        run: echo "${{ env.TEST_TOKEN }}"
+        # shell: bash
+      - name: Print {{ env.TOKENTEST }}
+        run: echo "${{ env.TOKENTEST }}"
+        # shell: bash
+      - name: Print $TOKENTEST
+        run: echo "$TOKENTEST"
+        # shell: bash
+
+      - name: Announcement
+        run: echo "Processing version ${GITHUB_REF#refs/tags/}"
+        shell: bash
+
+      - name: Dump github context
+        run: echo "${GITHUB_CONTEXT}"
+        shell: bash
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+
+# FIXME: Check that HEAD matches tag?
+
+# https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+
+# gh release create v1.3.2 --title "v1.3.2 (beta)"
+#   --notes "this is a beta release" --prerelease
