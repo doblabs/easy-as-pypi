@@ -73,22 +73,6 @@ meta = get_meta()
 #   'documentation': 'https://easy-as-pypi.readthedocs.io/en/latest',
 #   ...
 
-# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-# ┃                                                                     ┃
-# ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
-
-project_ghuser = 'pydob'
-# See project_ghrepo, below.
-
-# project_auth = 'Landon Bouma'
-project_auth = ",".join(meta["tool"]["poetry"]["authors"])
-# project_copy = 'Landon Bouma.'
-project_copy = f"2020-2023, {project_auth}"
-# project_orgn = 'Tally Bark LLC'
-project_orgn = meta["tool"]["poetry"]["maintainers"]
-
-# ***
-
 # Determine the distributable package name.
 # - You could always set this explicitly, e.g.,
 #
@@ -120,7 +104,19 @@ project_dist = meta["tool"]["poetry"]["name"]
 #     package_name = 'python_import_name'
 package_name = project_dist.replace('-', '_')
 
+# ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+# ┃                                                                     ┃
+# ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
+
+project_ghuser = 'pydob'
 project_ghrepo = project_dist
+
+# project_auth = 'Landon Bouma'
+project_auth = ",".join(meta["tool"]["poetry"]["authors"])
+# project_copy = 'Landon Bouma.'
+project_copy = f"2020-2023, {project_auth}"
+# project_orgn = 'Tally Bark LLC'
+project_orgn = meta["tool"]["poetry"]["maintainers"]
 
 # ***
 
