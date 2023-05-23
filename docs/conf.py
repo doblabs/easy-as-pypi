@@ -104,10 +104,14 @@ project_orgn = meta["tool"]["poetry"]["maintainers"]
 #   - But on RTD, the package name is further up the ancestry:
 #       /home/docs/checkouts/readthedocs.org/user_builds/easy-as-pypi/checkouts/latest/docs
 #     - Fortunately RTD declares an environ we can use.
-try:
-    project_dist = os.environ['READTHEDOCS_PROJECT']
-except KeyError:
-    project_dist = os.path.basename(project_root)
+#
+#  try:
+#      project_dist = os.environ['READTHEDOCS_PROJECT']
+#  except KeyError:
+#      project_dist = os.path.basename(project_root)
+#
+# Though if we use pyproject.toml metadata, we don't need the RTD environ.
+project_dist = meta["tool"]["poetry"]["name"]
 
 # Usually the installable package name is the same name as the
 # kebab-case directory name converted to snake_case.
