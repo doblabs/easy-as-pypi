@@ -25,7 +25,29 @@ name: Run checks
 
 on:
   - push
-  - pull_request
+
+  # Note we skip 'pull_request', which I think is redundant — although
+  # I see plenty of other projects that run checks on both 'push' and
+  # on 'pull_request'.
+  # - But AFAIK, this is just duplicate work: A pull request will always
+  #   run checks against a SHA that was previously pushed, and therefore
+  #   previously checked. (Or do I understand the situation incorrectly?)
+  # - On the other hand, there may be instances where not checking on
+  #   'pull_request' breaks another workflow. E.g., a workflow that does
+  #   something after a pull_request check passes:
+  #     on:
+  #       workflow_run:
+  #         workflows: ["Run checks"]
+  #         types:
+  #           - completed
+  #     jobs:
+  #       example:
+  #         runs-on: ubuntu-latest
+  #         if: >
+  #           github.event.workflow_run.event == 'pull_request'
+  #           && github.event.workflow_run.conclusion == 'success'
+  #
+  #  - pull_request
 
 # Cancel active pull_request workflow runs for the same branch.
 # - As inspired by Vim's .github/workflows/ci.yaml.
