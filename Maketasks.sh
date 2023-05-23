@@ -101,7 +101,7 @@ make_docs_html () {
   if ${venv_created} || ${VENV_FORCE:-false} ; then
     _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
-    poetry -C ${EDITABLE_DIR} install --with docs
+    poetry -C ${EDITABLE_DIR} install --with docs --extras readthedocs
   fi
 
   make_docs_html_with_inject "${SOURCE_DIR}" "${PACKAGE_NAME}" "${MAKE}"

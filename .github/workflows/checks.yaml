@@ -458,7 +458,7 @@ jobs:
           }}
     - name: Install dependencies
       if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-      run: poetry install --no-interaction --with docs
+      run: poetry install --no-interaction --with docs --extras readthedocs
 
     - name: Docs build
       run: poetry run make _docs_html_skip_venv

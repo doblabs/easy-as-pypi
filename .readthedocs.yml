@@ -45,6 +45,9 @@ sphinx:
 # (lb): Poetry wiring.
 # - RTD doesn't support Poetry, but `pip install .` supports
 #   pyproject.toml per PEP 517.
+# - We also add 'readthedocs' extras, which installs 'tomli'
+#   so that docs/conf.py can read pyproject.toml metadata
+#   (DRY: So we can avoid hardcoded strings from therein).
 # - CXREF:
 #   https://peps.python.org/pep-0517/
 #   https://python-poetry.org/docs/pyproject/#poetry-and-pep-517
@@ -52,4 +55,6 @@ python:
   install:
     - method: pip
       path: .
+      extra_requirements:
+        - readthedocs
 

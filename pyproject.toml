@@ -802,3 +802,9 @@ click = "^8.0.0"
 # TRACK/2023-05-07: Keep tabs on cachecontrol; remove this kludge eventually.
 urllib3 = "<2"
 
+# For Readthedocs build process.
+tomli = { version = ">=2.0.1", optional = true }
+
+[tool.poetry.extras]
+readthedocs = [ "tomli" ]
+
