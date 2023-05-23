@@ -69,10 +69,24 @@ package_name = project_dist.replace('-', '_')
 
 project_ghrepo = project_dist
 
+# If you see "WARNING: duplicate label" messages, check if the
+# sphinx.ext.autosectionlabel is enabled — then disable it.
+# - As opposed to exclude files using exclude_patterns.
+#
+# List of patterns, relative to source directory, that match files and
+# directories to ignore when looking for source files.
 exclude_patterns = [
-    'CODE-OF-CONDUCT.rst',
-    'CONTRIBUTING.rst',
-    'README.rst',
+    '_build',
+    # Note that docs/readme.rst merely includes the top-level README.rst.
+    # - E.g., docs/readme.rst contains a single directive:
+    #     .. include:: ../README.rst
+    # - If we don't exclude that file here, you'll see a toctree warning:
+    #     checking consistency...
+    #       /path/to/easy-as-pypi/docs/readme.rst:
+    #         WARNING: document isn't included in any toctree
+    # - Note that README.rst is still included probably (to be honest,
+    #   I'm not really sure what's going on =).
+    'readme.rst',
 ]
 
 # ***
@@ -116,17 +130,28 @@ project_texinfo = 'One line description of project.'
 #   http://www.sphinx-doc.org/en/master/usage/extensions/index.html
 extensions = [
     'sphinx.ext.autodoc',
+
     # For hyperlinks, e.g., :ref:`My Section Title`.
-    'sphinx.ext.autosectionlabel',
+    # ISOFF/2023-05-22: I don't see any diff with this option on or off,
+    # when when autosectionlabel enabled, if the same reST header title
+    # is used in two separate files, you'll see warnings, e.g.,:
+    #   WARNING: duplicate label "title", other instance in /path/to/easy-as-pypi/docs/<file>.rst
+    #
+    #  'sphinx.ext.autosectionlabel',
+    #
     'sphinx.ext.coverage',
+
     # (lb): pedantic_timedelta includes intersphinx.
-    # 'sphinx.ext.intersphinx',
+    #  'sphinx.ext.intersphinx',
+
     # Google style docstrings
     # https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html
     # https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
     # https://google.github.io/styleguide/pyguide.html#383-functions-and-methods
     'sphinx.ext.napoleon',
+
     'sphinx.ext.todo',
+
     'sphinx.ext.viewcode',
 ]
 
@@ -200,7 +225,12 @@ version = '.'.join(release.split('.')[:2])
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+#
+# ISOFF: easy-as-pypi: exclude_patterns definition moved above.
+# - Disabling this rather than deleting entirely, to retain diffability
+#   with reference conf.py (what `sphinx-quickstart` creates).
+#
+#  exclude_patterns = ['_build']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
