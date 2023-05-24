@@ -211,6 +211,11 @@ branch = true
 # However if you wanted to omit tests/ coverage, you could do this:
 #   source = [ "src/", ]
 
+# CXREF: Enable experimental relative_files, for coverage-comment workflow.
+# https://github.com/py-cov-action/python-coverage-comment-action#basic-usage
+# https://coverage.readthedocs.io/en/6.2/config.html#config-run-relative-files
+relative_files = true
+
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #

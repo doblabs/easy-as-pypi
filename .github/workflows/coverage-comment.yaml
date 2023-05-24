@@ -1,0 +1,89 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+
+# https://github.com/marketplace/actions/python-coverage-comment
+
+---
+
+# USYNC: coverage-comment-external.yaml on-workflows.
+name: "Attach PR coverage comment"
+
+on:
+  pull_request:
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
+# COPYD: https://github.com/py-cov-action/python-coverage-comment-action#basic-usage
+jobs:
+  test:
+    name: Run tests & display coverage
+    runs-on: ubuntu-latest
+    # Set permissions for actions/upload-artifact@v3
+    permissions:
+      # Gives the action the necessary permissions for publishing new
+      # comments in pull requests.
+      pull-requests: write
+      # Gives the action the necessary permissions for pushing data to the
+      # python-coverage-comment-action branch, and for editing existing
+      # comments (to avoid publishing multiple comments in the same PR)
+      contents: write
+    steps:
+      # github.event.workflow_run is empty...
+      - name: FIXME Just curious
+        run: |
+          echo "github.event: ${{ github.event }}"
+          echo "github.event.workflow_run: ${{ github.event.workflow_run }}"
+          echo "GITHUB_PR_RUN_ID: ${{ github.event.workflow_run.id }}"
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --with test
+
+      - name: Coverage compute
+        run: poetry run make _coverage_sqlite
+
+      - name: Coverage comment
+        id: coverage_comment
+        uses: py-cov-action/python-coverage-comment-action@v3
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      # Per source, the comment file only written if previous step
+      # failed to post coverage comment to PR, and is indicitave of
+      # "external PR". (So if you're PRing from the same org, don't
+      # worry if you see the next step skipped (COMMENT_FILE_WRITTEN
+      # is false) and the other workflow (coverage-comment-post.yaml)
+      # not run.
+      # CXREF:
+      # https://github.com/py-cov-action/python-coverage-comment-action/blob/2b8f85c293c3431e451c0e6084ca63f23cd80fe6/coverage_comment/main.py#L167
+      #
+      # FIXME/2023-05-23: Create PR from personal Git (or as @p6a) to test
+      #                   the other workflow works.
+      # FIXME/2023-05-23: Rename this and/or other workflow. (other one: -fallback.yaml
+      # or -external-PR.yaml)
+      # FIXME/2023-05-23: Change all .yml to .yaml (Or yml, maybe I like yml).
+      - name: Store Pull Request comment to be posted
+        uses: actions/upload-artifact@v3
+        if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
+        with:
+          # If you use a different name, update COMMENT_ARTIFACT_NAME accordingly
+          name: python-coverage-comment-action
+          # If you use a different name, update COMMENT_FILENAME accordingly
+          path: python-coverage-comment-action.txt
