@@ -1108,6 +1108,7 @@ cloc: cloc-digest
 # ***
 
 define CLOC_IGNORE_FILES
+.github/README--github-variable-dump--example.rst
 docs/conf.py
 endef
 export CLOC_IGNORE_FILES
