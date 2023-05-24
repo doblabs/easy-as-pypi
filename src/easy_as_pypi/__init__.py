@@ -81,3 +81,4 @@ def cli():
 # Add commands
 # YOU: Change as appropriate.
 cli.add_command(commands.easy_as_pypi.eat)
+cli.add_command(commands.easy_as_pypi.version)
