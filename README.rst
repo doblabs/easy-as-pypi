@@ -35,11 +35,6 @@ easy-as-pypi
   :target: https://github.com/pydob/easy-as-pypi/blob/release/LICENSE
   :alt: License Status
 
-.. ALTLY:  https://img.shields.io/coverity/scan/28425.svg
-.. image:: https://scan.coverity.com/projects/28425/badge.svg
-  :target: https://scan.coverity.com/projects/pydob-easy-as-pypi
-  :alt: Coverity Scan Build Status
-
 |
 
 One dev's boilerplate PyPI project.

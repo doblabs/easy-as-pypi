@@ -1,0 +1,407 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/pydob/easy-as-pypi#🥧
+# License: MIT
+
+# ISOFF/2023-05-24: This workflow is diabled.
+# - The scan seems to work, and the upload works,
+#   and Coverity acknowledges the update, e.g.,
+#   you'll see:
+#     Last Build Status: Running. Your build is currently being analyzed
+#     No builds were successfully analyzed yet.
+#   on the overview page:
+#     https://scan.coverity.com/projects/pydob-easy-as-pypi?tab=overview
+#   But then a moment later it disappears, and you just see:
+#     No builds were successfully analyzed yet.
+# - Coverity seems mostly aimed at paid users and C/C++ code, though
+#   it says it works on Python. It just doesn't say what it doesn't
+#   like about the upload.
+#
+# Nonetheless, I'm not sure what Coverity offers that CodeQL doesn't,
+# so perhaps you're not misssing anything here.
+
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
+# COPYD/2023-05-22: Originally copied from Vim:
+#
+#   https://github.com/vim/vim/blob/master/.github/workflows/coverity.yml
+#
+# Then tweaked per this doc:
+#
+#   https://community.synopsys.com/s/article/How-to-capture-and-analysis-python-script-by-Coverity
+#
+# because otherwise not much setup guidance I could find.
+
+# CXREF: https://scan.coverity.com/projects/pydob-easy-as-pypi
+#   https://scan.coverity.com/projects/pydob-easy-as-pypi/builds/new
+
+# SAVVY: Keep it to no more the 4 scans per day/28 per week.
+# - "The number of weekly builds per project are as follows:
+#    Up to 28 builds per week, with a maximum of 4 builds per day,
+#     for projects with fewer than 100K lines of code"
+#   https://scan.coverity.com/faq#frequency
+
+# DUNNO/2023-05-23: I uploaded scan results and https://scan.coverity.com
+# showed it queded (6th in line) but I checked back later (now) and there
+# is no indication of a build either queued or analyzed. The web page is
+# still telling me to submit the first build.
+# - The Project Settings page says this though:
+#     Last build analyzed	6 minutes ago
+# - The badge still says "pending", which I think is what it said when I
+#   first signed up.
+# - The Overview pages says:
+#     No builds were successfully analyzed yet
+#   So was there a failure? Then where are the logs? No email, either.
+#   And nothing gleaned on web search.
+
+---
+
+name: Coverity
+
+on:
+  schedule:
+    # At 00:42 daily — See not above: Limit to max 4 per day.
+    - cron: '42 0 * * *'
+
+  # USAGE: Force the workflow to run before cron
+  # - Uncomment this line, commit it, push it, open a PR, revert.
+  #   (Or use 'push' action and skip the PR.)
+  # - See also the `github.event_name` check below, which you may
+  #   want to disable, depending on what you're doing.
+  #
+  #  pull_request:
+  #  push:
+
+  # Allow manual runs via GitHub API, CLI, or browser.
+  # - DUNNO: Even after running workflow once, I don't see how to manually
+  #   run it. You can rerun an old run, but it reuses the old config.
+  # CXREF:
+  #   https://docs.github.com/en/actions/managing-workflow-runs/manually-running-a-workflow
+  #   https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#workflow_dispatch
+  workflow_dispatch:
+
+permissions:
+  # Need read to fetch code (actions/checkout).
+  contents: read
+
+jobs:
+  # CXREF: https://github.com/orgs/community/discussions/27128
+  check_date:
+    runs-on: ubuntu-latest
+
+    name: Check latest commit
+
+    outputs:
+      should_run: ${{ steps.should_run.outputs.should_run }}
+
+    steps:
+      # CXREF: https://github.com/actions/checkout
+      # - SAVVY: "Only a single commit is fetched by default. Set
+      #   fetch-depth: 0 to fetch all history for all branches and tags."
+      - name: Checkout repository from github
+        uses: actions/checkout@v3
+
+      # As mentioned above, the checkout only fetches one commit object.
+      # - You can see it for yourself:
+      #
+      #   - name: Print latest commits
+      #     run: git --no-pager log -5
+      #
+      # And this commit object won't match any in the repo you have on
+      # your machine.
+      #
+      # - github.sha is that one commit, aka HEAD (but not the branch HEAD).
+      - name: Print HEAD commit
+        run: git --no-pager log -1
+
+      - name: Print ${{ github.sha }} commit
+        run: git --no-pager log -1 ${{ github.sha }}
+
+      - name: Check latest commit is younger than a day
+        id: should_run
+
+        # USAGE: Disable this if you're testing via 'push' or 'pull_request'.
+        if: ${{ github.event_name == 'schedule' }}
+
+        # SAVVY: GHA wants us to use GITHUB_OUTPUT, but here's the old
+        # approach (from the copied code, see job CXREF). I've captured
+        # this for posterity in case you see this in other code you
+        # copy-paste and need to update it:
+        #
+        #   test -z $(git rev-list --after="24 hours" ${{ github.sha }}) \
+        #     && echo "::set-output name=should_run::false"
+        #
+        # If we didn't ensure to exit true:
+        #   continue-on-error: true
+        run: |
+          test -z $(git rev-list --after="24 hours" ${{ github.sha }}) \
+            && echo "should_run=false" >> "$GITHUB_OUTPUT" \
+            || true
+        # Use this to verify next job doesn't run when not supposed to:
+        #
+        #  test -z $(git rev-list --after="0 hours" ${{ github.sha }}) \
+        #    && echo "should_run=false" >> "$GITHUB_OUTPUT" \
+        #    || true
+
+  # ***
+
+  scan:
+    runs-on: ubuntu-20.04
+
+    needs: check_date
+
+    env:
+      CC: gcc
+      CFLAGS: -Wno-deprecated-declarations
+      DEBIAN_FRONTEND: noninteractive
+      TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      PROJECT: pydob%2Feasy-as-pypi
+
+    # If `gh run cancel` is not to your liking, and you'd rather
+    # see a successful workflow (with a skipped job) and not a
+    # canceled workflow and job, enable this if-check.
+    #
+    #  if: ${{ needs.check_date.outputs.should_run != 'false' }}
+
+    permissions:
+      # So we can use `gh`.
+      actions: 'write'
+
+    steps:
+      - name: Fail scan if missing token
+        if: "!env.TOKEN"
+        run: |
+          >&2 echo "ERROR: Please set COVERITY_SCAN_TOKEN secret"
+          exit 1
+
+      - name: Checkout repository from github
+        uses: actions/checkout@v3
+
+      # If gh replies:
+      #   HTTP 403: Resource not accessible by integration
+      #   (https://api.github.com/repos/pydob/easy-as-pypi/actions/runs/5064738262/cancel)
+      # then check permissions ('write').
+      - name: Skip scan if nothing changed
+        # `exit 1` kills the job, but also marks the workflow failed.
+        # So cancel-watch instead, be gracefuler (it marks the job
+        # canceled (with a bang!)). You should still seen a green
+        # checkmark on the branch page next to the latest SHA (if
+        # you run this workflow on push).
+        # - CXREF: https://stackoverflow.com/a/75809743/5332257
+        run: |
+          echo "Nothing changed, full stop"
+          gh run cancel ${{ github.run_id }}
+          gh run watch ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: ${{ needs.check_date.outputs.should_run == 'false' }}
+
+      # Enable this to stop processing early, if you're debugging
+      # earlier steps.
+      #
+      # - name: STOP HERE
+      #   run: exit 1
+
+      # MEH: We could probably cache the environment, but if
+      # this job only runs off cron, not a big deal if it runs
+      # slow.
+      # - Something like this that's used in other workflows:
+      #
+      #   - name: Load cached venv
+      #     id: cached-poetry-dependencies
+      #     uses: actions/cache@v3
+      #     with:
+      #       # Because the pseudo subproject is used, use subproject's `.venv/`.
+      #       #  path: .venv
+      #       path: ${{ env.PYPROJECT_DOC8_DIR }}/.venv
+      #       key: venv-${{ runner.os
+      #         }}-${{ steps.setup-python.outputs.python-version
+      #         }}-${{ github.job
+      #         }}-${{ hashFiles('**/poetry.lock')
+      #         }}-${{ hashFiles('.github/workflows/checks.yaml')
+      #         }}
+
+      - name: Download Coverity
+        run: |
+          wget -q https://scan.coverity.com/download/linux64 \
+            --post-data "token=$TOKEN&project=$PROJECT" \
+            -O coverity_tool.tgz
+          mkdir cov-scan
+          tar ax -f coverity_tool.tgz --strip-components=1 -C cov-scan
+
+      # Unpacks to our project directory:
+      #   /home/runner/work/easy-as-pypi/easy-as-pypi $ ls -la
+      #   drwxr-xr-x 20 runner docker       4096 May 24 02:09 cov-scan
+      #   -rw-r--r--  1 runner docker 1279374507 Apr 29 19:22 coverity_tool.tgz
+      #
+      # - name: Dir list
+      #   run: |
+      #     pwd
+      #     ls -la
+      #     echo
+      #     echo ./cov-scan
+      #     ls -la ./cov-scan
+      #     echo
+      #     echo ./cov-scan/bin
+      #     ls -la ./cov-scan/bin
+
+      # MAYBE/2023-05-23 20:48: Ideally, should add md5 verify:
+      #
+      #   wget https://scan.coverity.com/download/linux64 \
+      #     --post-data "token=$TOKEN&project=$PROJECT&md5=1" \
+      #     -O coverity_tool.md5
+      #
+      # But also it's not our machine we're running this on, and
+      # it's a public project, so the danger seems less crucial.
+
+      # COPYD: This list is what Vim uses.
+      # - We probably don't need lua, ruby, tcl, and others, but
+      #   seems tedious to trail-and-error test a shorter list.
+      #   So we'll just overuse GitHub's resources, whatever.
+      - name: Install packages
+        run: |
+          sudo apt update && sudo apt install -y \
+            autoconf \
+            gettext \
+            libcanberra-dev \
+            libperl-dev \
+            python-dev \
+            python3-dev \
+            liblua5.3-dev \
+            lua5.3 \
+            ruby-dev \
+            tcl-dev \
+            libgtk2.0-dev \
+            desktop-file-utils \
+            libtool-bin \
+            libsodium-dev
+
+      # Vim does this, but it doesn't add much value for our
+      # config, though makes the two cov-* calls below less wordy.
+      - name: Set up environment
+        run: |
+          echo "$(pwd)/cov-scan/bin" >> $GITHUB_PATH
+
+      # Skip configure, which emits the warning:
+      #   Warning:  Configuration already exists for file regex ^.*\.p(y|y3)$
+      #   and it will not be updated.
+      - name: Configure
+        if: false
+        run: cov-configure --python
+
+      # DUNNO: I'd guess cov-build counts against the API limit, and not
+      # posting (well, GETing) the results, but I'm not sure. Just curious.
+
+      # CXREF: https://community.synopsys.com/s/article/How-to-capture-and-analysis-python-script-by-Coverity
+      - name: Build/scan project
+        # Either of these runs work (well, works insofar as things seem to
+        # work fine locally, but after uploading results to Coverity, nothing).
+        #
+        # run: |
+        #   cov-build \
+        #     --dir cov-int \
+        #     --no-command \
+        #     --fs-capture-search src/
+        run: |
+          cov-build \
+            --dir cov-int \
+            --no-command \
+            --fs-capture-search ./
+
+      # I've seen these commands suggested, but they're not in the download
+      # we fetch. Perhaps this are for paying (and self-hosted?) customers.
+      # CXREF:
+      #   https://stackoverflow.com/questions/48820620/can-coverity-tool-scan-python-codebase-for-sca-and-security-issues
+      #
+      # - name: Analyze project
+      #   run: |
+      #     cov-analyze \
+      #       --dir cov-int \
+      #       --all \
+      #       --aggressiveness-level high
+      #
+      # - name: Generate HTML report
+      #   run: |
+      #     cov-format-errors \
+      #       --dir cov-int \
+      #       --html-output cov-results
+      #
+      # - name: Build/scan project
+      #   run: |
+      #     cov-commit-defects \
+      #       --dir cov-int \
+      #       --host coverity.mycompany.com \
+      #       --stream MYSTREAM \
+      #       --auth-key-file mycoverity.key
+
+      - name: Submit results
+        run: |
+          tar zcf cov-scan.tgz cov-int
+          curl \
+            --form token=$TOKEN \
+            --form email=$EMAIL \
+            --form file=@cov-scan.tgz \
+            --form version="$(git rev-parse HEAD)" \
+            --form description="Automatic GHA scan" \
+            "https://scan.coverity.com/builds?project=$PROJECT"
+        env:
+          EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+
+      # ***
+
+      # ./
+      # drwxr-xr-x  5 runner docker       4096 May 24 05:04 cov-int
+      # drwxr-xr-x 20 runner docker       4096 May 24 05:04 cov-scan
+      # -rw-r--r--  1 runner docker      51271 May 24 05:04 cov-scan.tgz
+      # -rw-r--r--  1 runner docker 1279374507 Apr 29 19:22 coverity_tool.tgz
+      #
+      # ./cov-int
+      # -rw-r--r--  1 runner docker   2330 May 24 05:04 BUILD.metrics.xml
+      # -rw-r--r--  1 runner docker     44 May 24 05:04 build-cwd.txt
+      # -rw-r--r--  1 runner docker 141582 May 24 05:04 build-log.txt
+      # drwxr-xr-x  3 runner docker   4096 May 24 05:04 emit
+      # -rw-r--r--  1 runner docker   1668 May 24 05:04 fs-capture-timings.txt
+      # drwxr-xr-x  2 runner docker   4096 May 24 05:04 output
+      # -rw-r--r--  1 runner docker    352 May 24 05:04 security-da-log.txt
+      # -rw-r--r--  1 runner docker    664 May 24 05:04 security-da-timings.txt
+      # drwxr-xr-x  2 runner docker   4096 May 24 05:04 tmp
+      # -rw-r--r--  1 runner docker   1953 May 24 05:04 tu-timings.txt
+      #
+      # ./cov-int/emit
+      # drwxr-xr-x 3 runner docker 4096 May 24 05:26 fv-az246-575
+      # -rw-r--r-- 1 runner docker   58 May 24 05:26 version
+      #
+      # ./cov-int/output
+      # -rw-r--r-- 1 runner docker   58 May 24 05:26 version
+      #
+      # ./cov-int/tmp
+      # -rw-r--r-- 1 runner docker 73728 May 24 05:26 emit-db-cache
+      # -rw-r--r-- 1 runner docker    12 May 24 05:26 emit-db-cache.lock
+
+      # LATER: Remove if you ever get this workflow working.
+      - name: Dir list
+        run: |
+          echo
+          echo cov-int/emit
+          ls -la cov-int/emit
+          echo
+          echo cov-int/output
+          ls -la cov-int/output
+          echo
+          echo cov-int/tmp
+          ls -la cov-int/tmp
+
+      # LATER: Remove if you ever get this workflow working.
+      - name: Inspect results
+        run: |
+          for path in cov-int/*; do
+            [ -f "$path" ] && echo && echo "$path" && cat "$path"
+          done
+          for path in cov-int/output/*; do
+            [ -f "$path" ] && echo && echo "$path" && cat "$path"
+          done
+          # for path in cov-int/tmp/*; do
+          #   [ -f "$path" ] && echo && echo "$path" && cat "$path"
+          # done
