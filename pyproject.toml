@@ -93,14 +93,6 @@ copyright_years = "2020-2023"
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
 
-# ***
-
-# YOU: Disable this if your project derived from easy-as-pypi
-#      does not have a runnable script.
-#      - Otherwise set this to the package entry point.
-[tool.poetry.scripts]
-    easy_as_pypi = "easy_as_pypi:cli"
-
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
@@ -137,6 +129,15 @@ pattern = "default-unprefixed"
 vcs = "git"
 style = "semver"
 tag-branch = "release"
+
+# ***
+
+# YOU: Disable this if your project derived from easy-as-pypi
+#      does not have a runnable script.
+#      - Otherwise set this to the package entry point.
+
+[tool.poetry.scripts]
+    easy_as_pypi = "easy_as_pypi:cli"
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
