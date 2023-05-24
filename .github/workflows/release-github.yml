@@ -27,34 +27,54 @@ jobs:
     env:
       TOKENTEST: ${{ secrets.TEST_TOKEN }}
 
+    # FIXME: Verify if necessary:
+    # permissions:
+    #   # So we can use `gh`.
+    #   actions: 'write'
+
     steps:
-      # FIXME/2023-05-22 14:09: Testing:
-      - name: Print {{ secrets.TEST_TOKEN }}
-        run: echo "${{ secrets.TEST_TOKEN }}"
-        # shell: bash
-      - name: Print {{ env.TEST_TOKEN }}
-        run: echo "${{ env.TEST_TOKEN }}"
-        # shell: bash
-      - name: Print {{ env.TOKENTEST }}
-        run: echo "${{ env.TOKENTEST }}"
-        # shell: bash
-      - name: Print $TOKENTEST
-        run: echo "$TOKENTEST"
-        # shell: bash
+      # - name: Print {{ secrets.TEST_TOKEN }}
+      #   run: echo "${{ secrets.TEST_TOKEN }}"
+      # - name: Print {{ env.TOKENTEST }}
+      #   run: echo "${{ env.TOKENTEST }}"
+      # - name: Print $TOKENTEST
+      #   run: echo "$TOKENTEST"
+
+      - name: Probe version
+        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        shell: bash
 
       - name: Announcement
-        run: echo "Processing version ${GITHUB_REF#refs/tags/}"
-        shell: bash
+        run: echo "Processing version ${VERSION_TAG}"
 
-      - name: Dump github context
-        run: echo "${GITHUB_CONTEXT}"
-        shell: bash
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
+      # - name: Dump github context
+      #   run: echo "${GITHUB_CONTEXT}"
+      #   # shell: bash
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
 
-# FIXME: Check that HEAD matches tag?
+      - name: Check if prerelease
+        run: |
+          echo "${VERSION_TAG}" \
+            | grep -q -E -e "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+            || echo "PRERELEASE=--prerelease" >> "$GITHUB_OUTPUT"
 
-# https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
-
-# gh release create v1.3.2 --title "v1.3.2 (beta)"
-#   --notes "this is a beta release" --prerelease
+      # CXREF: https://cli.github.com/manual/gh_release_create
+      # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
+      # - MAYBE: -n/--notes "these are the release notes" or
+      #          -F/--notes-file <file> or
+      #          --notes-start-tag <string> Tag to use as the starting point
+      #                                     for generating release notes
+      #          could be used to post release notes.
+      #   - See also
+      #     --generate-notes Automatically generate title and notes for the release
+      #   - You could parse the release notes from the HISTORY.rst.
+      # - -p/--prerelease marks as prerelease.
+      # - --verify-tag aborts release if the tag doesn't already exist, but
+      #   that should be impossible.
+      - name: Create release
+        run: |
+          echo "gh release create \"${VERSION_TAG}\" --title \"${VERSION_TAG}\" \
+            ${PRERELEASE} --verify-tag"
+          gh release create "${VERSION_TAG}" --title "${VERSION_TAG}" \
+            ${PRERELEASE} --verify-tag
