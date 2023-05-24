@@ -7,7 +7,7 @@
 
 [tool.poetry]
 name = "easy-as-pypi"
-version = "1.0.0"
+version = "0.0.0"
 description = "Bootstrapping your next Python CLI made easy as PyPI"
 
 authors = ["Landon Bouma <pydob@tallybark.com>"]
@@ -111,9 +111,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 #     https://github.com/mtkennerly/poetry-dynamic-versioning
 #     https://pypi.org/project/poetry-dynamic-versioning
 [tool.poetry-dynamic-versioning]
-enable = false
-# vcs = "git"
-# style = "semver"
+enable = true
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
