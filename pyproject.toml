@@ -130,6 +130,20 @@ vcs = "git"
 style = "semver"
 tag-branch = "release"
 
+[tool.poetry-dynamic-versioning.substitution]
+# Default files:
+#  files = ["*.py", "*/__init__.py", "*/__version__.py", "*/_version.py"]
+# - Note these paths only look one deep. You could recurse with **, e.g.:
+#    files = ["**/__init__.py"]
+# Just the one file, src/<pkg>/__init__.py.
+files = ["src/*/__init__.py"]
+# Default patterns:
+#  patterns = ["(^__version__\s*(?::.*?)?=\s*['\"])[^'\"]*(['\"])"]
+# which causes "Unescaped '\' in a string", but double-escaping,
+#  patterns = ["(^__version__\\s*(?::.*?)?=\\s*['\\"])[^'\\"]*(['\\"])"]
+# causes "Expected newline or end of document after a statement".
+# - Oh well, default is what we want.
+
 # ***
 
 # YOU: Disable this if your project derived from easy-as-pypi

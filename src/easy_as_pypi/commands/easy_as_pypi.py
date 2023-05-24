@@ -25,7 +25,6 @@
 """A simple Click command for YOU: to replace."""
 
 import click
-from pkg_resources import get_distribution
 
 
 @click.command()
@@ -37,8 +36,9 @@ def eat():
 @click.command()
 def version():
     """Print the package version."""
+    from .. import __version__
+
     # Another:
     # E.g., __name__: 'easy_as_pypi.commands.easy_as_pypi'
     module_name = __name__.split(".", 1)[0]
-    version = get_distribution(module_name).version
-    click.echo(f"{module_name} version {version}")
+    click.echo(f"{module_name} version {__version__}")

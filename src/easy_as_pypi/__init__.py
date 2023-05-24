@@ -52,6 +52,8 @@ __author_link__ = "https://tallybark.com"
 __package_name__ = "easy-as-pypi"
 __arg0name__ = os.path.basename(sys.argv[0])
 
+__version__ = "0.0.0"
+
 # ***
 
 # Determine path to localization files, which are installed alongside
