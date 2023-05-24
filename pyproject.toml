@@ -110,8 +110,33 @@ build-backend = "poetry_dynamic_versioning.backend"
 #   - Here's the Poetry equivalent, as a plugin.
 #     https://github.com/mtkennerly/poetry-dynamic-versioning
 #     https://pypi.org/project/poetry-dynamic-versioning
+
+# From poetry-dynamic-versioning docs: "If the base group is not included, then
+# this will be interpreted as a named preset from the Dunamai Pattern class.
+# This includes: default, default-unprefixed (makes the v prefix optional)."
+# - The base group being the major version number.
+# - But really I mean to point out that if you have non v-prefixed version
+#   tags, if you don't change 'pattern', you'll see, on `poetry check`:
+#
+#     The pattern did not match any tags
+#
+#     Pattern:
+#     (?x)                                                          (?# ignore whitespace)
+#         ^v((?P<epoch>\d+)!)?(?P<base>\d+(\.\d+)*)                 (?# v1.2.3 or v1!2000.1.2)
+#         ([-._]?((?P<stage>[a-zA-Z]+)[-._]?(?P<revision>\d+)?))?   (?# b0)
+#         (\+(?P<tagged_metadata>.+))?$                             (?# +linux)
+#
+#     Tags:
+#     ['1.0.13', '1.0.12', '1.0.11', '1.0.10', '1.0.9', '1.0.8', ...]
+#
+# https://github.com/mtkennerly/poetry-dynamic-versioning/issues/111
+
 [tool.poetry-dynamic-versioning]
 enable = true
+pattern = "default-unprefixed"
+vcs = "git"
+style = "semver"
+tag-branch = "release"
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
