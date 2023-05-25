@@ -220,7 +220,7 @@ jobs:
       #         }}-${{ steps.setup-python.outputs.python-version
       #         }}-${{ github.job
       #         }}-${{ hashFiles('**/poetry.lock')
-      #         }}-${{ hashFiles('.github/workflows/checks.yaml')
+      #         }}-${{ hashFiles('.github/workflows/checks.yml')
       #         }}
 
       - name: Download Coverity

@@ -11,7 +11,7 @@ name: Attach cov comment — External PR
 
 on:
   workflow_run:
-    # USYNC: coverage-comment.yaml name
+    # USYNC: coverage-comment.yml name ↔ coverage-comment-external.yml on-workflow_run.
     workflows: ["Attach PR coverage comment"]
     types:
       - completed

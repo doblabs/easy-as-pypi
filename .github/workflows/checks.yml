@@ -163,7 +163,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -199,7 +199,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -297,7 +297,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -324,7 +324,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -492,7 +492,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -510,7 +510,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -553,7 +553,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -571,7 +571,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -615,7 +615,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -668,7 +668,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -686,7 +686,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -737,7 +737,7 @@ jobs:
           path: ${{ env.PIP_CACHE }}
           key: dotlocal-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
         uses: snok/install-poetry@v1
@@ -755,7 +755,7 @@ jobs:
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
             }}-${{ hashFiles('**/poetry.lock')
-            }}-${{ hashFiles('.github/workflows/checks.yaml')
+            }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'

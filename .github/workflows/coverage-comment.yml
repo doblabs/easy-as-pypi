@@ -7,7 +7,7 @@
 
 ---
 
-# USYNC: coverage-comment-external.yaml on-workflows.
+# USYNC: coverage-comment.yml name ↔ coverage-comment-external.yml on-workflow_run.
 name: "Attach PR coverage comment"
 
 on:
@@ -71,20 +71,13 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ github.token }}
 
-      # Per source, the comment file only written if previous step
-      # failed to post coverage comment to PR, and is indicitave of
-      # "external PR". (So if you're PRing from the same org, don't
-      # worry if you see the next step skipped (COMMENT_FILE_WRITTEN
-      # is false) and the other workflow (coverage-comment-post.yaml)
-      # not run.
-      # CXREF:
-      # https://github.com/py-cov-action/python-coverage-comment-action/blob/2b8f85c293c3431e451c0e6084ca63f23cd80fe6/coverage_comment/main.py#L167
-      #
-      # FIXME/2023-05-23: Create PR from personal Git (or as @p6a) to test
-      #                   the other workflow works.
-      # FIXME/2023-05-23: Rename this and/or other workflow. (other one: -fallback.yaml
-      # or -external-PR.yaml)
-      # FIXME/2023-05-23: Change all .yml to .yaml (Or yml, maybe I like yml).
+      # Per source, the comment file is only written if the previous step
+      # failed to post the coverage comment to the PR, because the PR is
+      # an "external PR", i.e., the PR branch is from a remote repo. (So
+      # if you're PRing from the same org, don't worry if you see the next
+      # step skipped (COMMENT_FILE_WRITTEN is false).)
+      # CXREF: # https://github.com/py-cov-action/python-coverage-comment-action/blob/2b8f85c293c3431e451c0e6084ca63f23cd80fe6/coverage_comment/main.py#L167
+
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v3
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
