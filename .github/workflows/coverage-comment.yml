@@ -76,7 +76,7 @@ jobs:
       # an "external PR", i.e., the PR branch is from a remote repo. (So
       # if you're PRing from the same org, don't worry if you see the next
       # step skipped (COMMENT_FILE_WRITTEN is false).)
-      # CXREF: # https://github.com/py-cov-action/python-coverage-comment-action/blob/2b8f85c293c3431e451c0e6084ca63f23cd80fe6/coverage_comment/main.py#L167
+      # CXREF: https://github.com/py-cov-action/python-coverage-comment-action/blob/2b8f85c293c3431e451c0e6084ca63f23cd80fe6/coverage_comment/main.py#L167
 
       - name: Store Pull Request comment to be posted
         uses: actions/upload-artifact@v3
