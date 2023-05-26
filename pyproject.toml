@@ -151,7 +151,7 @@ files = ["src/*/__init__.py"]
 #      - Otherwise set this to the package entry point.
 
 [tool.poetry.scripts]
-    easy_as_pypi = "easy_as_pypi:cli"
+    easy-as-pypi = "easy_as_pypi:cli"
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

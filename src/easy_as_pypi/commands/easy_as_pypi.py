@@ -36,9 +36,6 @@ def eat():
 @click.command()
 def version():
     """Print the package version."""
-    from .. import __version__
+    from .. import __package_name__, __version__
 
-    # Another:
-    # E.g., __name__: 'easy_as_pypi.commands.easy_as_pypi'
-    module_name = __name__.split(".", 1)[0]
-    click.echo(f"{module_name} version {__version__}")
+    click.echo(f"{__package_name__} version {__version__}")
