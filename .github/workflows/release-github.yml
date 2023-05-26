@@ -5,76 +5,149 @@
 
 ---
 
-name: Release first to GitHub
+name: Release build to GitHub
+
 on:
   push:
     tags:
-      - "v[0-9]+.[0-9]+.[0-9]+"
+      - "v[0-9]+.[0-9]+.[0-9]+*"
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
 jobs:
 
-  build:
+  release-github:
     runs-on: ubuntu-latest
-
-    # steps:
-    #   - name: Checkout repository
-    #     uses: actions/checkout@v3
-    #
-    #   # - name: Build and publish to pypi
-    #   #   uses: JRubics/poetry-publish@v1.17
-    #   #   with:
-    #   #     pypi_token: ${{ secrets.PYPI_TOKEN }}
 
     env:
       TOKENTEST: ${{ secrets.TEST_TOKEN }}
 
-    # FIXME: Verify if necessary:
-    # permissions:
-    #   # So we can use `gh`.
-    #   actions: 'write'
+    permissions:
+      # For `gh release view`, else you see: "HTTP 403: Resource not accessible
+      # by integration (https://api.github.com/repos/pydob/easy-as-pypi/releases)"
+      contents: 'write'
 
     steps:
-      # - name: Print {{ secrets.TEST_TOKEN }}
-      #   run: echo "${{ secrets.TEST_TOKEN }}"
-      # - name: Print {{ env.TOKENTEST }}
-      #   run: echo "${{ env.TOKENTEST }}"
-      # - name: Print $TOKENTEST
-      #   run: echo "$TOKENTEST"
+
+      - name: Dump github
+        run: echo "${GITHUB_CXT}"
+        shell: bash
+        env:
+          GITHUB_CXT: ${{ toJson(github) }}
 
       - name: Probe version
-        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
         shell: bash
-
-      - name: Announcement
-        run: echo "Processing version ${VERSION_TAG}"
-
-      # - name: Dump github context
-      #   run: echo "${GITHUB_CONTEXT}"
-      #   # shell: bash
-      #   env:
-      #     GITHUB_CONTEXT: ${{ toJson(github) }}
 
       - name: Check if prerelease
         run: |
-          echo "${VERSION_TAG}" \
-            | grep -q -E -e "^v[0-9]+\.[0-9]+\.[0-9]+$" \
-            || echo "PRERELEASE=--prerelease" >> "$GITHUB_OUTPUT"
+          echo "$VERSION_TAG" | grep -q -E -e "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+            || echo "PRERELEASE=--prerelease" >> "$GITHUB_ENV"
+
+      - name: Announcement
+        run: |
+          [ -z "${PRERELEASE}" ] \
+            && prerelease_msg="" \
+            || prerelease_msg=" (prerelease)"
+          echo "Processing $VERSION_TAG tag${prerelease_msg}"
+
+      # ***
+
+      # Checkout the default branch and check the version tag is on HEAD.
+      # - This is mostly a paranoid check. We could support releasing
+      #   whatever commit was tagged, but until a developer presents us
+      #   with a compelling use case for such a situation, we don't
+      #   support it.
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # Fetch all history, so rev-parse HEAD is real HEAD.
+          fetch-depth: 0
+
+      # Compare default branch HEAD and workflow event GITHUB_SHA.
+      - name: Verify default branch HEAD is what was tagged
+        run: |
+          [ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] || exit 1
+
+      # ***
+
+      - name: Fail if already released
+        run: |
+          echo "gh release view \"$VERSION_TAG\""
+          ! gh release view "$VERSION_TAG" \
+            || exit 1
+        env:
+          GH_TOKEN: ${{ secrets.PAT__PUBLIC_REPO }}
+
+      # ***
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Install poetry-dynamic-versioning
+        run: poetry self add "poetry-dynamic-versioning[plugin]"
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Poetry build
+        run: |
+          poetry build
+
+      - name: Probe filename
+        run: |
+          echo "ASSET_BDIST=$(command echo dist/*.whl)" >> "$GITHUB_ENV"
+          echo "ASSET_SDIST=$(command echo dist/*.tar.gz)" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Inspect work
+        run: |
+          echo
+          echo "ASSET_BDIST: $ASSET_BDIST"
+          ls -la "$ASSET_BDIST"
+          echo
+          echo "ASSET_SDIST: $ASSET_SDIST"
+          ls -la "$ASSET_SDIST"
+
+      # ***
 
       # CXREF: https://cli.github.com/manual/gh_release_create
       # https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository
-      # - MAYBE: -n/--notes "these are the release notes" or
-      #          -F/--notes-file <file> or
-      #          --notes-start-tag <string> Tag to use as the starting point
-      #                                     for generating release notes
-      #          could be used to post release notes.
-      #   - See also
-      #     --generate-notes Automatically generate title and notes for the release
-      #   - You could parse the release notes from the HISTORY.rst.
-      # - -p/--prerelease marks as prerelease.
-      # - --verify-tag aborts release if the tag doesn't already exist, but
-      #   that should be impossible.
+      #
+      # Options:
+      #   -p/--prerelease     marks release as prerelease (see $PRERELEASE).
+      #   --verify-tag        aborts release if the tag doesn't already exist
+      #                       (but that should be impossible).
       - name: Create release
         run: |
-          echo "gh release create \"${VERSION_TAG}\" --title \"${VERSION_TAG}\" \
-            ${PRERELEASE} --verify-tag"
-          gh release create "${VERSION_TAG}" --title "${VERSION_TAG}" \
-            ${PRERELEASE} --verify-tag
+          echo "gh release create \"$VERSION_TAG\" \
+            --title \"$VERSION_TAG\" \
+            $PRERELEASE \
+            --verify-tag \
+            $ASSET_BDIST#bdist — $(basename $ASSET_BDIST) \
+            $ASSET_SDIST#sdist — $(basename $ASSET_SDIST)"
+          gh release create "$VERSION_TAG" \
+            --title "$VERSION_TAG" \
+            $PRERELEASE \
+            --verify-tag \
+            "$ASSET_BDIST#bdist — $(basename $ASSET_BDIST)" \
+            "$ASSET_SDIST#sdist — $(basename $ASSET_SDIST)"
+        env:
+          # Note that the built-in token doesn't generate workflow events.
+          # - E.g.,
+          #     GH_TOKEN: ${{ github.token }}
+          #   will not signal on.release.
+          # - Instead, use a personal access token (a classic token
+          #   with public_repo permission), which evokes the trigger.
+          # CXREF: https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+          GH_TOKEN: ${{ secrets.PAT__PUBLIC_REPO }}
+
+# ***
