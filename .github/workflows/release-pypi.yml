@@ -2,43 +2,46 @@
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
-# yamllint disable rule:line-length
 
 ---
 
-name: Release next to PyPI
+# USYNC: release-pypi.yml name ↔ run-reversioning.yml on-workflow_run.
+name: Publish release to PyPI
 
-# The 'release' event sets:
-# - GITHUB_SHA — Last commit in the tagged release
-# - GITHUB_REF — Tag ref of release refs/tags/<tag_name>
+# This workflow reacts to the 'release' event, which sets:
+#   GITHUB_SHA — Last commit in the tagged release
+#   GITHUB_REF — Tag ref of release refs/tags/<tag_name>
+#
+# We also support the manually-triggered workflow_dispatch event, in which
+# case the workflow reads the version tag from the HEAD of the default branch.
+#
 # CXREF:
-#   https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#using-event-activity-types
-#   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
-# There are a few types that seem like candidates for the hook:
-#   'created', 'published', and 'released'.
-# - Per the docs: The 'created' type does not trigger for draft releases
-#   (which the author doesn't use anyway). The 'published' type triggers
-#   "for pre-releases published from draft releases" (whatever that means).
-#   Finally, "If you want a workflow to run when stable and pre-releases
-#   publish, subscribe to published instead of released and prereleased."
-#   - CXREF:
-#     https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
-# - So we'll do the last thing.
-#   - CXREF: More specific details on what each type means:
-#     https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads#release
+#   https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#using-event-activity-types
+#   https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions
+#
+# - Per the docs, we want the 'published' event, and not, say 'created' or 'released':
+#   - "If you want a workflow to run when stable and pre-releases publish,
+#      subscribe to published instead of released and prereleased."
+#     CXREF: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#release
+#   - Two other events, 'created' and 'released', are related (though with
+#     somewhat confusing names, e.g., I get that a 'release' might be 'created'
+#     or 'published', but what does it mean when a 'release' is 'released'?).
 #     - 'created':   "A draft was saved, or a release or pre-release was published
 #                     without previously being saved as a draft."
 #     - 'published': "A release, pre-release, or draft of a release was published."
-#     - 'released':  "A release was published, or a pre-release was changed to a release."
-# - Note, too, I've seen simpler syntax, e.g.,:
+#     - 'released':  "A release was published, or a pre-release changed to a release."
+#     CXREF: https://docs.github.com/en/webhooks-and-events/webhooks/webhook-events-and-payloads#release
+#
+# - Note, too, I've seen this written without the 'types' entry, e.g.,:
 #     on:
 #       release:
-#         - created
-#   but the docs use more verbose and elicited syntax.
+#         - published
 
 on:
   release:
     types: [published]
+
+  workflow_dispatch:
 
 env:
   # USYNC: https://github.com/actions/python-versions/releases
@@ -46,99 +49,314 @@ env:
   PYTHON_VERSION: 3.11
 
 jobs:
-
-  poetry-publish:
+  prepare-publish:
     runs-on: ubuntu-latest
 
+    # DUNNO/2023-05-26: `gh release view|download` works fine in this job
+    # without additional permissions, but in the 'needs' job, later, it
+    # needs:
+    #   permissions:
+    #     # For `gh release view|download`.
+    #     contents: write
+    # - Is there something about 'needs' jobs that they have fewer
+    #   permissions? (Also weird that the 'permissions: write-all'
+    #   trick doesn't work in the 'needs' job.)
+
     steps:
-      - name: Curious about ubuntu-latest PI
-        run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
+      - name: Probe version tag (not workflow_dispatch)
+        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
         shell: bash
+        if: github.event_name != 'workflow_dispatch'
 
-      # CXREF: https://github.com/actions/checkout
-      - name: Checkout repository
+      - name: Checkout repository (not workflow_dispatch)
         uses: actions/checkout@v3
-        # Checkout the default branch and ensure it's what was released.
-        # - (Either an edge case, or shouldn't happen, but prevents at
-        #   least two weird states: User tags a commit that was previously
-        #   released; or user starts a new release while previous release
-        #   still running. In either case, probably being too paranoid.)
-        ref: ${{ github.event.repository.default_branch }}
+        if: github.event_name != 'workflow_dispatch'
 
-      - name: Print vars and environs
+      - name: Checkout repository (is workflow_dispatch)
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # Fetch all history, so rev-parse HEAD is real HEAD.
+          fetch-depth: 0
+        if: github.event_name == 'workflow_dispatch'
+
+      - name: Probe version tag (is workflow_dispatch)
+        run: echo "VERSION_TAG=$(git tag --points-at HEAD)" >> "$GITHUB_ENV"
+        if: github.event_name == 'workflow_dispatch'
+
+      # MEH: We could support HEAD not being tagged (e.g., user wants to
+      # tag and release previous commit) if we looked instead for highest
+      # version tag. But it's a handful of shell code to copy here.
+      # - CXREF: ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
+      #     git_latest_version_tag
+      - name: Fail if VERSION_TAG undiscoverable
+        run: exit 1
+        if: env.VERSION_TAG == ''
+
+      - name: Check if prerelease
         run: |
-          echo "GITHUB_SHA: $GITHUB_SHA"
-          echo "GITHUB_REF: $GITHUB_REF"
-          echo "github.ref: ${{ github.ref }}"
+          echo "$VERSION_TAG" | grep -q -E -e "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+            || echo "PRERELEASE=true" >> "$GITHUB_ENV"
 
-      # Compare default branch HEAD and workflow event GITHUB_SHA.
-      - name: Verify default branch HEAD is what was released
-        run: '[ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] || exit 1'
-        # if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
-        # shell: bash
+      - name: Probe version
+        run: |
+          echo "VERSION=${VERSION_TAG#v}" >> "$GITHUB_ENV"
+        shell: bash
 
-      # Print release tag, mostly out of curiosity.
-      # - MEH: Is there anything about the tag to verify?
-      #   - The author assumes the SHA for the tag is GITHUB_SHA.
+      - name: Set pipx index URL
+        run: |
+          [ -z "${PRERELEASE}" ] \
+            && index_url="" \
+            || index_url="--index-url https://test.pypi.org/simple"
+          echo "INDEX_URL=$index_url" >> "$GITHUB_ENV"
+        shell: bash
+
       - name: Announcement
-        run: echo "Pushing version ${GITHUB_REF#refs/tags/} to PyPI"
-        shell: bash
-
-      # FIXME/2023-05-23: Copied from isort job: How does pipx work
-      #                   before installing Python? (I copied the pipx
-      #                   from third-party and I think it came before
-      #                   Python setup, too...)
-      # - It might by that ubuntu-latest includes Python and pipx,
-      #   and that, oh, pipx uses its own environment to install
-      #   systemwide. Then setup-python creates a virtualenv...
-      #   and then we're probably running system poetry later,
-      #   too...
-      - name: Install poetry
-        run: pipx install poetry
-
-      - name: Curious about ubuntu-latest PII
         run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
+          [ -z "${PRERELEASE}" ] \
+            && prerelease_msg="" \
+            || prerelease_msg=" (prerelease)"
+          echo "Pushing $VERSION_TAG to PyPI${prerelease_msg}"
+
+      # ***
+
+      # github.repository is, e.g.,"doblabs/easy-as-pypi".
+      - name: Probe package name
+        run: echo "PACKAGE_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
         shell: bash
+
+      - name: Check if previously released
+        run: |
+          echo "pipx install $INDEX_URL $PACKAGE_NAME==$VERSION"
+          ! pipx install $INDEX_URL $PACKAGE_NAME==$VERSION \
+            || echo "IS_RELEASED=true" >> "$GITHUB_ENV"
+        shell: bash
+
+      # Determine if previously released (and skip re-releasing if so).
+      - name: View release
+        run: |
+          echo "gh release view $VERSION_TAG"
+          gh release view $VERSION_TAG
+        env:
+          GH_TOKEN: ${{ github.token }}
+        if: env.IS_RELEASED == ''
+
+      # Here's how you might publish using Poetry, but this approach
+      # requires a PyPI token.
+      # - We instead use the pypa/ action (see next job), which uses
+      #   a "trusted publisher" approach, where GitHub and PyPI manage
+      #   the OIDC token(s) automatically.
+      #
+      #     - name: Download release
+      #       run: |
+      #         gh release download $VERSION_TAG -D dist/
+      #       env:
+      #         GH_TOKEN: ${{ github.token }}
+      #       if: env.IS_RELEASED == ''
+      #
+      #     - name: Install poetry
+      #       run: pipx install poetry
+      #       if: env.IS_RELEASED == ''
+      #
+      #     - name: Install poetry-dynamic-versioning
+      #       run: poetry self add "poetry-dynamic-versioning[plugin]"
+      #       if: env.IS_RELEASED == ''
+      #
+      #     # CXREF: https://python-poetry.org/docs/repositories/
+      #     - name: Poetry publish package
+      #       env:
+      #         # 2 ways to token: Use config setting:
+      #         #  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+      #         # Or use their environ:
+      #         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+      #       run: |
+      #         # poetry config pypi-token.pypi $PYPI_TOKEN
+      #         repository=""
+      #         if [ -n "$PRERELEASE" ]; then
+      #           poetry config repositories.testpypi https://test.pypi.org/legacy/
+      #           repository="--repository testpypi"
+      #         fi
+      #         echo
+      #         echo "poetry config --list"
+      #         poetry config --list
+      #         echo
+      #         echo "poetry publish $repository"
+      #         poetry publish $repository
+      #       if: env.IS_RELEASED == ''
+
+      - name: Store variables for next job
+        id: set_outputs
+        run: |
+          echo "INDEX_URL=$INDEX_URL" >> "$GITHUB_OUTPUT"
+          echo "IS_RELEASED=$IS_RELEASED" >> "$GITHUB_OUTPUT"
+          echo "PACKAGE_NAME=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
+          echo "PRERELEASE=$PRERELEASE" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VERSION_TAG=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+
+    outputs:
+      INDEX_URL: ${{ steps.set_outputs.outputs.INDEX_URL }}
+      IS_RELEASED: ${{ steps.set_outputs.outputs.IS_RELEASED }}
+      PACKAGE_NAME: ${{ steps.set_outputs.outputs.PACKAGE_NAME }}
+      PRERELEASE: ${{ steps.set_outputs.outputs.PRERELEASE }}
+      VERSION: ${{ steps.set_outputs.outputs.VERSION }}
+      VERSION_TAG: ${{ steps.set_outputs.outputs.VERSION_TAG }}
+
+  # ***
+
+  poetry-publish:
+
+    runs-on: ubuntu-latest
+
+    needs: prepare-publish
+
+    # Easiest approach would be to skip if IS_RELEASED, e.g.,
+    #   if: needs.prepare-publish.outputs.IS_RELEASED == '' && ...
+    # but if this job is skipped, so is smoke-test, which 'needs'
+    # this job. So we'll skip the individual steps, and not the job.
+    # - Unfortunately, pypa/gh-action-pypi-publish@release/v1 still builds
+    #   its image, even when its step(s) skipped, which takes a few moments.
+    if: needs.prepare-publish.result == 'success'
+
+    # CXREF: PyPI recommends using an environment ('release')
+    #        to keep non-admin organization members from publishing.
+    # https://github.com/doblabs/easy-as-pypi/settings/environments
+    # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#using-an-environment
+    # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+    # https://test.pypi.org/manage/account/publishing/
+    #   https://pypi.org/manage/account/publishing/
+    environment: release
+
+    # DUNNO/2023-05-26: I was missing 'contents: write' (`gh release view`
+    # was reporting 'release not found', very misleading), so I tried the
+    # 'permissions: write-all' trick, but that didn't fix it. Surprisingly.
+    # - tl;dr: Don't expect 'write-all' to work like you expect.
+    permissions:
+      # For `gh release view|download`.
+      contents: write
+      # Mandatory permission for "trusted publishing" (PyPI action).
+      id-token: write
+
+    env:
+      IS_RELEASED: ${{ needs.prepare-publish.outputs.IS_RELEASED }}
+      PRERELEASE: ${{ needs.prepare-publish.outputs.PRERELEASE }}
+      VERSION_TAG: ${{ needs.prepare-publish.outputs.VERSION_TAG }}
+
+    steps:
+      - name: Checkout repository (for gh)
+        uses: actions/checkout@v3
+        if: env.IS_RELEASED == ''
+
+      # Note that `gh status` does not work here, prints error:
+      #   could not load notifications: could not get notifications:
+      #   HTTP 403: Resource not accessible by integration
+      # (https://api.github.com/notifications?all=true&participating=true&per_page=100)
+      # - This suggests a permissions error, but 'permissions: write-all'
+      #   didn't resolve it (though 'permissions: write-all' didn't make
+      #   `gh release view` work either (had to use 'contents: write').
+      #   Which makes it seem like write-all does not, in fact, apply
+      #   'write' access to all permissions (and shouldn't be relied upon
+      #   for debugging)).
+      #   - I also tried alt. GH_TOKEN: ${{ secrets.PAT__PUBLIC_REPO }}
+      #     like some people suggested (using PAT instead of temp token),
+      #     but `gh status` still doesn't work for me from this workflow.
+      - name: Download release
+        run: |
+          # Won't work:
+          #  gh status
+          echo "gh release view $VERSION_TAG"
+          gh release view $VERSION_TAG
+          echo "gh release download $VERSION_TAG -D dist/"
+          gh release download $VERSION_TAG -D dist/
+        env:
+          GH_TOKEN: ${{ github.token }}
+        if: env.IS_RELEASED == ''
+
+      - name: Inspect dist/
+        run: echo && echo dist/ && ls -la dist/
+        if: env.IS_RELEASED == ''
+
+      # https://github.com/marketplace/actions/pypi-publish
+      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      # https://github.com/pypa/gh-action-pypi-publish
+      - name: Publish package distributions to test.PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+        if: env.IS_RELEASED == '' && env.PRERELEASE != ''
+
+      # Seems like there should be a better (DRYer) way
+      # then using two if's. Oh well.
+      - name: Publish package distributions to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        if: env.IS_RELEASED == '' && env.PRERELEASE == ''
+
+  # ***
+
+  smoke-test:
+    name: Smoke test PyPI release
+
+    runs-on: ubuntu-latest
+
+    needs: [prepare-publish, poetry-publish]
+
+    if: needs.prepare-publish.result == 'success'
+     && needs.poetry-publish.result == 'success'
+
+    env:
+      INDEX_URL: ${{ needs.prepare-publish.outputs.INDEX_URL }}
+      PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
+      VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
+
+    steps:
+      # Historically, if you publish a release from your terminal and then
+      # try to install the package, it won't be available for a few seconds.
+      # - That shouldn't happen here because it's a been a number of seconds
+      #   since the PyPI update (it takes a fews seconds to start this new
+      #   job). But if did happen, we could probably simply just sleep, e.g.:
+      #
+      #   # Wait for PyPI to get package ready.
+      #   - name: Sleep for 5 seconds
+      #     run: sleep 5s
+      #     shell: bash
+
+      - name: Install package
+        run: |
+          echo "pipx install $INDEX_URL $PACKAGE_NAME==$VERSION"
+          pipx install $INDEX_URL $PACKAGE_NAME==$VERSION
+
+      - name: Run it!
+        run: |
+          echo "$PACKAGE_NAME version"
+          $PACKAGE_NAME version
+          echo "Expecting version: $VERSION"
+        shell: bash
+
+      - name: Check version
+        run: |
+          [ "$($PACKAGE_NAME version)" = "$PACKAGE_NAME version $VERSION" ] \
+            || exit 1
+        shell: bash
+
+      # ***
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'poetry'
+          cache: 'pip'
 
-      - name: Curious about ubuntu-latest PIII
-        run: |
-          type -a python || true
-          python --version || true
-          type -a poetry || true
-          poetry --version || true
+      - name: Install package
+        run: pip install $PACKAGE_NAME
+
+      - name: Infer module name
+        run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
         shell: bash
 
-      # # Do I need to build or install?
-      #
-      # - name: Install package
-      #   run: poetry install --no-interaction
-      #
-      # - name: Build distributable
-      #   run: poetry build
-
-      # CXREF: https://python-poetry.org/docs/repositories/
-      - name: Poetry build and publish package
-        env:
-          # 2 ways to token: Use config setting, or use their environ.
-          #  PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+      - name: Load it!
         run: |
-          #  poetry config pypi-token.pypi $PYPI_TOKEN
-          poetry publish --build
-        # FIXME/2023-05-23: Unblock this eventually...
-        if: false
+          python -c "import $MODULE_NAME; print($MODULE_NAME.__version__)"
+        shell: bash
+
+# ***
