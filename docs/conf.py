@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # vim:tw=0:ts=4:sw=4:et:norl:ft=python:nospell
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/pydob/ <varies>
-# Pattern: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/doblabs/ <varies>
+# Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
 # Boilerplate documentation build configuration file,
@@ -64,12 +64,12 @@ meta = get_meta()
 #   'name': 'easy-as-pypi',
 #   'version': '1.0.0',
 #   'description': 'Bootstrapping your next Python CLI made easy as PyPI',
-#   'authors': ['Landon Bouma <pydob@tallybark.com>'],
-#   'maintainers': ['Tally Bark LLC <pydob@tallybark.com>'],
+#   'authors': ['Landon Bouma <doblabs@tallybark.com>'],
+#   'maintainers': ['Tally Bark LLC <doblabs@tallybark.com>'],
 #   'license': 'MIT',
 #   'readme': 'README.rst',
-#   'homepage': 'https://github.com/pydob/easy-as-pypi',
-#   'repository': 'https://github.com/pydob/easy-as-pypi',
+#   'homepage': 'https://github.com/doblabs/easy-as-pypi',
+#   'repository': 'https://github.com/doblabs/easy-as-pypi',
 #   'documentation': 'https://easy-as-pypi.readthedocs.io/en/latest',
 #   ...
 
@@ -109,7 +109,7 @@ package_name = project_dist.replace('-', '_')
 # ┃ YOU/DEV: Customize this import and these strings for your project.  ┃
 
 # Pull the GH org from the repository URL.
-# E.g., project_ghuser = 'pydob'
+# E.g., project_ghuser = 'doblabs'
 project_ghuser = os.path.basename(os.path.dirname(meta["tool"]["poetry"]["repository"]))
 project_ghrepo = project_dist
 
@@ -380,7 +380,7 @@ html_context = {
 # File-wide metadata.
 # (lb): I found this documented somewhere but it did not fix the
 # "Edit on GitHub" broken link.
-#   github_url = 'https://github.com/pydob/easy-as-pypi'
+#   github_url = 'https://github.com/doblabs/easy-as-pypi'
 
 # Add any paths that contain custom themes here, relative to this directory.
 #html_theme_path = []

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # vim:tw=0:ts=2:sw=2:et:norl:nospell
-# Project: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
 # USAGE: Copy the first function to a new file, customize it,
@@ -37,7 +37,7 @@ example_prepare_yourapp_boilerplate_envs () {
   # - 1st line: # This file exists within '${appname_train}':
   # - 3rd line: #   ${github_project}
   # - 5th line: # Copyright © ${header_copy_years} ${header_copy_names}. All rights reserved.
-  export header_projecturl="https://github.com/pydob/easy-as-pypi#🥧"
+  export header_projecturl="https://github.com/doblabs/easy-as-pypi#🥧"
   export header_copy_years="2020"
   export header_copy_names="Landon Bouma"
 
@@ -218,7 +218,7 @@ setup_source_string_matching () {
   # - 1st line: # This file exists within '${source_appname_train}':
   # - 3rd line: #   ${source_github_project}
   # - 5th line: # Copyright © ${source_author_copy_years} ${source_author_copy_names}. All rights reserved.
-  source_header_projecturl="https://github.com/pydob/easy-as-pypi#🥧"
+  source_header_projecturl="https://github.com/doblabs/easy-as-pypi#🥧"
   source_header_copy_years="2020"
   source_header_copy_names="Landon Bouma"
 

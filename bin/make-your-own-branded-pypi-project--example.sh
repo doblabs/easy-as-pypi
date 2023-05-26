@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # vim:tw=0:ts=2:sw=2:et:norl:nospell
-# Project: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

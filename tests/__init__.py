@@ -1,6 +1,6 @@
 # This file exists within 'easy-as-pypi':
 #
-#   https://github.com/pydob/easy-as-pypi#🥧
+#   https://github.com/doblabs/easy-as-pypi#🥧
 #
 # Copyright © 2020 Landon Bouma. All rights reserved.
 #

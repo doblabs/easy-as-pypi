@@ -1,6 +1,6 @@
 # vim:tw=0:ts=4:sw=4:et:norl
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
 # Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
@@ -10,8 +10,8 @@ name = "easy-as-pypi"
 version = "0.0.0"
 description = "Bootstrapping your next Python CLI made easy as PyPI"
 
-authors = ["Landon Bouma <pydob@tallybark.com>"]
-maintainers = ["Tally Bark LLC <pydob@tallybark.com>"]
+authors = ["Landon Bouma <doblabs@tallybark.com>"]
+maintainers = ["Tally Bark LLC <doblabs@tallybark.com>"]
 
 license = "MIT"
 readme = "README.rst"
@@ -21,8 +21,8 @@ readme = "README.rst"
 #
 #   packages = [{include = "the_package_name", from = "src"}]
 
-homepage = "https://github.com/pydob/easy-as-pypi"
-repository = "https://github.com/pydob/easy-as-pypi"
+homepage = "https://github.com/doblabs/easy-as-pypi"
+repository = "https://github.com/doblabs/easy-as-pypi"
 documentation = "https://easy-as-pypi.readthedocs.io/en/latest"
 
 # REFER: https://pypi.org/classifiers/

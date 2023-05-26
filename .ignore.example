@@ -1,6 +1,6 @@
 # vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=gitignore
-# Project: https://github.com/pydob/ <varies>
-# Pattern: https://github.com/pydob/easy-as-pypi#🥧
+# Project: https://github.com/doblabs/ <varies>
+# Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
 # USAGE: `/bin/cp .ignore.example .ignore` and personalize.

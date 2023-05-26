@@ -13,5 +13,5 @@ Human Maintainer
 ################
 
 - `Landon Bouma <https://github.com/landonb>`__
-  ``<tallybark+pydob -at- gmail.com>``
+  ``<tallybark+doblabs -at- gmail.com>``
 

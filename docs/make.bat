@@ -2,7 +2,7 @@
 
 REM This file exists within 'easy-as-pypi':
 REM
-REM   https://github.com/pydob/easy-as-pypi
+REM   https://github.com/doblabs/easy-as-pypi
 
 set PROJECTNAME=easy-as-pypi
 
