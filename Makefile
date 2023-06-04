@@ -37,6 +37,8 @@ VENV_PYVER ?= 3.11
 #   may need to fallback on system site-packages to find `gnucash`.
 #
 #     VENV_ARGS = --system-site-packages
+#
+# SAVVY: Rather than edit this file, edit Makefile.project.
 VENV_ARGS =
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -164,6 +166,13 @@ PYBROWSER := python -c "$$BROWSER_PYSCRIPT"
 MAKEFILE_LOCAL ?= Makefile.local
 
 -include $(MAKEFILE_LOCAL)
+
+# USAGE: Similar to Makefile.local, but for projects derived from the
+# EAPP boilerplate to add to their repos.
+
+MAKEFILE_PROJECT ?= Makefile.project
+
+-include $(MAKEFILE_PROJECT)
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
