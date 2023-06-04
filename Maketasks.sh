@@ -14,7 +14,7 @@ make_develop () {
 
   _pyenv_prepare_shell "${VENV_PYVER}"
 
-  # local venv_created=false
+  local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "${VENV_NAME}"
 
   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
@@ -31,7 +31,7 @@ make_doc8_pip () {
 
   _pyenv_prepare_shell "${VENV_PYVER}"
 
-  # local venv_created=false
+  # local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_DOC8}" "" "${VENV_NAME}"
 
   python -c "import doc8" 2> /dev/null \
@@ -56,7 +56,7 @@ make_doc8_poetry () {
 
   local VENV_DOC8=".venv"
 
-  # local venv_created=false
+  # local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_DOC8}" "" ""
 
   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
@@ -95,10 +95,10 @@ make_docs_html () {
 
   _pyenv_prepare_shell "${VENV_PYVER}"
 
-  local venv_created=false
+  local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_DOCS}" "" "${VENV_NAME}"
 
-  if ${venv_created} || ${VENV_FORCE:-false} ; then
+  if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
     _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
     poetry -C ${EDITABLE_DIR} install --with docs --extras readthedocs
@@ -293,7 +293,7 @@ _venv_manage_and_activate () {
   if [ ! -d "${venv_name}" ]; then
     python3 -m venv ${venv_args} "${venv_name}"
 
-    venv_created=true
+    VENV_CREATED=true
 
     if [ -d "${venv_default}" ]; then
       # So that bare `workon` picks the `make develop` virtualenv.
