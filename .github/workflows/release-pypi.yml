@@ -353,9 +353,9 @@ jobs:
       #            and application version are different.
       - name: Run it!
         run: |
-          echo "$PACKAGE_NAME version"
+          echo "Checking \$PACKAGE_NAME version » $VERSION"
+          echo "\$ $PACKAGE_NAME version"
           $PACKAGE_NAME version
-          echo "Expecting version: $VERSION"
         shell: bash
 
       - name: Check version
