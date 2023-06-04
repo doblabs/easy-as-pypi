@@ -17,6 +17,14 @@ make_develop () {
   local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "${VENV_NAME}"
 
+  if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
+    command rm -f ${EDITABLE_DIR}/poetry.lock
+
+    # MAYBE: Also move pip installs herein and skip if VENV_CREATED already?
+    #
+    #   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
+  fi
+
   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
   poetry -C ${EDITABLE_DIR} install --with dist,i18n,lint,test,docstyle,docs,extras
