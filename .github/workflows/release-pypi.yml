@@ -146,6 +146,11 @@ jobs:
       # - We instead use the pypa/ action (see next job), which uses
       #   a "trusted publisher" approach, where GitHub and PyPI manage
       #   the OIDC token(s) automatically.
+      # - Oddly, the `gh release download` works here without permissions,
+      #   e.g., without this:
+      #     permissions:
+      #       contents: write
+      #   unlike the next job, which needs those permissions to call it.
       #
       #     - name: Download release
       #       run: |
@@ -220,6 +225,12 @@ jobs:
 
     # CXREF: PyPI recommends using an environment ('release')
     #        to keep non-admin organization members from publishing.
+    # - BWARE: The environment configuration's branch protection rules
+    #   apply to tags, too, e.g.,
+    #     Branch "v1.1.0a2" is not allowed to deploy to release due to
+    #     environment protection rules.
+    #   So if you enable branch protection rules, add 'v*' rules for tags.
+    #
     # https://github.com/doblabs/easy-as-pypi/settings/environments
     # https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#using-an-environment
     # https://docs.pypi.org/trusted-publishers/using-a-publisher/
@@ -325,6 +336,21 @@ jobs:
           echo "pipx install $INDEX_URL $PACKAGE_NAME==$VERSION"
           pipx install $INDEX_URL $PACKAGE_NAME==$VERSION
 
+      # Note the poetry-dynamic-versioning works with non-SemVer versions
+      # but will make them SemVer-compliant, e.g., it'll change the alpha
+      # tag "v1.1.0a3" (non-Semver) to "1.1.0-a.3" (which is SemVer-okay).
+      # - On GH and PyPI it's still the original tag, because the
+      #   workflow uses the Git tag.
+      #   - E.g., given previous example,
+      #       pipx install easy-as-pypi==1.1.0a3
+      #     works, but `easy-as-pypi version` says:
+      #       easy-as-pypi version 1.1.0-a.3
+      # - FTREQ/2023-06-04: Validate version in `release-github.yml`:
+      #   - Run `poetry dynamic-versioning`.
+      #   - Parse Toml to confirm version.
+      #   - Cleanup with `git reset --hard HEAD`.
+      #   - UCASE: Prevent getting here and failing because PyPI version
+      #            and application version are different.
       - name: Run it!
         run: |
           echo "$PACKAGE_NAME version"
