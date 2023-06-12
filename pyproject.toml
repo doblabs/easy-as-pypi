@@ -853,7 +853,7 @@ click = "^8.0.0"
 #   (though also 12 days between installs).
 #
 # TRACK/2023-05-07: Keep tabs on cachecontrol; remove this kludge eventually.
-urllib3 = "<2"
+urllib3 = "<3"
 
 # For Readthedocs build process.
 tomli = { version = ">=2.0.1", optional = true }
