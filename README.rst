@@ -37,7 +37,7 @@ easy-as-pypi
 
 |
 
-One dev's boilerplate PyPI project.
+Boilerplate PyPI project.
 
 .. Install with ``pip``::
 ..
@@ -72,7 +72,7 @@ But most of the gold is buried within:
 
   - Localize user messages using ``Babel``.
 
-  - Setup and install to separate virtualenvs for various scenarios.
+  - Easily install to shared or isolated virtualenvs.
 
 - GitHub Actions linting, testing, and coverage upload.
 
@@ -80,7 +80,7 @@ Most of the files are designed to be hard linked from the derived
 projects themselves, as they won't need to be customized (such as
 ``Makefile``).
 
-- That way when the boilerplate changes, you can just commit the
+- Then when the boilerplate changes, you can just commit the
   changes in the derived project, call them "dependency updates"
   or something, and not have to worry about merging changes manually
   (and running ``meld`` or something).
