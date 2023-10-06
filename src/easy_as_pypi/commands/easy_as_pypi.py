@@ -36,6 +36,6 @@ def eat():
 @click.command()
 def version():
     """Print the package version."""
-    from .. import __package_name__, __version__
+    from .. import __package_name__, __version_probe__
 
-    click.echo(f"{__package_name__} version {__version__}")
+    click.echo(f"{__package_name__} version {__version_probe__()}")
