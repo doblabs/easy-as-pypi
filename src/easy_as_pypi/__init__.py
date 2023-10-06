@@ -47,7 +47,7 @@ __author_name__ = "Landon Bouma"
 __author_link__ = "https://tallybark.com"
 
 # (lb): Not sure if the package name is available at runtime. Seems kinda meta,
-# like, Who am I? Useful for calling get_distribution, or to avoid hardcoding
+# like, "Who am I?" Useful for calling get_distribution, or to avoid hardcoding
 # the package name in text generated for the UX.
 __package_name__ = "easy-as-pypi"
 __arg0name__ = os.path.basename(sys.argv[0])
