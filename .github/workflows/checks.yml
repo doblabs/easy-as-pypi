@@ -44,6 +44,68 @@ env:
 
 jobs:
 
+  # *** RUN GITHUB RELEASE WORKFLOW AFTER CHECKS PASS IF VERSION-TAG PUSHED
+
+  # These three jobs are used to wait for checks to pass, and to run the
+  # GH release workflow if the checks event was caused by a version tag.
+  #
+  # We do it this way because it's the simplest approach. This way, the GH
+  # release workflow doesn't have to verify checks passed, or to wait for
+  # checks to complete. It'll know by virtue of it running (because we
+  # invoked it) that checks have passed, and that it's all good to release.
+
+  release-gh-await:
+    runs-on: ubuntu-latest
+    needs:
+      - test
+      - black
+      - flake8
+      - isort
+      - doc8-pip
+      - doc8-poetry
+      - docs
+      - twine-check
+      - poetry-check
+      - pydocstyle
+      - coverage
+      - yamllint
+    # Not necessary to check success, e.g.,
+    #   if: needs.test.result == 'success' && ...
+    # This job is skipped if any of its 'needs' failed.
+    steps:
+      # No-op.
+      - run: true
+
+  release-gh-check-ref:
+    runs-on: ubuntu-latest
+    needs: release-gh-await
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Test event type and ref
+        id: check-is-version-tag
+        run: |
+          if [[ \
+            ${{ github.event.ref }} =~ ^refs/tags/v?[0-9]+\.[0-9]+\.[0-9]+.*$ \
+          ]]; then
+              echo "is_version_tag=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_REF_TYPE: ${{ github.ref_type }}
+      - name: Report detected maybe
+        if: steps.check-is-version-tag.outputs.is_version_tag == 'true'
+        run: echo "Version tag detected"
+    outputs:
+      is_version_tag: ${{ steps.check-is-version-tag.outputs.is_version_tag }}
+
+  release-gh-runner:
+    needs: release-gh-check-ref
+    if: needs.release-gh-check-ref.outputs.is_version_tag == 'true'
+    uses: ./.github/workflows/release-github.yml
+    secrets: inherit
+    with:
+      version_tag: ${{ github.ref_name }}
+
   # *** TEST
 
   test:
