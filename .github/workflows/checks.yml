@@ -8,46 +8,14 @@
 
 # USYNC: The jobs below should include most of the same jobs as the
 #        Makefile 'lint' recipe and the tox.ini 'labels' setting.
-# - Obviously, skip `black` (unless you wanted to wire a job that runs
-#   `black` and checks for file changes, but `flake8` should be sufficient).
-# - Also skip 'linkcheck', which generally fails before docs are published.
-#   Sorta a chicken before the egg.
+#        - Except skip 'linkcheck', which usually fails before
+#          docs are published. Chicken before the egg.
 
 name: Run checks
 
-# Run on all push and pull_request events.
-# - Note that we could restrict to specific branches, e.g.,
-#
-#   on:
-#     push:
-#       branches: ['**']
-#     pull_request:
 
 on:
   - push
-
-  # Note we skip 'pull_request', which I think is redundant — although
-  # I see plenty of other projects that run checks on both 'push' and
-  # on 'pull_request'.
-  # - But AFAIK, this is just duplicate work: A pull request will always
-  #   run checks against a SHA that was previously pushed, and therefore
-  #   previously checked. (Or do I understand the situation incorrectly?)
-  # - On the other hand, there may be instances where not checking on
-  #   'pull_request' breaks another workflow. E.g., a workflow that does
-  #   something after a pull_request check passes:
-  #     on:
-  #       workflow_run:
-  #         workflows: ["Run checks"]
-  #         types:
-  #           - completed
-  #     jobs:
-  #       example:
-  #         runs-on: ubuntu-latest
-  #         if: >
-  #           github.event.workflow_run.event == 'pull_request'
-  #           && github.event.workflow_run.conclusion == 'success'
-  #
-  #  - pull_request
 
 # Cancel active pull_request workflow runs for the same branch.
 # - As inspired by Vim's .github/workflows/ci.yaml.
