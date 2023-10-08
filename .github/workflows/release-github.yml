@@ -34,7 +34,7 @@ jobs:
         # Note that checks.yml only calls this workflow with version tags,
         # so this check is unnecessary (always true).
         run: |
-          if [[ ${VERSION_TAG} =~ ^v[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
+          if [[ ${VERSION_TAG} =~ ^v?[0-9]+\.[0-9]+\.[0-9]+.*$ ]]; then
             echo "is_version_tag=true" >> $GITHUB_OUTPUT
           fi
         env:
@@ -71,8 +71,9 @@ jobs:
         shell: bash
 
       - name: Check if prerelease
+        # Note the v?: Don't care!
         run: |
-          echo "$VERSION_TAG" | grep -q -E -e "^v[0-9]+\.[0-9]+\.[0-9]+$" \
+          echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
             || echo "PRERELEASE=--prerelease" >> "$GITHUB_ENV"
 
       - name: Announcement
