@@ -110,10 +110,28 @@ jobs:
 
       - name: Set pipx index URL
         run: |
+          test_pypi_url="https://test.pypi.org/simple"
+          # REFER: https://packaging.python.org/en/latest/guides/using-testpypi/
+          # "To allow pip to also download packages from PyPI, point --extra-index-url
+          #  to PyPI. Useful when the package you’re testing has dependencies."
+          # BWARE: Spaces in --pip-args will work locally, but on GHA, even
+          #        using quotes, pipx will die on args complaint.
+          #        - So use '=' to keep --pip-args a single word.
+          extra_index_arg="--extra-index-url=https://pypi.org/simple/"
+          # SPIKE: Determine if we really need --extra-index-url or not.
+          #  extra_index_arg=""
+          #
           [ -z "${PRERELEASE}" ] \
-            && index_url="" \
-            || index_url="--index-url https://test.pypi.org/simple"
-          echo "INDEX_URL=$index_url" >> "$GITHUB_ENV"
+            && index_url_pip="" \
+            || index_url_pip="--index-url ${test_pypi_url} ${extra_index_arg}"
+          echo "INDEX_PIP=$index_url_pip" >> "$GITHUB_ENV"
+          #
+          # yamllint disable-line rule:line-length
+          [ -z "${PRERELEASE}" ] \
+            && index_url_pipx="" \
+            || index_url_pipx="\
+                 --index-url ${test_pypi_url} --pip-args=${extra_index_arg}"
+          echo INDEX_PIPX=$index_url_pipx >> "$GITHUB_ENV"
         shell: bash
 
       - name: Announcement
@@ -130,10 +148,16 @@ jobs:
         run: echo "PACKAGE_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
         shell: bash
 
+      # # Local, and GHA: 1.2.0.
+      # - name: pipx --version
+      #   run: pipx --version
+      #   shell: bash
+
+      # On GHA: pipx: error: unrecognized arguments: easy-as-pypi==1.1.1a20
       - name: Check if previously released
         run: |
-          echo "pipx install $INDEX_URL $PACKAGE_NAME==$VERSION"
-          ! pipx install $INDEX_URL $PACKAGE_NAME==$VERSION \
+          echo "pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION"
+          ! pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION \
             || echo "IS_RELEASED=true" >> "$GITHUB_ENV"
         shell: bash
 
@@ -197,7 +221,8 @@ jobs:
       - name: Store variables for next job
         id: set_outputs
         run: |
-          echo "INDEX_URL=$INDEX_URL" >> "$GITHUB_OUTPUT"
+          echo "INDEX_PIP=$INDEX_PIP" >> "$GITHUB_OUTPUT"
+          echo "INDEX_PIPX=$INDEX_PIPX" >> "$GITHUB_OUTPUT"
           echo "IS_RELEASED=$IS_RELEASED" >> "$GITHUB_OUTPUT"
           echo "PACKAGE_NAME=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
           echo "PRERELEASE=$PRERELEASE" >> "$GITHUB_OUTPUT"
@@ -205,7 +230,8 @@ jobs:
           echo "VERSION_TAG=$VERSION_TAG" >> "$GITHUB_OUTPUT"
 
     outputs:
-      INDEX_URL: ${{ steps.set_outputs.outputs.INDEX_URL }}
+      INDEX_PIP: ${{ steps.set_outputs.outputs.INDEX_PIP }}
+      INDEX_PIPX: ${{ steps.set_outputs.outputs.INDEX_PIPX }}
       IS_RELEASED: ${{ steps.set_outputs.outputs.IS_RELEASED }}
       PACKAGE_NAME: ${{ steps.set_outputs.outputs.PACKAGE_NAME }}
       PRERELEASE: ${{ steps.set_outputs.outputs.PRERELEASE }}
