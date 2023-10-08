@@ -324,14 +324,17 @@ jobs:
       INDEX_URL: ${{ needs.prepare-publish.outputs.INDEX_URL }}
       PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
       VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
+      IS_RELEASED: ${{ needs.prepare-publish.outputs.IS_RELEASED }}
 
     steps:
       # Wait for PyPI.
       # - You'll see the new release on the web interface pretty much
       #   immediately, but it takes a bit for pip to find it.
-      - name: Sleep for 15 seconds
-        run: sleep 15s
+      # - 2023-10-08: Too short: 15s, 30s, 45s.
+      - name: Sleep for 60 seconds
+        run: sleep 60s
         shell: bash
+        if: env.IS_RELEASED == ''
 
       - name: Install package
         run: |
