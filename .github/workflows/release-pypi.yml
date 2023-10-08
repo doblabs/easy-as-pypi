@@ -139,7 +139,7 @@ jobs:
           gh release view $VERSION_TAG
         env:
           GH_TOKEN: ${{ github.token }}
-        if: env.IS_RELEASED == ''
+        if: env.IS_RELEASED == 'true'
 
       # Here's how you might publish using Poetry, but this approach
       # requires a PyPI token.
@@ -222,6 +222,7 @@ jobs:
     # - Unfortunately, pypa/gh-action-pypi-publish@release/v1 still builds
     #   its image, even when its step(s) skipped, which takes a few moments.
     if: needs.prepare-publish.result == 'success'
+      && needs.prepare-publish.outputs.IS_RELEASED == ''
 
     # CXREF: PyPI recommends using an environment ('release')
     #        to keep non-admin organization members from publishing.
@@ -249,14 +250,12 @@ jobs:
       id-token: write
 
     env:
-      IS_RELEASED: ${{ needs.prepare-publish.outputs.IS_RELEASED }}
       PRERELEASE: ${{ needs.prepare-publish.outputs.PRERELEASE }}
       VERSION_TAG: ${{ needs.prepare-publish.outputs.VERSION_TAG }}
 
     steps:
       - name: Checkout repository (for gh)
         uses: actions/checkout@v3
-        if: env.IS_RELEASED == ''
 
       # Note that `gh status` does not work here, prints error:
       #   could not load notifications: could not get notifications:
@@ -281,11 +280,9 @@ jobs:
           gh release download $VERSION_TAG -D dist/
         env:
           GH_TOKEN: ${{ github.token }}
-        if: env.IS_RELEASED == ''
 
       - name: Inspect dist/
         run: echo && echo dist/ && ls -la dist/
-        if: env.IS_RELEASED == ''
 
       # https://github.com/marketplace/actions/pypi-publish
       # https://docs.pypi.org/trusted-publishers/using-a-publisher/
@@ -294,11 +291,11 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-        if: env.IS_RELEASED == '' && env.PRERELEASE != ''
+        if: env.PRERELEASE != ''
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        if: env.IS_RELEASED == '' && env.PRERELEASE == ''
+        if: env.PRERELEASE == ''
 
   # ***
 
@@ -309,8 +306,19 @@ jobs:
 
     needs: [prepare-publish, poetry-publish]
 
-    if: needs.prepare-publish.result == 'success'
-     && needs.poetry-publish.result == 'success'
+    # Note the 'if' is skipped if any needs were skipped, unless always.
+    if: always()
+      && needs.prepare-publish.result == 'success'
+      && (needs.poetry-publish.result == 'success'
+          || (needs.poetry-publish.result == 'skipped'
+              && needs.prepare-publish.outputs.IS_RELEASED == 'true'
+             )
+         )
+    # Alternatively, run if all needs 'success' or 'skipped':
+    #   if: |
+    #     always()
+    #     && !contains(needs.*.result, 'failure')
+    #     && !contains(needs.*.result, 'cancelled')
 
     env:
       INDEX_URL: ${{ needs.prepare-publish.outputs.INDEX_URL }}
@@ -363,6 +371,9 @@ jobs:
         shell: bash
 
       # ***
+
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
