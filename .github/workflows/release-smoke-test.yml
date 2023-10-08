@@ -1,0 +1,173 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+# USYNC: 'PyPI Release Smoke test'
+name: PyPI Release Smoke test
+
+on:
+  workflow_dispatch:
+    inputs:
+      INDEX_PIP:
+        required: false
+        type: string
+      INDEX_PIPX:
+        required: false
+        type: string
+      PACKAGE_NAME:
+        required: true
+        type: string
+      VERSION:
+        required: true
+        type: string
+
+run-name: 🎒 — Smoke test — ${{ inputs.VERSION }}
+
+env:
+  # Lest: "The `python-version` input is not set. The version
+  #        of Python currently in `PATH` will be used." and
+  #       "Cache paths are empty. Please check the previous
+  #        logs and make sure that the python version is specified"
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  # BWARE: Trailing zeroes disappear unless quoted.
+  PYTHON_VERSION: "3.11"
+
+jobs:
+
+  blather:
+    name: Blather
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump github.event
+        run: echo "${GITHUB_EVENT}"
+        shell: bash
+        env:
+          GITHUB_EVENT: ${{ toJson(github.event) }}
+
+  pip-smoke-test:
+    name: pip Smoke test PyPI release
+
+    runs-on: ubuntu-latest
+
+    env:
+      INDEX_PIP: ${{ inputs.INDEX_PIP }}
+      PACKAGE_NAME: ${{ inputs.PACKAGE_NAME }}
+      VERSION: ${{ inputs.VERSION }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # FIXME/2023-10-08 21:32: Reeanbling cache...
+          cache: 'pip'
+
+      # ***
+
+      # DUNNO: pip-install sometimes won't find the version
+      # (even if a previous workflow or job ran the exact
+      # same pip-install command and found success, bizarre).
+      # - So we'll retry a few times until universe settles.
+
+      # REFER: https://github.com/nick-fields/retry
+      - name: Install package
+        uses: nick-fields/retry@v2
+        with:
+          retry_on: error
+          max_attempts: 5
+          retry_wait_seconds: 5
+          # Timeout shouldn't matter, but it's required.
+          #  timeout_minutes: 10
+          timeout_seconds: 60
+          command: |
+            echo "pip install $INDEX_PIP $PACKAGE_NAME==$VERSION"
+            pip install $INDEX_PIP $PACKAGE_NAME==$VERSION
+
+      - name: Infer module name
+        run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
+        shell: bash
+
+      - name: Load it!
+        run: |
+          python -c "import $MODULE_NAME; print($MODULE_NAME.__version__)"
+        shell: bash
+
+  pipx-smoke-test:
+    name: pipx Smoke test PyPI release
+
+    runs-on: ubuntu-latest
+
+    env:
+      INDEX_PIPX: ${{ inputs.INDEX_PIPX }}
+      PACKAGE_NAME: ${{ inputs.PACKAGE_NAME }}
+      VERSION: ${{ inputs.VERSION }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          # FIXME/2023-10-08 21:32: Reeanbling cache...
+          cache: 'pip'
+
+      # ***
+
+      # See comment above: The first one or few pipx-install don't
+      # always find the version.
+      # - 2023-10-08: So far I've only ever seen one retry needed,
+      #   and that included a time when pip-install ran immediately,
+      #   then pipx-install had to be run twice.
+
+      - name: Install package
+        uses: nick-fields/retry@v2
+        with:
+          retry_on: error
+          max_attempts: 5
+          retry_wait_seconds: 5
+          timeout_seconds: 60
+          command: |
+            echo "pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION"
+            pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION
+
+      # Note the poetry-dynamic-versioning works with non-SemVer versions
+      # but will make them SemVer-compliant, e.g., it'll change the alpha
+      # tag "v1.1.0a3" (non-Semver) to "1.1.0-a.3" (which is SemVer-okay).
+      # - On GH and PyPI it's still the original tag, because the
+      #   workflow uses the Git tag.
+      #   - E.g., given previous example,
+      #       pipx install easy-as-pypi==1.1.0a3
+      #     works, but `easy-as-pypi version` says:
+      #       easy-as-pypi version 1.1.0-a.3
+      # - FTREQ/2023-06-04: Validate version in `release-github.yml`:
+      #   - Run `poetry dynamic-versioning`.
+      #   - Parse Toml to confirm version.
+      #   - Cleanup with `git reset --hard HEAD`.
+      #   - UCASE: Prevent getting here and failing because PyPI version
+      #            and application version are different.
+      - name: Run it!
+        run: |
+          echo "Checking \$PACKAGE_NAME version » $VERSION"
+          # FIXME/2023-10-01 14:00: This echo probably unnecessary.
+          echo "\$ $PACKAGE_NAME version"
+          $PACKAGE_NAME version
+        shell: bash
+
+      - name: Check version
+        run: |
+          [ "$($PACKAGE_NAME version)" = "$PACKAGE_NAME version $VERSION" ] \
+            || exit 1
+        shell: bash
+
+# ***
