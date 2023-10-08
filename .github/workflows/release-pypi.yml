@@ -44,7 +44,9 @@ on:
   workflow_dispatch:
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
-run-name: Release on PyPI — ${{ github.ref_name }}
+#  Release on PyPI — ${{ github.ref_name }}
+# run-name: 🚀 — 🥧² — ${{ github.ref_name }}
+run-name: 🥧² — PyPI — ${{ github.ref_name }}
 
 env:
   # USYNC: https://github.com/actions/python-versions/releases
