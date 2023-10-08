@@ -127,7 +127,7 @@ build-backend = "poetry_dynamic_versioning.backend"
 enable = true
 pattern = "default-unprefixed"
 vcs = "git"
-style = "semver"
+# Leave style = "pep440", not "semver", to maybe PyPI normalization.
 tag-branch = "release"
 
 [tool.poetry-dynamic-versioning.substitution]
