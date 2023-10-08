@@ -1,0 +1,21 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+# yamllint disable rule:line-length
+
+---
+
+name: Run branch or unspecial tag checks
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - "!v?[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+  branch-checks-runner:
+    uses: ./.github/workflows/checks.yml
+    secrets: inherit

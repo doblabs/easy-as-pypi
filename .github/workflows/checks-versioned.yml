@@ -1,0 +1,51 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+# yamllint disable rule:line-length
+
+---
+
+name: Run version tag checks and publish GitHub release
+
+on:
+  push:
+    tags:
+      - "v?[0-9]+.[0-9]+.[0-9]+*"
+
+jobs:
+  versioned-checks-runner:
+    uses: ./.github/workflows/checks.yml
+    secrets: inherit
+
+  # Now that version tag push handled by dedicated workflow,
+  # this check will always be true.
+  check-is-version-tag:
+    runs-on: ubuntu-latest
+    needs: versioned-checks-runner
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Test event type and ref is proper version tag
+        id: check-is-version-tag
+        run: |
+          if [[ \
+            ${{ github.event.ref }} =~ ^refs/tags/v?[0-9]+\.[0-9]+\.[0-9]+.*$ \
+          ]]; then
+              echo "is_version_tag=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_REF_TYPE: ${{ github.ref_type }}
+      - name: Report detected maybe
+        if: steps.check-is-version-tag.outputs.is_version_tag == 'true'
+        run: echo "Version tag detected"
+    outputs:
+      is_version_tag: ${{ steps.check-is-version-tag.outputs.is_version_tag }}
+
+  release-gh-runner:
+    needs: check-is-version-tag
+    if: needs.check-is-version-tag.outputs.is_version_tag == 'true'
+    uses: ./.github/workflows/release-github.yml
+    secrets: inherit
+    with:
+      version_tag: ${{ github.ref_name }}
