@@ -382,7 +382,7 @@ jobs:
           cache: 'pip'
 
       - name: Install package
-        run: pip install $PACKAGE_NAME
+        run: pip install $INDEX_URL $PACKAGE_NAME==$VERSION
 
       - name: Infer module name
         run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
