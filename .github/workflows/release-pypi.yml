@@ -126,9 +126,12 @@ jobs:
           # BWARE: Spaces in --pip-args will work locally, but on GHA, even
           #        using quotes, pipx will die on args complaint.
           #        - So use '=' to keep --pip-args a single word.
-          extra_index_arg="--extra-index-url=https://pypi.org/simple/"
+          # extra_index_arg="--extra-index-url=https://pypi.org/simple/"
           # SPIKE: Determine if we really need --extra-index-url or not.
-          #  extra_index_arg=""
+          extra_index_arg=""
+          [ -z "${extra_index_arg}" ] \
+            && pipx_pip_args="" \
+            || pipx_pip_args="--pip-args=${extra_index_arg}"
           #
           [ -z "${PRERELEASE}" ] \
             && index_url_pip="" \
@@ -139,7 +142,7 @@ jobs:
           [ -z "${PRERELEASE}" ] \
             && index_url_pipx="" \
             || index_url_pipx="\
-                 --index-url ${test_pypi_url} --pip-args=${extra_index_arg}"
+                 --index-url ${test_pypi_url} ${pipx_pip_args}"
           echo INDEX_PIPX=$index_url_pipx >> "$GITHUB_ENV"
         shell: bash
 
@@ -339,8 +342,8 @@ jobs:
 
   # ***
 
-  smoke-test:
-    name: Smoke test PyPI release
+  sleep-before-smoking:
+    name: Wait for release to propagate...
 
     runs-on: ubuntu-latest
 
@@ -354,83 +357,110 @@ jobs:
               && needs.prepare-publish.outputs.IS_RELEASED == 'true'
              )
          )
-    # Alternatively, run if all needs 'success' or 'skipped':
-    #   if: |
-    #     always()
-    #     && !contains(needs.*.result, 'failure')
-    #     && !contains(needs.*.result, 'cancelled')
-
-    env:
-      INDEX_URL: ${{ needs.prepare-publish.outputs.INDEX_URL }}
-      PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
-      VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
-      IS_RELEASED: ${{ needs.prepare-publish.outputs.IS_RELEASED }}
-
     steps:
       # Wait for PyPI.
       # - You'll see the new release on the web interface pretty much
-      #   immediately, but it takes a bit for pip to find it.
-      # - 2023-10-08: Too short: 15s, 30s, 45s, 60s.
-      - name: Sleep for 300 seconds
-        run: sleep 300
+      #   immediately, but it takes a bit for pip to find it (~12 sec).
+      # - SAVVY/2023-10-08: Huh, 17s not always enough?
+      - name: Sleep for 13 seconds
+        run: sleep 13s
         shell: bash
-        if: github.event_name == 'release' && env.IS_RELEASED == ''
+        if: needs.prepare-publish.outputs.IS_RELEASED == ''
 
-      - name: Install package
-        run: |
-          echo "pipx install $INDEX_URL $PACKAGE_NAME==$VERSION"
-          pipx install $INDEX_URL $PACKAGE_NAME==$VERSION
+  # ***
 
-      # Note the poetry-dynamic-versioning works with non-SemVer versions
-      # but will make them SemVer-compliant, e.g., it'll change the alpha
-      # tag "v1.1.0a3" (non-Semver) to "1.1.0-a.3" (which is SemVer-okay).
-      # - On GH and PyPI it's still the original tag, because the
-      #   workflow uses the Git tag.
-      #   - E.g., given previous example,
-      #       pipx install easy-as-pypi==1.1.0a3
-      #     works, but `easy-as-pypi version` says:
-      #       easy-as-pypi version 1.1.0-a.3
-      # - FTREQ/2023-06-04: Validate version in `release-github.yml`:
-      #   - Run `poetry dynamic-versioning`.
-      #   - Parse Toml to confirm version.
-      #   - Cleanup with `git reset --hard HEAD`.
-      #   - UCASE: Prevent getting here and failing because PyPI version
-      #            and application version are different.
-      - name: Run it!
-        run: |
-          echo "Checking \$PACKAGE_NAME version » $VERSION"
-          echo "\$ $PACKAGE_NAME version"
-          $PACKAGE_NAME version
+  # This is a kludge — and while not as rare as a 29 in cribbage, it's
+  # not everyday you get to craft a kludge.
+  #
+  # - The smoke-test code was originally here, or at least it was
+  #   meant to be here.
+  #
+  #   But no matter how long the sleep (and you need to sleep > ~12 sec.
+  #   after publishing to PyPI before you can pip-install a new version),
+  #   be it 15, 30, 60, or 300 secs., `pip(x) install` would always fail,
+  #   complaining "Could not find a version that satisfies...."
+  #
+  #   - Here's the kludge: Run the workflow again, but in a fresh context.
+  #
+  #     - Note that merely making a 'uses' job doesn't work, as reusable
+  #       workflows run within the same context as the caller.
+  #
+  #     - Note, too, there might be a way to get around this within the
+  #       same workflow. (I tried `pip cache remove $PACKAGE_NAME`,
+  #       which removes nothing, because no wheels files downloaded,
+  #       not surprising, but worth a shot.)
+
+  # - DUNNO/2023-10-08: I ran this workflow manually, and pipx-install
+  #   installed the version. But then in the new workflow, pipx-install
+  #   failed (on the exact same command). I re-ran the workflow, and then
+  #   it worked.
+  #   - Is this a race condition? Do we need to sleep longer?
+  #     Is GHA recycling (Python) environments and doing this?
+
+  smoke-test-runner:
+    runs-on: ubuntu-latest
+
+    needs: [prepare-publish, poetry-publish, sleep-before-smoking]
+
+    # Run if all needs 'success' or 'skipped'.
+    if: |
+      always()
+      && !contains(needs.*.result, 'failure')
+      && !contains(needs.*.result, 'cancelled')
+
+    steps:
+      - name: Dump github object
+        run: echo "${GITHUB_OBJ}"
         shell: bash
+        env:
+          GITHUB_OBJ: ${{ toJson(github) }}
 
-      - name: Check version
-        run: |
-          [ "$($PACKAGE_NAME version)" = "$PACKAGE_NAME version $VERSION" ] \
-            || exit 1
-        shell: bash
-
-      # ***
-
-      - name: Checkout repository
+      - name: Checkout repository (not workflow_dispatch)
         uses: actions/checkout@v3
 
-      - name: Set up Python ${{ env.PYTHON_VERSION }}
-        id: setup-python
-        uses: actions/setup-python@v4
-        with:
-          python-version: ${{ env.PYTHON_VERSION }}
-          cache: 'pip'
+      # # REFER: https://cli.github.com/manual/gh_workflow_run
+      # - name: Re-run this workflow...
+      #   # See also workflow ID
+      #   run: |
+      #     echo "gh workflow run 'Publish release to PyPI'"
+      #     gh workflow run 'Publish release to PyPI'
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-      - name: Install package
-        run: pip install $INDEX_URL $PACKAGE_NAME==$VERSION
-
-      - name: Infer module name
-        run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
-        shell: bash
-
-      - name: Load it!
+      # REFER: https://cli.github.com/manual/gh_workflow_run
+      - name: Run external smoke-test workflow
         run: |
-          python -c "import $MODULE_NAME; print($MODULE_NAME.__version__)"
-        shell: bash
+          # USYNC: 'PyPI Release Smoke test'
+          #
+          echo "gh workflow run 'PyPI Release Smoke test'"
+          gh workflow run 'PyPI Release Smoke test' \
+            -f "INDEX_PIP=${INDEX_PIP}" \
+            -f "INDEX_PIPX=${INDEX_PIPX}" \
+            -f "PACKAGE_NAME=${PACKAGE_NAME}" \
+            -f "VERSION=${VERSION}"
+          #
+          # echo "... | gh workflow run release-smoke-test.yml --json"
+          # # Doesn't like double-quotes outside, singles inside:
+          # echo "{
+          #   'INDEX_PIP': '${INDEX_PIP}',
+          #   'INDEX_PIPX': '${INDEX_PIPX}',
+          #   'PACKAGE_NAME': '${PACKAGE_NAME}',
+          #   'VERSION': '${VERSION}'
+          # }" | gh workflow run release-smoke-test.yml --json
+          # #   could not parse provided JSON:
+          # #   invalid character '\'' looking for beginning of object key string
+          # # - But then, what \" escape all the keys and values? Ugh.
+          # echo '{
+          #   \"INDEX_PIP\": \"${INDEX_PIP}\",
+          #   \"INDEX_PIPX\": \"${INDEX_PIPX}\",
+          #   \"PACKAGE_NAME\": \"${PACKAGE_NAME}\",
+          #   \"VERSION\": \"${VERSION}\"
+          # }' | gh workflow run release-smoke-test.yml --json
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INDEX_PIP: ${{ needs.prepare-publish.outputs.INDEX_PIP }}
+          INDEX_PIPX: ${{ needs.prepare-publish.outputs.INDEX_PIPX }}
+          PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
+          VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
 
 # ***
