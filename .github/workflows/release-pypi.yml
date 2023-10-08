@@ -43,6 +43,9 @@ on:
 
   workflow_dispatch:
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
+run-name: Release on PyPI — ${{ github.ref_name }}
+
 env:
   # USYNC: https://github.com/actions/python-versions/releases
   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
