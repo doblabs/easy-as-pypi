@@ -15,6 +15,14 @@ on:
     tags:
       - "!v?[0-9]+.[0-9]+.[0-9]+*"
 
+# Cancel active workflow runs for the same ref type and ref.
+# - As inspired by Vim's .github/workflows/ci.yaml.
+concurrency:
+  # E.g., on push, "checks-unspecial-784d511ea5a454ab2b5523dfc39d8e8db01aa32b".
+  # - Note: For github.event_name = pull_request, use github.head_ref, not sha.
+  group: ${{ github.workflow }}-${{ github.sha }}
+  cancel-in-progress: true
+
 jobs:
   branch-checks-runner:
     uses: ./.github/workflows/checks.yml

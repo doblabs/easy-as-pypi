@@ -13,6 +13,13 @@ on:
     tags:
       - "v?[0-9]+.[0-9]+.[0-9]+*"
 
+# In the unlikely event user removed a release tag and reapplied it,
+# kill outstanding jobs from previous workflow on same version (ref).
+concurrency:
+  # E.g., on push, "checks-versioned-refs/tags/1.1.1a1".
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   versioned-checks-runner:
     uses: ./.github/workflows/checks.yml

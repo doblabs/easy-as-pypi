@@ -16,15 +16,6 @@ name: Run checks
 on:
   workflow_call:
 
-# Cancel active pull_request workflow runs for the same branch.
-# - As inspired by Vim's .github/workflows/ci.yaml.
-concurrency:
-  # The concurrency group contains the workflow name and the branch name for
-  # pull requests or the commit hash for any other events.
-  # - E.g., on push, "checks-784d511ea5a454ab2b5523dfc39d8e8db01aa32b".
-  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.head_ref || github.sha }}
-  cancel-in-progress: true
-
 env:
   # USYNC: https://github.com/actions/python-versions/releases
   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
