@@ -66,13 +66,6 @@ jobs:
       contents: 'write'
 
     steps:
-
-      - name: Dump github
-        run: echo "${GITHUB_CXT}"
-        shell: bash
-        env:
-          GITHUB_CXT: ${{ toJson(github) }}
-
       - name: Probe version
         run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
         shell: bash
