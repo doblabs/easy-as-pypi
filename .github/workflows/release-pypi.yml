@@ -334,7 +334,7 @@ jobs:
       - name: Sleep for 60 seconds
         run: sleep 60s
         shell: bash
-        if: env.IS_RELEASED == ''
+        if: github.event_name == 'release' && env.IS_RELEASED == ''
 
       - name: Install package
         run: |
