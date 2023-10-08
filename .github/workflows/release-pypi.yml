@@ -361,9 +361,9 @@ jobs:
       # Wait for PyPI.
       # - You'll see the new release on the web interface pretty much
       #   immediately, but it takes a bit for pip to find it.
-      # - 2023-10-08: Too short: 15s, 30s, 45s.
-      - name: Sleep for 60 seconds
-        run: sleep 60s
+      # - 2023-10-08: Too short: 15s, 30s, 45s, 60s.
+      - name: Sleep for 300 seconds
+        run: sleep 300
         shell: bash
         if: github.event_name == 'release' && env.IS_RELEASED == ''
 
