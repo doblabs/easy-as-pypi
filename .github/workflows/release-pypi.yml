@@ -326,16 +326,12 @@ jobs:
       VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
 
     steps:
-      # Historically, if you publish a release from your terminal and then
-      # try to install the package, it won't be available for a few seconds.
-      # - That shouldn't happen here because it's a been a number of seconds
-      #   since the PyPI update (it takes a fews seconds to start this new
-      #   job). But if did happen, we could probably simply just sleep, e.g.:
-      #
-      #   # Wait for PyPI to get package ready.
-      #   - name: Sleep for 5 seconds
-      #     run: sleep 5s
-      #     shell: bash
+      # Wait for PyPI.
+      # - You'll see the new release on the web interface pretty much
+      #   immediately, but it takes a bit for pip to find it.
+      - name: Sleep for 15 seconds
+        run: sleep 15s
+        shell: bash
 
       - name: Install package
         run: |
