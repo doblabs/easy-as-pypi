@@ -5,8 +5,8 @@ easy-as-pypi
 .. CXREF:
    https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/adding-a-workflow-status-badge
 
-.. image:: https://github.com/doblabs/easy-as-pypi/actions/workflows/checks.yaml/badge.svg?branch=release
-  :target: https://github.com/doblabs/easy-as-pypi/actions/workflows/checks.yaml/badge.svg?branch=release
+.. image:: https://github.com/doblabs/easy-as-pypi/actions/workflows/checks-unspecial.yml/badge.svg?branch=release
+  :target: https://github.com/doblabs/easy-as-pypi/actions/workflows/checks-unspecial.yml/badge.svg?branch=release
   :alt: Build Status
 
 .. CXREF: https://app.codecov.io/github.com/doblabs/easy-as-pypi/settings/badge
