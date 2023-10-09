@@ -3,6 +3,11 @@
 # Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
+# CXREF:
+#
+#   https://pypi.org/project/easy-as-pypi/
+#   https://test.pypi.org/project/easy-as-pypi/
+
 ---
 
 # USYNC: release-pypi.yml name ↔ run-reversioning.yml on-workflow_run.
