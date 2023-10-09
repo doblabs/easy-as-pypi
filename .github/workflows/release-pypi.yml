@@ -98,6 +98,15 @@ jobs:
         run: exit 1
         if: env.VERSION_TAG == ''
 
+      # Double-check tag is version-formatted, esp. if 'workflow_dispatch'
+      # (which got whatever was tagged on HEAD).
+      - name: Verify version
+        run: |
+          echo "${VERSION_TAG}" | grep -q -E -v "^v?[0-9]+\.[0-9]+\.[0-9]+.*$" \
+            && echo "ERROR: Not a version tag: ${VERSION_TAG}" \
+            && exit 1 \
+            || true
+
       - name: Check if prerelease
         run: |
           echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
