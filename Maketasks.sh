@@ -18,7 +18,7 @@ make_develop () {
   _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "${VENV_NAME}"
 
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
-    command rm -f ${EDITABLE_DIR}/poetry.lock
+    command rm ${EDITABLE_DIR}/poetry.lock
 
     # MAYBE: Also move pip installs herein and skip if VENV_CREATED already?
     #
