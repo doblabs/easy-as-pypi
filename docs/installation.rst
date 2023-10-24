@@ -19,7 +19,7 @@ To install user-local, simply run::
 To install within a |virtualenv|_, try::
 
     $ mkvirtualenv easy-as-pypi
-    (easy-as-pypi) $ pip install release-ghub-pypi
+    (easy-as-pypi) $ pip install easy-as-pypi
 
 To develop on the project, link to the source files instead::
 
