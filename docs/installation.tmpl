@@ -1,0 +1,46 @@
+############
+Installation
+############
+
+.. vim:tw=0:ts=3:sw=3:et:norl:nospell:ft=rst
+
+.. |virtualenv| replace:: ``virtualenv``
+.. _virtualenv: https://virtualenv.pypa.io/en/latest/
+
+.. |workon| replace:: ``workon``
+.. _workon: https://virtualenvwrapper.readthedocs.io/en/latest/command_ref.html?highlight=workon#workon
+
+To install system-wide, run as superuser::
+
+    $ pip3 install {{ project.name }}
+
+To install user-local, simply run::
+
+    $ pip3 install -U {{ project.name }}
+
+To install within a |virtualenv|_, try::
+
+    $ cd "$(mktemp -d)"
+
+    $ python3 -m venv .venv
+
+    $ . ./.venv/bin/activate
+
+    ({{ project.name }}) $ pip install {{ project.name }}
+
+To develop on the project, link to the source files instead::
+
+    ({{ project.name }}) $ deactivate
+    $ git clone git@github.com:doblabs/{{ project.name }}.git
+    $ cd {{ project.name }}
+    $ python3 -m venv {{ project.name }}
+    $ . ./.venv/bin/activate
+    ({{ project.name }}) $ make develop
+
+After creating the virtual environment, it's easy to start
+developing from a fresh terminal::
+
+    $ cd {{ project.name }}
+    $ . ./.venv/bin/activate
+    ({{ project.name }}) $ ...
+
