@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# CXREF: ~/.waffle/home/.mrconfig-wirepydob-eapp
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+source_deps () {
+  # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
+  insist_cmd 'realpath'
+
+  # CXREF: ~/.kit/git/ohmyrepos/lib/update-faithful.sh
+  #   https://github.com/landonb/ohmyrepos#😤
+  . "$(dirname "$(realpath "$0")")/deps/git-update-faithful/lib/update-faithful.sh"
+}
+
+insist_cmd () {
+  local cmdname="$1"
+
+  command -v "${cmdname}" > /dev/null && return 0
+
+  >&2 echo "ERROR: Missing system command ‘${cmdname}’."
+
+  exit 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+update_deps_easy_as_pypi () {
+  # The *-faithful-* workflow expects that this executable lives at
+  #   /path/to/easy-as-pypi/bin/update-deps
+  # such that the canon path (aka path to this project) is 1 directory up.
+  local canon_path_absolute="$(realpath "$(dirname "$0")/..")"
+
+  # If we didn't use the render-faithful-file feature, we could skip the
+  # venv. (We could also skip the update-faithful-begin altogether, which
+  # really only exists so that venv create and activate, which takes a few
+  # seconds, happens sooner rather than later, for better UX messaging.)
+  local skip_venv_activate=false
+
+  # SAVVY: How you might test a subset of this file operation:
+  #
+  #   UPDEPS_CANON_BASE_ABSOLUTE="${canon_path_absolute}"
+  #   render-faithful-file "docs/index.rst"
+  #   update-faithful-file ".github/dependabot.yml"
+  #   >&2 echo "STOP!"
+  #   exit 1
+
+  # ***
+
+  # Sets UPDEPS_CANON_BASE_ABSOLUTE environ so it's available to each
+  # update-faithful-file and render-faithful-file. Also creates and
+  # activates the venv for render-faithful-file, and manages a UX
+  # progress message, in the spirit of other OMR messaging (like
+  # the `infuse` method).
+  update-faithful-begin "${canon_path_absolute}" "${skip_venv_activate}"
+
+  # *** Top-level ./ files
+
+  # Note the comment leaders below:
+  # - BUILD: Means the file is generate by some build process.
+  #   - This are listed so that you can compare directory listing
+  #     to the list below, to ensure nothing missing.
+  # - IGNOR: Files unique to the EAPP canon project.
+  # - BELOW: Directory placeholder; look further down in this fcn for files.
+  # - INFUS: Private, uncommitted files dev manages via OMR `infuse`.
+  #   - Well, not really uncommitted, but committed to private dev repo,
+  #     then "infused" into this project using symbolic and hard links.
+  # - SPLIT: Files that vary slightly between this project and spin-offs.
+  #   - In many cases, you can templatize these (using render-faithful-file).
+
+  # SPLIT: update-faithful-file "AUTHORS.rst"
+  # IGNOR: "bin/"
+  update-faithful-file "codecov.yml"
+  update-faithful-file "CODE-OF-CONDUCT.rst"
+  render-faithful-file "CONTRIBUTING.rst"
+  # └→ Uses: "CONTRIBUTING.tmpl"
+  # BUILD: ".coverage"
+  # BUILD: "dist"
+  # BELOW: "docs/"
+  update-faithful-file ".editorconfig"
+  # IGNOR: ".git"
+  # BELOW: ".github/"
+  update-faithful-file ".gitignore"
+  # INFUS: ".gitignore.local"
+  # └→ Symlinked by link_private_exclude, from user's infuser:
+  #      ~/.kit/py/.mrinfuse/easy-as-pypi/_git/info/exclude
+  # SPLIT: "HISTORY.rst"
+  # BUILD: "htmlcov/"
+  # INFUS: ".ignore"
+  # └→ Symlinked by link_private_ignore, from user's infuser:
+  #      ~/.kit/py/.mrinfuse/easy-as-pypi/.ignore-for-the-masses
+  update-faithful-file ".ignore.example"
+  # SPLIT: "LICENSE"
+  # └→ Well, not always split, but unlikely to ever change, and
+  #    don't want to presume that derived project uses the same.
+  update-faithful-file "Makefile"
+  # INFUS: "Makefile.local"
+  # IGNOR: "Makefile.local.example"
+  # └→ We don't ship the Makefile example. In the unlikely event a dev
+  #    actually wants it, they can copy it from this reference project.
+  update-faithful-file "Maketasks.sh"
+  # BUILD: "poetry.lock"
+  # BELOW: ".pyproject-doc8/"
+  # BUILD: ".pyproject-editable/"
+  # SPLIT: "pyproject.toml"
+  # BUILD: ".pytest_cache/"
+  # SPLIT: "README.rst"
+  update-faithful-file ".readthedocs.yml"
+  # SPLIT: "src/"
+  # SPLIT: "tests/"
+  # BUILD: ".tox/"
+  update-faithful-file "tox.ini"
+  # BUILD: ".venv-doc8/"
+  # BUILD: ".venv-docs/"
+  # BUILD: ".venv-easy-as-pypi/"
+  update-faithful-file ".yamllint"
+
+  # *** docs/ files
+
+  update-faithful-file "docs/authors.rst"
+  update-faithful-file "docs/code-of-conduct.rst"
+  update-faithful-file "docs/conf.py"
+  update-faithful-file "docs/contributing.rst"
+  # SPLIT: "docs/<package_name>"*".rst"
+  # SPLIT: "docs/history-ci.md"
+  update-faithful-file "docs/history.rst"
+  render-faithful-file "docs/index.rst"
+  render-faithful-file "docs/installation.rst"
+  # SPLIT: "docs/license.rst"
+  render-faithful-file "docs/make.bat"
+  update-faithful-file "docs/Makefile"
+  render-faithful-file "docs/modules.rst"
+  update-faithful-file "docs/readme.rst"
+
+  # *** .github/ files
+
+  # IGNOR: ".github/README--github-variable-dump--example.rst"
+  update-faithful-file ".github/dependabot.yml"
+  # IGNOR: ".github/disabled/coverity.yml"
+  update-faithful-file ".github/workflows/checks-unspecial.yml"
+  update-faithful-file ".github/workflows/checks-versioned.yml"
+  update-faithful-file ".github/workflows/checks.yml"
+  update-faithful-file ".github/workflows/codeql-analysis.yml"
+  update-faithful-file ".github/workflows/coverage-comment-external.yml"
+  update-faithful-file ".github/workflows/coverage-comment.yml"
+  update-faithful-file ".github/workflows/readthedocs-preview.yml"
+  update-faithful-file ".github/workflows/release-github.yml"
+  update-faithful-file ".github/workflows/release-pypi.yml"
+  update-faithful-file ".github/workflows/release-smoke-test.yml"
+
+  # *** .pyproject-doc8/ files
+
+  update-faithful-file ".pyproject-doc8/README.md"
+  # BUILD: update-faithful-file ".pyproject-doc8/poetry.lock"
+  update-faithful-file ".pyproject-doc8/pyproject.toml"
+  update-faithful-file ".pyproject-doc8/src/__init__.py"
+  update-faithful-file ".pyproject-doc8/tests/__init__.py"
+
+  # *** Done
+
+  update-faithful-finish
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  source_deps
+
+  update_deps_easy_as_pypi "$@"
+}
+
+# Run the update-deps iff being executed.
+if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
+  main "$@"
+fi
+
+unset -f main
+unset -f source_deps
+unset -f insist_cmd
+
