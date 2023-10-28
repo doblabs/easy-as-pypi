@@ -17,6 +17,11 @@ SOURCE_DIR = src
 
 # Path to package and dependency source code clones, necessary if
 # you want to run `make develop` to setup an editable virtualenv.
+# - I (lb) know this is a hardcoded business value (by which I mean,
+#   this path is specific to my development machines), but there's
+#   not a reasonable default we can assume. TL/DR, I'll allow this.
+#   - See MAKEFILE_LOCAL, below, for an easy way to customize this,
+#     without having to edit this file.
 EDITABLES_ROOT ?= $(shell echo ~/.kit/py)
 
 # Local dir wherein to place editable pyproject.toml,
