@@ -13,7 +13,7 @@ source_deps () {
 
   # CXREF: ~/.kit/git/ohmyrepos/lib/update-faithful.sh
   #   https://github.com/landonb/ohmyrepos#😤
-  . "$(dirname "$(realpath "$0")")/deps/git-update-faithful/lib/update-faithful.sh"
+  . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
 }
 
 insist_cmd () {
