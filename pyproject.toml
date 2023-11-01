@@ -84,6 +84,11 @@ copyright_years = "2020-2023"
 
 # ***
 
+[tool.git_update_faithful]
+coc_contact_email = "tallybark+doblabs -at- gmail.com"
+
+# ***
+
 # The default Poetry build-system is these two lines:
 #   requires = ["poetry-core"]
 #   build-backend = "poetry.core.masonry.api"
