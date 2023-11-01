@@ -581,4 +581,8 @@ linkcheck_anchors_ignore = [
     #   `<https://easy_as_pypi.readthedocs.io/en/latest/contributing.html#get-started>`__
     "get-started",
 ]
+# 2023-11-01: linkcheck now reports broken on local links, not sure why.
+#   sphinx-build --version: 6.2.1. See also:
+#     ../.venv-easy-as-pypi/lib/python3.11/site-packages/sphinx/__init__.py
+linkcheck_ignore = ["code-of-conduct.html"]
 
