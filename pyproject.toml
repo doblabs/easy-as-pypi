@@ -89,6 +89,13 @@ coc_contact_email = "tallybark+doblabs -at- gmail.com"
 
 # ***
 
+# YOU: Disable this if your project derived from easy-as-pypi
+#      does not have a runnable script.
+#      - Otherwise set this to the package entry point.
+
+[tool.poetry.scripts]
+easy-as-pypi = "easy_as_pypi:cli"
+
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
@@ -152,15 +159,6 @@ files = ["src/*/__init__.py"]
 #  patterns = ["(^__version__\\s*(?::.*?)?=\\s*['\\"])[^'\\"]*(['\\"])"]
 # causes "Expected newline or end of document after a statement".
 # - Oh well, default is what we want.
-
-# ***
-
-# YOU: Disable this if your project derived from easy-as-pypi
-#      does not have a runnable script.
-#      - Otherwise set this to the package entry point.
-
-[tool.poetry.scripts]
-    easy-as-pypi = "easy_as_pypi:cli"
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
