@@ -2,6 +2,8 @@
 .. easy-as-pypi Documentation
 .. ##########################
 
+.. vim:tw=0:ts=3:sw=3:et:norl:nospell:ft=rst
+
 .. .. |easy-as-pypi| replace:: ``easy-as-pypi``
 .. .. _easy-as-pypi: https://github.com/doblabs/easy-as-pypi
 

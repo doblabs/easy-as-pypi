@@ -1,5 +1,7 @@
 @ECHO OFF
 
+REM vim:tw=0:ts=4:sw=4:noet:norl:nospell:ft=dosbatch:ff=dos
+
 REM This file exists within 'easy-as-pypi':
 REM
 REM   https://github.com/doblabs/easy-as-pypi
