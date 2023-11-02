@@ -100,10 +100,46 @@ jobs:
           python -c "import $MODULE_NAME; print($MODULE_NAME.__version__)"
         shell: bash
 
+  # ***
+
+  # pipx won't install lib-only package, e.g., one without entry point defined.
+  #
+  # - Otherwise pipx complains:
+  #
+  #     No apps associated with package easy-as-pypi-appdirs or its dependencies. If
+  #     you are attempting to install a library, pipx should not be used. Consider
+  #     using pip or a similar tool instead.
+  #
+  # So do a crude toml grep to see if the Poetry entry point is defined.
+
+  verify-installs-app:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Check Tag
+        id: check-is-app
+        run: |
+          if grep -q -E "^\[tool.poetry.scripts]$" "pyproject.toml"; then
+            echo "is_app=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Report Maybe
+        if: steps.check-is-app.outputs.is_app == 'true'
+        run: echo "Installs-app detected"
+
+    outputs:
+      is_app: ${{ steps.check-is-app.outputs.is_app }}
+
   pipx-smoke-test:
     name: pipx Smoke test PyPI release
 
     runs-on: ubuntu-latest
+
+    needs: verify-installs-app
+    if: needs.verify-installs-app.outputs.is_app == 'true'
 
     env:
       INDEX_PIPX: ${{ inputs.INDEX_PIPX }}
