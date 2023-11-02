@@ -82,11 +82,23 @@ insist_cmd () {
 source_dep () {
   local dep_path="$1"
 
-  # This file at bin/update-faithful, so project root is one level up.
+  # The executables are at bin/*, so project root is one level up.
   local project_root
   project_root="$(dirname "$(realpath "$0")")/.."
 
   local dep_path="${project_root}/${dep_path}"
+
+  if [ ! -f "${dep_path}" ]; then
+    # Or maybe user is trying to source from their terminal.
+    if $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
+      if [ -n "${BASH_SOURCE[0]}" ]; then
+        # The lib is at lib/update-faithful.sh so project root is one level up.
+        project_root="$(dirname "$(realpath "${BASH_SOURCE[0]}")")/.."
+      fi
+    fi
+
+    dep_path="${project_root}/${dep_path}"
+  fi
 
   if [ ! -f "${dep_path}" ]; then
     >&2 echo "ERROR: Could not identify update-faithful dependency path."
@@ -125,8 +137,14 @@ update_faithful_file () {
 
   # ***
 
-  must_pass_checks_and_ensure_cache \
-    "${canon_base_absolute}" "${canon_file_absolute}" "${local_file}"
+  local success=true
+
+  if ${success} && ! must_pass_checks_and_ensure_cache \
+    "${canon_base_absolute}" "${canon_file_absolute}" "${local_file}" \
+  ; then
+    # Soft-fail.
+    success=false
+  fi
 
   # ***
 
@@ -144,12 +162,23 @@ update_faithful_file () {
 
   # ***
 
-  if ! examine_and_update_local_from_canon \
-    "${local_file}" "${canon_file_absolute}" "${canon_file_relative}" \
-  ; then
-    git reset HEAD > /dev/null
+  local canon_head
+  canon_head="$(print_canon_scoped_head "${canon_file_absolute}")"
 
-    # Note that failed call called cache_file_mark_failed.
+  if ${success} && ! examine_and_update_local_from_canon \
+    "${local_file}" "${canon_file_absolute}" "${canon_file_relative}" "${canon_head}" \
+  ; then
+    success=false
+  fi
+
+  if ! ${success}; then
+    # Skip `cache_file_cleanup`, but mark failed, so caller can continue
+    # calling update-faithful-file and eventually update-faithful-finish.
+    # Then all the successes and failures are printed in one go, and the
+    # user can fix everything and will find success on their second run.
+    cache_file_mark_failed "${canon_head}" "${canon_file_absolute}"
+
+    git reset HEAD > /dev/null
 
     return 1
   fi
@@ -162,7 +191,9 @@ must_pass_checks_and_ensure_cache () {
   local canon_file_absolute="$2"
   local local_file="$3"
 
-  must_git_nothing_staged_or_faithful_update_underway
+  local is_update_begin=false
+  [ -n "${local_file}" ] || is_update_begin=true
+  must_git_nothing_or_only_deletes_staged_or_faithful_update_underway ${is_update_begin}
 
   cache_file_ensure_exists
 
@@ -170,6 +201,19 @@ must_pass_checks_and_ensure_cache () {
 
   if [ -n "${canon_file_absolute}" ]; then
     must_be_file "${canon_file_absolute}" "reference"
+
+    if [ -n "$(
+      cd "${canon_base_absolute}"
+
+      git status --porcelain=v1 -- "${canon_file_absolute}"
+    )" ]; then
+      # If we don't exit here, user sees "Cannot update changed and divergent follower file"
+      # message (warn_diverged_and_uncommitted) which is misleading when it's the canon file's
+      # fault, not follower's.
+      >&2 error "ERROR: The canon reference file has uncommitted changes: “${canon_file_absolute}”"
+
+      return 1
+    fi
   fi
 
   if [ -n "${local_file}" ]; then
@@ -185,10 +229,29 @@ must_pass_checks_and_ensure_cache () {
 
 # ***
 
-must_git_nothing_staged_or_faithful_update_underway () {
+must_git_nothing_or_only_deletes_staged_or_faithful_update_underway () {
+  local is_update_begin="$1"
+
   ( git_nothing_staged \
     || cache_file_nonempty \
   ) && return 0
+
+  # Something is staged, and cache file not started, so this is
+  # first update-faithful. If only deletes staged, we assume user
+  # git-rm'd divergent files and wants to commit with updates (as
+  # opposed to committing git-rm files, running update-faithful,
+  # then squashing the two commits).
+  if ! git_nothing_staged && git_only_delete_files_staged; then
+    # So that we only print the alert once, skip on update-faithful-begin.
+    if ! ${is_update_begin}; then
+      warn "ALERT: Starting update-faithful on a repo with deletes staged."
+      info "- These files will be incorporated into the update-faithful commit:"
+
+      git_print_staged_files
+    fi
+
+    return 0
+  fi
 
   local projpath="${1:-$(pwd)}"
 
@@ -202,6 +265,14 @@ must_git_nothing_staged_or_faithful_update_underway () {
 
 git_nothing_staged () {
   git diff --cached --quiet
+}
+
+git_only_delete_files_staged () {
+  [ -z "$(git diff --cached --name-status | sed '/^D\t/d')" ]
+}
+
+git_print_staged_files () {
+  git --no-pager diff --cached --name-only
 }
 
 # ***
@@ -250,13 +321,11 @@ examine_and_update_local_from_canon () {
   local local_file="$1"
   local canon_file_absolute="$2"
   local canon_file_relative="$3"
+  local canon_head="$4"
 
-  local canon_head
   local local_changed=false
   local local_strayed=false
   local local_matches_HEAD=false
-
-  canon_head="$(print_canon_scoped_head "${canon_file_absolute}")"
 
   insist_canon_head_consistent "${canon_head}" "${canon_file_absolute}"
 
@@ -634,6 +703,9 @@ update_local_from_canon () {
   local success=false
 
   if [ ! -e "${local_file}" ]; then
+    # Note you can `git rm "${local_file}"` and not git-commit,
+    # then run update-faithful operation, and it'll commit changes
+    # to canon file.
     copy_canon_version "${local_file}" "${canon_file_absolute}" "${canon_file_relative}" "${canon_head}"
 
     _stage_follower "baptised"
@@ -719,14 +791,6 @@ update_local_from_canon () {
         fi
       fi
     fi
-  fi
-
-  if ! ${success}; then
-    # Skip `cache_file_cleanup`, but mark failed, so caller can continue
-    # calling update-faithful-file and eventually update-faithful-finish.
-    # Then all the successes and failures are printed in one go, and the
-    # user can fix everything and will find success on their second run.
-    cache_file_mark_failed "${canon_head}" "${canon_file_absolute}"
   fi
 
   ${success} && return 0
@@ -863,7 +927,7 @@ render_document_from_template () {
   local src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
   local src_format="json"
 
-  print_tmpl_src_data > "${src_data}"
+  print_tmpl_src_data "${canon_base_absolute}" > "${src_data}"
 
   # ***
 
@@ -891,19 +955,41 @@ render_document_from_template () {
 # ***
 
 print_tmpl_src_data () {
+  local canon_base_absolute="$1"
+
   venv_install_yq
 
   local project_name=""
   local project_url=""
+  local coc_contact_email=""
 
-  project_name="$(tomlq -r .tool.poetry.name pyproject.toml)"
-  project_url="$(tomlq -r .tool.poetry.homepage pyproject.toml)"
+  project_name="$(
+    tomlq -r .tool.poetry.name pyproject.toml
+  )"
+  project_url="$(
+    tomlq -r .tool.poetry.homepage pyproject.toml
+  )"
+
+  # Fallback canon pyproject.toml for missing values.
+
+  coc_contact_email="$(
+    tomlq -r --exit-status .tool.git_update_faithful.coc_contact_email pyproject.toml
+  )"
+
+  if [ $? -ne 0 ]; then
+    coc_contact_email="$(
+      cd "${canon_base_absolute}"
+
+      tomlq -r .tool.git_update_faithful.coc_contact_email pyproject.toml
+    )"
+  fi
 
   echo "\
 {
     \"project\": {
         \"name\": \"${project_name}\",
-        \"url\": \"${project_url}\"
+        \"url\": \"${project_url}\",
+        \"coc_contact_email\": \"${coc_contact_email}\"
     }
 }"
 }
@@ -1065,9 +1151,11 @@ update_faithful_finish () {
       if test -n "${UPDEPS_GIT_RM_F_LIST}"; then
         cleanup_git_cpyst="
                                       git rm -f ${UPDEPS_GIT_RM_F_LIST}
-                                      git commit -m \"Deps: Temporarily expunge divergent faithfuls
-
-- These files will be restored in the next commit\""
+                                      # Optional: git-commit. Or just run update-faithful next.
+                                      printf \"%s\\\n\\\n%s\" \\
+                                        \"Deps: Temporarily expunge divergent faithfuls\" \\
+                                        \"- These files will be restored in the next commit.\" \\
+                                        | git commit -F -"
       fi
       info
       info "    - If you wanna just replace all the conflicts, eh:
