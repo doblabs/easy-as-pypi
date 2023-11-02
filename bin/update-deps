@@ -154,7 +154,7 @@ update_deps_easy_as_pypi () {
   # *** .pyproject-doc8/ files
 
   update-faithful-file ".pyproject-doc8/README.md"
-  # BUILD: update-faithful-file ".pyproject-doc8/poetry.lock"
+  update-faithful-file ".pyproject-doc8/poetry.lock"
   update-faithful-file ".pyproject-doc8/pyproject.toml"
   update-faithful-file ".pyproject-doc8/src/__init__.py"
   update-faithful-file ".pyproject-doc8/tests/__init__.py"
