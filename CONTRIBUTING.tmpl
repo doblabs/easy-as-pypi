@@ -10,13 +10,13 @@ Contributing
 .. _user-docs: https://github.com/doblabs/easy-as-pypi/tree/release/docs
 
 .. |envlist| replace:: ``envlist``
-.. _envlist: https://tox.readthedocs.io/en/latest/config.html#conf-envlist
+.. _envlist: https://tox.wiki/en/latest/config.html#env_list
 
 .. |flake8| replace:: ``flake8``
-.. _flake8: http://flake8.pycqa.org/en/latest/
+.. _flake8: https://flake8.pycqa.org/en/latest/
 
 .. |isort| replace:: ``isort``
-.. _isort: https://github.com/timothycrosley/isort
+.. _isort: https://github.com/PyCQA/isort
 
 .. |pdb| replace:: ``pdb``
 .. _pdb: https://docs.python.org/3/library/pdb.html
@@ -25,7 +25,7 @@ Contributing
 .. _pytest: https://docs.pytest.org/en/latest/
 
 .. |tox| replace:: ``tox``
-.. _tox: https://tox.readthedocs.io/en/latest/
+.. _tox: https://tox.wiki/en/latest/
 
 .. |virtualenv| replace:: ``virtualenv``
 .. _virtualenv: https://virtualenv.pypa.io/en/latest/
@@ -34,7 +34,7 @@ Contributing
 .. _virtualenvwrapper: https://pypi.org/project/virtualenvwrapper/
 
 .. |PEP-257| replace:: PEP 257
-.. _PEP-257: https://www.python.org/dev/peps/pep-0257/
+.. _PEP-257: https://peps.python.org/pep-0257/
 
 .. |goog-py-sty| replace:: Google Python Style Guide
 .. _goog-py-sty: https://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
@@ -241,7 +241,7 @@ for local development.
      * ``Feedback: Fix something per PR feedback.``
 
      (You'll notice that this strategy is similar to
-     `gitmoji <https://gitmoji.carloscuesta.me/>`__,
+     `gitmoji <https://gitmoji.dev/>`__,
      but it's more concise, and less obtuse.)
 
 7. Throughout development, run tests and the linter -- and definitely before
@@ -528,13 +528,13 @@ Style Reference
 The project style tracks as closely as possible to community conventions,
 mostly established in 2001 by Python's creator, Guido van Rossum, and others:
 
-* `PEP 8 -- Style Guide for Python Code <https://www.python.org/dev/peps/pep-0008/>`_
+* `PEP 8 -- Style Guide for Python Code <https://peps.python.org/pep-0008/>`_
 
-* `PEP 257 -- Docstring Conventions <https://www.python.org/dev/peps/pep-0257/>`_
+* `PEP 257 -- Docstring Conventions <https://peps.python.org/pep-0257/>`_
 
 In lieu of
 `PEP 287 -- reStructuredText Docstring Format
-<https://www.python.org/dev/peps/pep-0287/>`__,
+<https://peps.python.org/pep-0287/>`__,
 the project prefers Google-style docstrings, as defined in the
 `Google Python Style Guide
 <https://google.github.io/styleguide/pyguide.html>`__:
@@ -544,18 +544,18 @@ the project prefers Google-style docstrings, as defined in the
 
 When building the HTML documentation from the sources,
 Google-style docstrings are recognized by a
-`Sphinx <http://www.sphinx-doc.org/en/master/>`__
+`Sphinx <https://www.sphinx-doc.org/en/master/>`__
 extension:
 
 * `napoleon
-  <http://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html>`__:
+  <https://www.sphinx-doc.org/en/master/usage/extensions/napoleon.html>`__:
   Support for NumPy and Google style docstrings.
 
 Conventional Deviations
 -----------------------
 
-The conventions outlined in `PEP 8 <https://www.python.org/dev/peps/pep-0008/>`_
-are enforced by the `Flake8 <http://flake8.pycqa.org/en/latest/>`__ linter, with
+The conventions outlined in `PEP 8 <https://peps.python.org/pep-0008/>`_
+are enforced by the `Flake8 <https://flake8.pycqa.org/en/latest/>`__ linter, with
 the following custom rules:
 
 * Use a maximum line length of 89 characters.

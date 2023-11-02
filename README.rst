@@ -12,14 +12,14 @@ easy-as-pypi
 .. CXREF: https://app.codecov.io/github.com/doblabs/easy-as-pypi/settings/badge
 
 .. image:: https://codecov.io/gh/doblabs/easy-as-pypi/branch/release/graph/badge.svg?token=AlKUyOgTGY
-  :target: https://codecov.io/gh/doblabs/easy-as-pypi
+  :target: https://app.codecov.io/gh/doblabs/easy-as-pypi
   :alt: Coverage Status
 
 .. image:: https://readthedocs.org/projects/easy-as-pypi/badge/?version=latest
   :target: https://easy-as-pypi.readthedocs.io/en/latest/
   :alt: Documentation Status
 
-.. image:: https://img.shields.io/github/release/doblabs/easy-as-pypi.svg?style=flat
+.. image:: https://img.shields.io/github/v/release/doblabs/easy-as-pypi.svg?style=flat
   :target: https://github.com/doblabs/easy-as-pypi/releases
   :alt: GitHub Release Status
 
@@ -28,7 +28,7 @@ easy-as-pypi
   :alt: PyPI Release Status
 
 .. image:: https://img.shields.io/pypi/pyversions/easy-as-pypi.svg
-  :target: https://pypi.python.org/pypi/easy-as-pypi/
+  :target: https://pypi.org/project/easy-as-pypi/
   :alt: PyPI Supported Python Versions
 
 .. image:: https://img.shields.io/github/license/doblabs/easy-as-pypi.svg?style=flat
