@@ -877,7 +877,8 @@ urllib3 = "<2"
 
 # For Readthedocs build process.
 tomli = { version = ">=2.0.1", optional = true }
+sphinx = { version = "^6.2.1", optional = true }
 
 [tool.poetry.extras]
-readthedocs = [ "tomli" ]
+readthedocs = [ "tomli", "sphinx" ]
 
