@@ -1,6 +1,6 @@
 #!/bin/bash
 # vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=bash
-# Author: Landon Bouma (landonb &#x40; retrosoft &#x2E; com)
+# Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/thegittinsgood/git-update-faithful#⛲
 # License: MIT
 
