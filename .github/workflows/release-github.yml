@@ -62,7 +62,7 @@ jobs:
 
     permissions:
       # For `gh release view`, else you see: "HTTP 403: Resource not accessible
-      # by integration (https://api.github.com/repos/pydob/easy-as-pypi/releases)"
+      # by integration (https://api.github.com/repos/doblabs/easy-as-pypi/releases)"
       contents: 'write'
 
     steps:
