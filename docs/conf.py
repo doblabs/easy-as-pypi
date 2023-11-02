@@ -375,8 +375,8 @@ html_context = {
     # - MAYBE: Replace hardcoded value with {{ template.value }},
     #          or maybe use `git rev-parse --abbrev-ref=loose HEAD`.
     #    import subprocess
-    #    result = subprocess.run(['git', 'rev-parse', '--abbrev-ref=loose', 'HEAD'], capture_output=True)
-    #    result.stdout.strip()
+    #    completed_proc = subprocess.run(['git', 'rev-parse', '--abbrev-ref=loose', 'HEAD'], capture_output=True)
+    #    completed_proc.stdout.decode().strip()
     'github_version': 'release/',
     # Path in the checkout to the docs root.
     'conf_py_path': 'docs/',
