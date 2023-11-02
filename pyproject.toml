@@ -444,6 +444,8 @@ builtins = [
 
 [tool.isort]
 
+include_trailing_comma = true
+
 # USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
 line_length = 88
 
