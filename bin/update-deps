@@ -74,7 +74,7 @@ update_deps_easy_as_pypi () {
   # SPLIT: update-faithful-file "AUTHORS.rst"
   # IGNOR: "bin/"
   update-faithful-file "codecov.yml"
-  update-faithful-file "CODE-OF-CONDUCT.rst"
+  render-faithful-file "CODE-OF-CONDUCT.rst"
   render-faithful-file "CONTRIBUTING.rst"
   # └→ Uses: "CONTRIBUTING.tmpl"
   # BUILD: ".coverage"
