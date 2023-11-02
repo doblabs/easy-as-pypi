@@ -362,7 +362,7 @@ html_theme_options = {
 
 # https://docs.readthedocs.io/en/latest/vcs.html?highlight=conf_py_path
 html_context = {
-    # Enable the "Edit in GitHub" link within the header of each page.
+    # Enable the "Edit on GitHub" link within the header of each page.
     'display_github': True,
     # Set the following variables to generate the resulting github URL for each page.
     # Format Template: https://{{ github_host|default("github.com") }}
@@ -370,8 +370,14 @@ html_context = {
     #   /{{ github_version }}{{ conf_py_path }}{{ pagename }}{{ suffix }}
     'github_user': project_ghuser,
     'github_repo': project_ghrepo,
-    # Branch name.
-    'github_version': 'develop/',
+    # This branch name controls the *Edit on GitHub* on RTD page headers.
+    # USYNC: The main/default GH branch: 'release'.
+    # - MAYBE: Replace hardcoded value with {{ template.value }},
+    #          or maybe use `git rev-parse --abbrev-ref=loose HEAD`.
+    #    import subprocess
+    #    result = subprocess.run(['git', 'rev-parse', '--abbrev-ref=loose', 'HEAD'], capture_output=True)
+    #    result.stdout.strip()
+    'github_version': 'release/',
     # Path in the checkout to the docs root.
     'conf_py_path': 'docs/',
 }

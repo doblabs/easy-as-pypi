@@ -142,6 +142,7 @@ enable = true
 pattern = "default-unprefixed"
 vcs = "git"
 # Leave style = "pep440", not "semver", to maybe PyPI normalization.
+# USYNC: The main/default GH branch: 'release'.
 tag-branch = "release"
 
 [tool.poetry-dynamic-versioning.substitution]
