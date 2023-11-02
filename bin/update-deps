@@ -125,6 +125,7 @@ update_deps_easy_as_pypi () {
   # SPLIT: "docs/<package_name>"*".rst"
   # SPLIT: "docs/history-ci.md"
   update-faithful-file "docs/history.rst"
+  update-faithful-file "docs/.ignore"
   render-faithful-file "docs/index.rst"
   render-faithful-file "docs/installation.rst"
   # SPLIT: "docs/license.rst"
