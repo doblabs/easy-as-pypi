@@ -131,9 +131,10 @@ jobs:
           # BWARE: Spaces in --pip-args will work locally, but on GHA, even
           #        using quotes, pipx will die on args complaint.
           #        - So use '=' to keep --pip-args a single word.
-          # extra_index_arg="--extra-index-url=https://pypi.org/simple/"
-          # SPIKE: Determine if we really need --extra-index-url or not.
-          extra_index_arg=""
+          # Note we need --extra-index-url otherwise pip only tries to find
+          # packages on the test server, which fails if any are missing (or
+          # yanked, like appdirs==1.4.4).
+          extra_index_arg="--extra-index-url=https://pypi.org/simple/"
           [ -z "${extra_index_arg}" ] \
             && pipx_pip_args="" \
             || pipx_pip_args="--pip-args=${extra_index_arg}"
