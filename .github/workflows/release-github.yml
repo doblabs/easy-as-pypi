@@ -44,10 +44,6 @@ jobs:
         if: steps.check-is-version-tag.outputs.is_version_tag == 'true'
         run: echo "Version tag detected"
 
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        if: steps.check-is-version-tag.outputs.is_version_tag == 'true'
-
     outputs:
       is_version_tag: ${{ steps.check-is-version-tag.outputs.is_version_tag }}
 
