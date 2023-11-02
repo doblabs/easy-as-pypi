@@ -89,6 +89,10 @@ coc_contact_email = "tallybark+doblabs -at- gmail.com"
 
 # ***
 
+# ================================================================= #
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+# ================================================================= #
+
 # The default Poetry build-system is these two lines:
 #   requires = ["poetry-core"]
 #   build-backend = "poetry.core.masonry.api"
@@ -225,6 +229,11 @@ precision = 0
 #
 #       exclude_lines = [ "if __name__ == .__main__.:", ]
 #
+#   Or possibly:
+#
+#       exclude_lines =
+#           if __name__ == .__main__.:
+#
 # - For the easy-as-pypi reference project, we don't currently
 #   test the Click group command:
 #
@@ -277,7 +286,7 @@ relative_files = true
 line-length = 88
 
 # Default: Sussed from pyproject.toml
-#  target-version = ['py37']
+#  target-version = ['py38']
 
 # Default: Only .py or .pyi files:
 #  include = '\.pyi?$'
@@ -501,7 +510,7 @@ file-encoding = "utf-8"
 # to serve essentially the same purpose,
 # e.g., a developer might run:
 #
-#   poetry install --with dist,lint,test,docstyle,docs,extras
+#   poetry install --with dist,i18n,lint,test,docstyle,docs,extras
 
 # ***
 
@@ -661,6 +670,12 @@ codecov = ">=2.1.13"
 #   https://pypi.org/project/Faker
 #   https://github.com/joke2k/faker
 #  Faker = ">=18.7.0"
+#
+# - "Faker integration with the pytest framework."
+#
+#   https://pypi.org/project/pytest-faker
+#   https://github.com/pytest-dev/pytest-faker
+#  pytest-faker >= 2.0.0
 
 # - "Generates random data for your tests"
 #
@@ -807,9 +822,11 @@ restview = ">=3.0.1"
 # Because flake8, start at 3.8.1.
 python = "^3.8.1"
 
+# *** App deps
+
 click = "^8.0.0"
 
-# ****
+# *** Kludge deps
 
 # KLUGE/2023-05-19: Use urllib3 v1 to avoid upstream pkg regression, e.g.,
 #

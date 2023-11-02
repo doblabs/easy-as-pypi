@@ -255,7 +255,6 @@ project = project_dist
 copyright = project_copy
 author = project_auth
 
-# (lb): Using setuptools_scm magic, per
 # easy-as-pypi uses poetry-dynamic-versioning, so no need to maintain
 # the version here; we can grab it from the package.
 # - This approach originally inspired by setuptools_scm (pre-Poetry):
