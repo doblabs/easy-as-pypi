@@ -1,0 +1,117 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+# yamllint disable rule:line-length
+
+---
+
+
+# ***
+
+doblabs/ansi-escape-room:
+  - doblabs/easy-as-pypi-termio
+  # - doblabs/nark
+
+doblabs/ansiwrap-hotoffthehamster:
+  - doblabs/nark
+
+doblabs/click-hotoffthehamster:
+  - doblabs/easy-as-pypi-config
+  # - doblabs/easy-as-pypi-termio
+  # - doblabs/dob-bright
+  # - doblabs/dob-viewer
+  # - doblabs/dob
+  # - befinance/birdseye
+
+doblabs/click-hotoffthehamster-alias:
+  - doblabs/dob
+
+doblabs/config-decorator:
+  - doblabs/easy-as-pypi-config
+  # - doblabs/nark
+  # - doblabs/dob-bright
+  # - befinance/birdseye
+
+doblabs/human-friendly_pedantic-timedelta:
+  - doblabs/nark
+  # - doblabs/dob-prompt
+  # - doblabs/dob
+
+doblabs/sqlalchemy-migrate-hotoffthehamster:
+  - doblabs/nark
+
+# ***
+
+doblabs/easy-as-pypi:
+  # - doblabs/easy-as-pypi-appdirs
+  # - doblabs/easy-as-pypi-config
+  # - doblabs/easy-as-pypi-getver
+  # - doblabs/easy-as-pypi-termio
+  # Cascade proj-by-proj:
+  - doblabs/easy-as-pypi-appdirs
+
+doblabs/easy-as-pypi-appdirs:
+  # - doblabs/nark
+  # # - doblabs/dob-bright
+  # # - doblabs/dob-prompt
+  # # - doblabs/dob
+  # - befinance/birdseye
+  # Cascade proj-by-proj:
+  - doblabs/easy-as-pypi-config
+
+doblabs/easy-as-pypi-config:
+  # - doblabs/dob-bright
+  # # - doblabs/dob
+  # - befinance/birdseye
+  # Cascade proj-by-proj:
+  - doblabs/easy-as-pypi-getver
+
+doblabs/easy-as-pypi-getver:
+  # - doblabs/nark
+  # # - doblabs/dob-bright
+  # # - doblabs/dob-prompt
+  # # - doblabs/dob-viewer
+  # # - doblabs/dob
+  # - befinance/birdseye
+  # Cascade proj-by-proj:
+  - doblabs/easy-as-pypi-termio
+
+doblabs/easy-as-pypi-termio:
+  # - doblabs/dob-bright
+  # # - doblabs/dob-viewer
+  # # - doblabs/dob
+  # Cascade to apps:
+  - doblabs/nark
+  - befinance/birdseye
+
+# ***
+
+doblabs/nark:
+  # - doblabs/dob-bright
+  # # - doblabs/dob-prompt
+  # # - doblabs/dob-viewer
+  # # - doblabs/dob
+  # Cascade proj-by-proj:
+  - doblabs/dob-bright
+
+doblabs/dob-bright:
+  # - doblabs/dob-prompt
+  # # - doblabs/dob-viewer
+  # # - doblabs/dob
+  # Cascade proj-by-proj:
+  - doblabs/dob-prompt
+
+doblabs/dob-prompt:
+  - doblabs/dob-viewer
+
+doblabs/dob-viewer:
+  - doblabs/dob
+
+# ***
+
+# doblabs/dob:
+#   - Done!
+
+# befinance/birdseye:
+#   - Done!
