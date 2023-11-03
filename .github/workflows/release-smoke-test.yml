@@ -48,6 +48,8 @@ jobs:
         env:
           GITHUB_EVENT: ${{ toJson(github.event) }}
 
+  # ***
+
   pip-smoke-test:
     name: pip Smoke test PyPI release
 
@@ -132,6 +134,8 @@ jobs:
 
     outputs:
       is_app: ${{ steps.check-is-app.outputs.is_app }}
+
+  # ***
 
   pipx-smoke-test:
     name: pipx Smoke test PyPI release
