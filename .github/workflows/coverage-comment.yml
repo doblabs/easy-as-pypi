@@ -8,7 +8,7 @@
 ---
 
 # USYNC: coverage-comment.yml name ↔ coverage-comment-external.yml on-workflow_run.
-name: "Attach PR coverage comment"
+name: "Attach Cov comment — Interal PR"
 
 on:
   pull_request:

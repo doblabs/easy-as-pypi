@@ -13,6 +13,8 @@
 #     checks|passing codecov|90% docs|passing release|v1.1.3 pypi|v1.1.3
 #       python|3.9|3.10|3.11 license|MIT
 #   So we'll do the same here (unlike other workflows whose names are capitalized)
+#   - I.e., rather than
+#     name: Checks — Unspecial Push
 name: checks
 
 on:
