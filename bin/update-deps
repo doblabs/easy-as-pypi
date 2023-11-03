@@ -138,6 +138,7 @@ update_deps_easy_as_pypi () {
 
   # IGNOR: ".github/README--github-variable-dump--example.rst"
   update-faithful-file ".github/dependabot.yml"
+  update-faithful-file ".github/doblabs-dependencies.yml"
   # IGNOR: ".github/disabled/coverity.yml"
   update-faithful-file ".github/workflows/checks-unspecial.yml"
   update-faithful-file ".github/workflows/checks-versioned.yml"
@@ -149,6 +150,8 @@ update_deps_easy_as_pypi () {
   update-faithful-file ".github/workflows/release-github.yml"
   update-faithful-file ".github/workflows/release-pypi.yml"
   update-faithful-file ".github/workflows/release-smoke-test.yml"
+  update-faithful-file ".github/workflows/update-cascade.yml"
+  update-faithful-file ".github/workflows/update-deps.yml"
 
   # *** .pyproject-doc8/ files
 
