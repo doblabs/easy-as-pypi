@@ -5,9 +5,9 @@
 
 ---
 
-name: Release build to GitHub
+name: Publish release to GitHub
 
-# Invoked from "Run checks" (checks.yml) workflow via job "uses" directive.
+# Invoked from "Checks — Runner" (checks.yml) workflow via job "uses" directive.
 # - Running from checks means this workflow never has to check state -- we
 #   know the tag is a version tag, and that the tag commit has passed checks.
 
