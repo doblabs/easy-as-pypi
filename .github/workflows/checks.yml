@@ -11,7 +11,7 @@
 #        - Except skip 'linkcheck', which usually fails before
 #          docs are published. Chicken before the egg.
 
-name: Run checks
+name: Checks — Runner
 
 on:
   workflow_call:

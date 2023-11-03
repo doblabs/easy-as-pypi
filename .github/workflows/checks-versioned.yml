@@ -6,7 +6,7 @@
 
 ---
 
-name: Run version tag checks and publish GitHub release
+name: Checks — Version Tag (and GH Rel)
 
 on:
   push:

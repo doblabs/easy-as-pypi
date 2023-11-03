@@ -6,7 +6,7 @@
 ---
 
 # USYNC: 'PyPI Release Smoke test'
-name: PyPI Release Smoke test
+name: PyPI Smoke test
 
 on:
   workflow_dispatch:
