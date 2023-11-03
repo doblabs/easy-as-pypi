@@ -30,7 +30,7 @@ Output::
      "actor_id": "129664",
      "actor": "landonb",
      "triggering_actor": "landonb",
-     "workflow": "Run checks",
+     "workflow": "Checks — Runner",
      "head_ref": "",
      "base_ref": "",
      "event_name": "push",

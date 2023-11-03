@@ -11,7 +11,7 @@
 #        - Except skip 'linkcheck', which usually fails before
 #          docs are published. Chicken before the egg.
 
-name: Run checks
+name: Checks — Runner
 
 on:
   workflow_call:
@@ -186,7 +186,7 @@ jobs:
   #
   #    on:
   #      workflow_run:
-  #        workflows: ["Run checks"]
+  #        workflows: ["Checks — Runner"]
   #        types:
   #          - completed
 

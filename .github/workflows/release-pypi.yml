@@ -10,7 +10,6 @@
 
 ---
 
-# USYNC: release-pypi.yml name ↔ run-reversioning.yml on-workflow_run.
 name: Publish release to PyPI
 
 # This workflow reacts to the 'release' event, which sets:
@@ -436,10 +435,10 @@ jobs:
       # REFER: https://cli.github.com/manual/gh_workflow_run
       - name: Run external smoke-test workflow
         run: |
-          # USYNC: 'PyPI Release Smoke test'
+          # USYNC: 'PyPI Smoke test'
           #
-          echo "gh workflow run 'PyPI Release Smoke test'"
-          gh workflow run 'PyPI Release Smoke test' \
+          echo "gh workflow run 'PyPI Smoke test'"
+          gh workflow run 'PyPI Smoke test' \
             -f "INDEX_PIP=${INDEX_PIP}" \
             -f "INDEX_PIPX=${INDEX_PIPX}" \
             -f "PACKAGE_NAME=${PACKAGE_NAME}" \
