@@ -210,4 +210,18 @@ jobs:
             || exit 1
         shell: bash
 
-# ***
+  # ***
+
+  update-cascade:
+    name: Run update & release cascade
+
+    uses: ./.github/workflows/update-cascade.yml
+    secrets: inherit
+
+    needs: [pip-smoke-test, pipx-smoke-test]
+
+    # Note the 'if' is skipped if any needs were skipped, unless always.
+    if: always()
+      && needs.pip-smoke-test.result == 'success'
+      && (needs.pipx-smoke-test.result == 'success'
+          || needs.pipx-smoke-test.result == 'skipped')
