@@ -1,0 +1,83 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release Cascade Updater
+
+on:
+  # Via update-cascade.yml
+  repository_dispatch:
+    types: [update-deps]
+
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
+jobs:
+  poetry-update:
+    name: Update lock deps
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # SAVVY: How we'd access repository_dispatch args if we needed to add any:
+      #  - run: |
+      #      echo "event.client_payload.sha: ${{ github.event.client_payload.sha }}"
+      #      echo "event.client_payload.ref: ${{ github.event.client_payload.ref }}"
+
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # token: ${{ github.token }}
+          token: ${{ secrets.USER_PAT }}
+          # persist-credentials: true
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Run bin/update-poetry
+        id: run-update-poetry
+        run: |
+          is_new_pr="$(./.github/bin/update-poetry)"
+          echo "is_new_pr=${is_new_pr}" >> $GITHUB_OUTPUT
+        env:
+          # So update-poetry can run gh.
+          # GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.USER_PAT }}
+          # FIXME/2023-11-04 02:36: Can I use both tokens?
+          # One for commit, one for PR, one for approve?
+          USER_TOKEN: ${{ secrets.USER_PAT }}
+          GBOT_TOKEN: ${{ github.token }}
+
+    outputs:
+      is_new_pr: ${{ steps.run-update-poetry.outputs.is_new_pr }}
+
+  # ***
+
+  # If no PR, continue cascade; otherwise update-merged.yml workflow
+  # will continue cascade after PR is merged, and new package version
+  # is released.
+  update-cascade:
+    name: "Cascade if !PR"
+
+    uses: ./.github/workflows/update-cascade.yml
+    secrets: inherit
+
+    needs: poetry-update
+
+    if: needs.poetry-update.outputs.is_new_pr == 'false'
