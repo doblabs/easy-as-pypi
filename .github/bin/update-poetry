@@ -1,0 +1,286 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+REPO_ORG_PROJ="doblabs/easy-as-pypi"
+
+source_deps () {
+  insist_cmd 'git'
+  insist_cmd 'poetry'
+  insist_cmd 'gh'
+
+  # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
+  insist_cmd 'realpath'
+
+  # For `print_canon_scoped_head` (which uses `identify_scope_ends_at` from git-put-wise).
+  # - Supports running this script on local Dev repo with PRIVATE commits.
+  # CXREF: ~/.kit/git/ohmyrepos/lib/update-faithful.sh
+  #   https://github.com/landonb/ohmyrepos#😤
+  . "$(dirname "$(realpath "$0")")/../../deps/git-update-faithful/lib/update-faithful.sh"
+
+# MAYBE/2023-11-03 15:59: Use git-nubs?
+  # # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
+  # insist_cmd 'realpath'
+  #
+  # # CXREF: https://github.com/landonb/sh-git-nubs#🌰
+  # #   ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
+  # . "$(dirname "$(realpath "$0")")/../deps/sh-git-nubs/bin/git-nubs.sh"
+}
+
+insist_cmd () {
+  local cmdname="$1"
+
+  command -v "${cmdname}" > /dev/null && return 0
+
+  >&2 echo "ERROR: Missing system command ‘${cmdname}’."
+
+  exit 1
+}
+
+# Program prints "true" or "false" to stdout for CI workflow.
+# Program prints to stderr for trace/progress messages.
+print_prog () {
+  >&2 printf "$1"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+update_poetry_update () {
+  assert_git_status_tidy
+
+  print_prog "poetry update... "
+
+  # Meh: We could restrict to updating just our org's repos,
+  # e.g., `poetry update doblabs/<pkg> doblabs/<pkg> ...`,
+  # but no reason not to update everything.
+  poetry update -q --lock
+
+  print_prog "✓\n"
+
+  # local git_status_output="$(git status --porcelain=v1)"
+
+  assert_git_status_0_or_1_changes
+
+  assert_git_status_only_poetry_lock_changed_if_any
+
+  if test -z "$(git status --porcelain=v1)"; then
+    echo "false"
+  else
+    local branch_name
+    branch_name="$(print_branch_name)"
+
+    local remote_name
+    remote_name="$(git_upstream_remote)"
+
+    prepare_branch "${branch_name}" "${remote_name}"
+
+    poetry_update_commit_changes "${branch_name}"
+
+    push_branch "${branch_name}"
+
+    gh_pr_create_and_auto_merge_when_checks_finish
+
+    resume_old_branch_and_cleanup "${branch_name}"
+
+    echo "true"
+  fi
+}
+
+# ***
+
+# FIXME/2023-11-03: Make the strings in functions below user-configurable,
+# including: Branch name, Commit message, PR name/title.
+
+print_branch_name () {
+  TTTtt0 () {
+    echo "$(date '+%Y%m%d%H%M')"
+  }
+
+  shorten_string () {
+    local string="$1"
+    local maxlen="${2:-12}"
+
+    printf "${string}" | sed -E 's/^(.{'${maxlen}'}).*/\1/g'
+  }
+
+  git_HEAD_commit_sha () {
+    git rev-parse HEAD
+  }
+
+  branch_name="update-deps/$(TTTtt0)/$(shorten_string "$(git_HEAD_commit_sha)")"
+
+  printf "%s" "${branch_name}"
+}
+
+prepare_branch () {
+  local branch_name="$1"
+  local remote_name="$2"
+
+  local scoped_head="HEAD"
+  scoped_head="$(print_canon_scoped_head ".")"
+
+  print_prog "git checkout -b ${branch_name} ${scoped_head}\n"
+
+  git checkout -q -b "${branch_name}" "${scoped_head}"
+}
+
+resume_old_branch_and_cleanup () {
+  local branch_name="$1"
+
+  git checkout -q -
+
+  # Hrmmm. Should we rebase? Delete local branch. Both? Neither?
+  # - LATER: Might need Big D.
+  # Ignore stderr message that -q doesn't inhibit:
+  #   warning: deleting branch 'update-deps/202311032330/8e1a81a0b299' that has been merged to
+  #            'refs/remotes/publish/update-deps/202311032330/8e1a81a0b299', but not yet merged to HEAD.
+  #
+  # FIXME/2023-11-03 23:41: Revisit this.
+  #  git branch -q -d "${branch_name}" 2> /dev/null
+}
+
+poetry_update_commit_changes () {
+  print_prog "git add poetry.lock\n"
+
+  git add poetry.lock
+
+  print_prog "git commit... "
+
+  git commit -q -m "Build: Deps: Update poetry.lock [update-deps cascade]"
+
+  print_prog "✓\n"
+}
+
+# ***
+
+push_branch () {
+  local branch_name="$1"
+
+  local remote_name
+remote_name="$(git_upstream_remote)"
+
+  print_prog "git push '${remote_name}'... "
+
+  # SILLY: Using URL, local repo won't update list of remote branches
+  # for associated remote, and then `git pr create` fails. So you need
+  # to use a remote name here...
+
+  # git push -q \
+  #   "git@github.com:doblabs/easy-as-pypi.git" \
+  #   "HEAD:refs/heads/${branch_name}"
+
+  # Even though --quiet, GH's message printed, e.g.,:
+  #   remote:
+  #   remote: Create a pull request for 'update-deps/202311032254/60a97a99c63d' on GitHub by visiting:
+  #   remote:      https://github.com/doblabs/easy-as-pypi/pull/new/update-deps/202311032254/60a97a99c63d
+  #   remote:
+
+  # Note the --set-upstream, avoids gh-pr-create asking which remote.
+
+  git push -q -u ${remote_name} "HEAD:refs/heads/${branch_name}" 2> /dev/null
+
+  print_prog "✓\n"
+}
+
+# Look for the org/proj remote name.
+git_upstream_remote () {
+  git remote -v \
+    | grep \
+        -e "[[:space:]]git@.*:${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "github.com/${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+    | sed 's/^\([^[:space:]]\+\).*/\1/'
+}
+
+# ***
+
+gh_pr_create_and_auto_merge_when_checks_finish () {
+  local pr_title="Build: Bump poetry.lock (bump all)"
+  local pr_body="Cascading release"
+  local new_pr_url
+
+  local label_name="poetry.lock"
+
+  print_prog "gh label create ${label_name}...\n"
+
+  gh label create -f \
+    "${label_name}" \
+    --description "Pull requests that update poetry.lock" \
+    --color 74e34f
+
+  # --base is new branch's tracking branch, aka default branching
+  # (assuming running from GH Action that checked out the default
+  # branch).
+
+  print_prog "gh pr create --title \"${pr_title}\" --body \"${pr_body}\"\n"
+
+  new_pr_url="$(
+    gh pr create \
+      --title "${pr_title}" \
+      --body "${pr_body}" \
+      --label "${label_name}" \
+    | tail -1
+  )"
+
+  print_prog "gh pr merge \"${new_pr_url}\" --auto --delete-branch --rebase\n"
+
+  gh pr merge "${new_pr_url}" --auto --delete-branch --rebase
+
+  print_prog "New PR\n  ${new_pr_url}\n"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+assert_git_status_tidy () {
+  test -z "$(git status --porcelain=v1)" \
+    && return 0
+
+  >&2 echo "ERROR: $(basename "$0") requires a tidy repo"
+
+  exit 1
+}
+
+# Overly cautious git-status check (expect 0 or 1 changes).
+assert_git_status_0_or_1_changes () {
+  test $(git status --porcelain=v1 | wc -l) -le 1 \
+    && return 0 || true
+
+  >&2 echo "ERROR: Unexpected: More than 1 file changed by poetry-update?!"
+
+  exit 1
+}
+
+# Overly cautious git-status check (expect only poetry.lock).
+assert_git_status_only_poetry_lock_changed_if_any () {
+  test -z "$(git status --porcelain=v1)" \
+    && return 0 || true
+
+  test "$(git status --porcelain=v1)" = " M poetry.lock" \
+    && return 0 || true
+
+  >&2 echo "ERROR: Unexpected: poetry.lock is not sole change after poetry-update?!"
+
+  exit 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  set -e
+
+  source_deps
+
+  update_poetry_update "$@"
+}
+
+# Run the command iff being executed.
+if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
+  main "$@"
+fi
+
+unset -f main
+unset -f source_deps
+unset -f insist_cmd
+
