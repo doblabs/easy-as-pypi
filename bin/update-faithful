@@ -139,6 +139,7 @@ update_deps_easy_as_pypi () {
   # IGNOR: ".github/README--github-variable-dump--example.rst"
   update-faithful-file ".github/dependabot.yml"
   update-faithful-file ".github/doblabs-dependencies.yml"
+  update-faithful-file ".github/bin/update-poetry"
   # IGNOR: ".github/disabled/coverity.yml"
   update-faithful-file ".github/workflows/checks-unspecial.yml"
   update-faithful-file ".github/workflows/checks-versioned.yml"
