@@ -171,7 +171,7 @@ main () {
   update_deps_easy_as_pypi "$@"
 }
 
-# Run the update-deps iff being executed.
+# Run the command iff being executed.
 if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
   main "$@"
 fi
