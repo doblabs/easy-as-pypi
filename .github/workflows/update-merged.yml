@@ -77,6 +77,57 @@ jobs:
 
   # ***
 
+  # The workflow runs on *all* closed PRs, so we need to filter.
+  #
+  # - We'll skip the job itself if the PR is obviously inactionable:
+  #
+  #   - Check that the PR was merged. If not, there's nothing to do.
+  #
+  #   - Look for the poetry.lock tag, added by .github/bin/update-poetry.
+  #
+  # - We'll run the job but fail if the tagged and merged PR looks fishy:
+  #
+  #   - Verify the tag name matches the .github/bin/update-poetry format.
+  #     E.g.,
+  #
+  #       $ jq .event.pull_request.head.ref pull_request.json
+  #       "update-deps/202311041112/9f9255a89e96"
+  #
+  #       $ jq .head_ref pull_request.json
+  #       "update-deps/202311041112/9f9255a89e96"
+  #
+  # - There are a few more items we could verify, but currently don't:
+  #
+  #   - Verify it's the same user that update-poetry uses to make the PR.
+  #     E.g.,
+  #
+  #       $ jq .event.pull_request.user.login pull_request.json
+  #       "user"
+  #
+  #       # DUNNO: Are these the workflow actors? Do they always match
+  #       #   the PR user? Does the workflow runs as user who committed
+  #       #   HEAD? I should read up, and test with separate GH user.
+  #       $ jq .actor pull_request.json
+  #       "user"
+  #       $ jq .triggering_actor pull_request.json
+  #       "user"
+  #
+  #   - Verify the auto-merge properties:
+  #
+  #       $ jq .event.pull_request.auto_merge.enabled_by.login pull_request.json
+  #       "user"
+  #
+  #       $ jq .event.pull_request.auto_merge.merge_method pull_request.json
+  #       "rebase"
+  #
+  #   - Verify PR title and body
+  #
+  #       $ jq .event.pull_request.title pull_request.json
+  #       "Build: Bump poetry.lock (bump all)"
+  #
+  #       $ jq .event.pull_request.body pull_request.json
+  #       "Cascading release"
+
   if_merged:
 
     if: github.event.pull_request.merged == true
@@ -85,12 +136,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: |
-          echo "The PR was merged, and labeled poetry.lock"
+      - run: echo "The PR was merged, and labeled poetry.lock"
 
-      # FIXME: Inspect dump for something to ID PR as update-deps.
-      #
-      #  pull_request.sender
+      # Verify tag name looks like one of ours.
+      - name: Verify tag name format — “${{ github.head_ref }}”
+        run: |
+          echo "${HEAD_REF}" | grep -E -e "^update-deps/[0-9]{12}/[0-9a-f]{12}$"
+        env:
+          HEAD_REF: ${{ github.head_ref }}
 
       - name: Checkout this repo
         uses: actions/checkout@v3
@@ -137,4 +190,4 @@ jobs:
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
-          git bump s
+          git bump-version-tag s
