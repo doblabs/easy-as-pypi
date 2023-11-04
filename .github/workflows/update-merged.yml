@@ -179,7 +179,6 @@ jobs:
           # Relative path under $GITHUB_WORKSPACE to place the repository.
           path: 'versioner'
 
-
       - name: Install Dunamai
         run: pipx install dunamai
 
@@ -187,4 +186,6 @@ jobs:
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
+          set -x
           git bump-version-tag s
+          set +x
