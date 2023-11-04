@@ -14,6 +14,8 @@ on:
   # Via GitHub Actions website button
   workflow_dispatch:
 
+run-name: 👣 — 1.) Cascade Dispatch
+
 jobs:
   identify-downstream-repos:
     name: "Find Cascade repos"
