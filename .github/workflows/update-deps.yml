@@ -36,9 +36,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.repository.default_branch }}
-          # token: ${{ github.token }}
+          # Use the user token, not ${{ github.token }}, so that
+          # git-push triggers workflow events. (Though TBH I don't
+          # remember if it's the token setting here or the one on
+          # bin/update-poetry, below that does this.)
+          #  token: ${{ github.token }}
           token: ${{ secrets.USER_PAT }}
-          # persist-credentials: true
 
       - name: Install poetry
         run: pipx install poetry
@@ -56,19 +59,10 @@ jobs:
           is_new_pr="$(./.github/bin/update-poetry)"
           echo "is_new_pr=${is_new_pr}" >> $GITHUB_OUTPUT
         env:
-          # So update-poetry can run gh.
-          # GH_TOKEN: ${{ github.token }}
-          GH_TOKEN: ${{ secrets.USER_PAT }}
-          # Send both tokens:
-          # - User PAT used so git-commit triggers checks workflow (so PR
-          #   can auto-merge, because GH token inhibits workflow events);
-          # - User PAT used to create PR, and GH token used to approve it
-          #   (to get around Branch protection approval-required rule, if
-          #   set).
-          #   - Note if GH token creates PR and User PAT approves,
-          #     PR-closed workflow will not run (for reason stated above,
-          #     that GH token inhibits workflow events).
-          # One for commit, one for PR, one for approve?
+          # Send tokens so update-poetry can run gh.
+          #  GH_TOKEN: ${{ github.token }}
+          #  GH_TOKEN: ${{ secrets.USER_PAT }}
+          # Send both tokens: See update-poetry `gh` comments for why.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
 
@@ -81,7 +75,7 @@ jobs:
   # will continue cascade after PR is merged, and new package version
   # is released.
   update-cascade:
-    name: "Cascade if !PR"
+    name: "Cascade maybe"
 
     uses: ./.github/workflows/update-cascade.yml
     secrets: inherit

@@ -33,24 +33,11 @@ jobs:
         env:
           GITHUB_OBJ: ${{ toJson(github) }}
 
-      - name: Dump env
-        run: |
-          echo XXXXXXXX hostname
-          hostname
-          echo XXXXXXXX pwd
-          pwd
-          echo XXXXXXXX ls -la
-          ls -la
-          echo XXXXXXXX set
-          set
-          echo XXXXXXXX env
-          env
-          echo XXXXXXXX set | sort
-          set | sort
-          echo XXXXXXXX env | sort
-          env | sort
-          echo XXXXXXXX
+      - name: Dump PR labels
+        run: echo "${GITHUB_OBJ}"
         shell: bash
+        env:
+          GITHUB_OBJ: ${{ toJson(github.event.pull_request.labels) }}
 
   # ***
 

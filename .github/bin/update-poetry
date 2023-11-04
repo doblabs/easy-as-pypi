@@ -5,7 +5,16 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-REPO_ORG_PROJ="doblabs/easy-as-pypi"
+# FIXME/2023-11-04 04:43: Customize this for each project.
+REPO_ORG_PROJ="${REPO_ORG_PROJ:-doblabs/easy-as-pypi}"
+
+UPDEPS_LABEL_NAME="poetry.lock"
+
+# FIXME/2023-11-04: Let user set these, somehow.
+UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
+UPDEPS_USER_NAME="update-poetry"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 source_deps () {
   insist_cmd 'git'
@@ -62,8 +71,6 @@ update_poetry_update () {
 
   print_prog "✓\n"
 
-  # local git_status_output="$(git status --porcelain=v1)"
-
   assert_git_status_0_or_1_changes
 
   assert_git_status_only_poetry_lock_changed_if_any
@@ -92,9 +99,6 @@ update_poetry_update () {
 }
 
 # ***
-
-# FIXME/2023-11-03: Make the strings in functions below user-configurable,
-# including: Branch name, Commit message, PR name/title.
 
 TTTtt0 () {
   echo "$(date '+%Y%m%d%H%M')"
@@ -134,14 +138,14 @@ resume_old_branch_and_cleanup () {
 
   git checkout -q -
 
-  # Hrmmm. Should we rebase? Delete local branch. Both? Neither?
-  # - LATER: Might need Big D.
-  # Ignore stderr message that -q doesn't inhibit:
-  #   warning: deleting branch 'update-deps/202311032330/8e1a81a0b299' that has been merged to
-  #            'refs/remotes/publish/update-deps/202311032330/8e1a81a0b299', but not yet merged to HEAD.
-  #
-  # FIXME/2023-11-03 23:41: Revisit this.
-  #  git branch -q -d "${branch_name}" 2> /dev/null
+  # Delete local branch when this script is run from user terminal (not from GHA).
+  if test -z "${GITHUB_ACTIONS}"; then
+    # FIXME: Might need Big D.
+    # Ignore stderr message that -q doesn't inhibit:
+    #   warning: deleting branch 'foo' that has been merged to
+    #            'refs/remotes/origin/foo', but not yet merged to HEAD.
+    git branch -q -d "${branch_name}" 2> /dev/null
+  fi
 }
 
 poetry_update_commit_changes () {
@@ -151,22 +155,38 @@ poetry_update_commit_changes () {
 
   print_prog "git commit... "
 
-  local commit_user=""
-  local user_email="landonb@users.noreply.github.com"
-  local user_name="bin/update-poetry"
+  # REFER/2023-11-04: I found GITHUB_ACTIONS when inspecting GHA runtime
+  #                   with `env`, not sure if it's documented.
 
-  if test -z "$(git config user.email)"; then
-    commit_user="-c user.email=\"${user_email}\" -c user.name=\"${user_name}\""
+  if ${GITHUB_ACTIONS:-false} \
+    && test -z "$(git config user.email)" \
+    && test -z "$(git config user.name)" \
+  ; then
+    # We could use git's -c option, e.g.,
+    #   local commit_user=""
+    #   commit_user="-c user.email=\"${email}\" -c user.name=\"${name}\""
+    # but then we'd need to use eval because of the embedded quotes, e.g.,
+    #   # Using eval, because of the possibly empty string commit_user.
+    #   eval "git ${commit_user} commit -q -m "..."
+    # So we'll go the cleaner route.
+    git config user.email "${UPDEPS_USER_EMAIL}"
+    git config user.name "${UPDEPS_USER_NAME}"
   fi
 
-  # Using eval, because of the possibly empty string commit_user.
-  eval "git ${commit_user} commit -q \
-    -m \"Build: Deps: Update poetry.lock [update-deps cascade]\""
+  git commit -q -m "Build: Deps: Update poetry.lock [update-deps cascade]"
 
   print_prog "✓\n"
 }
 
 # ***
+
+# SAVVY: We'll look for the remote name that uses a GitHub URL and
+# assume that's the github.com/<org>/<proj> repo.
+# - For a GitHub Actions workflow, this'll be the default 'origin'
+#   remote.
+# - But when run from a local dev terminal, don't assume what remote
+#   they're using (e.g., the author has a *system* and doesn't use
+#   'origin', but uses different remote names for different purposes).
 
 push_branch () {
   local branch_name="$1"
@@ -176,28 +196,28 @@ push_branch () {
 
   print_prog "git push '${remote_name}'... "
 
-  # SILLY: Using URL, local repo won't update list of remote branches
-  # for associated remote, and then `git pr create` fails. So you need
-  # to use a remote name here...
-
-  # git push -q \
-  #   "git@github.com:doblabs/easy-as-pypi.git" \
-  #   "HEAD:refs/heads/${branch_name}"
-
-  # Even though --quiet, GH's message printed, e.g.,:
+  # Even though --quiet, any message from the remote is printed to stderr, e.g.,:
   #   remote:
-  #   remote: Create a pull request for 'update-deps/202311032254/60a97a99c63d' on GitHub by visiting:
-  #   remote:      https://github.com/doblabs/easy-as-pypi/pull/new/update-deps/202311032254/60a97a99c63d
+  #   remote: Create a pull request for 'foo' on GitHub by visiting:
+  #   remote:      https://github.com/doblabs/easy-as-pypi/pull/new/foo
   #   remote:
 
-  # Note the --set-upstream, avoids gh-pr-create asking which remote.
+  # Note the -u/--set-upstream, which avoids gh-pr-create asking which remote.
+
+  # Note the workflow caller called checkout using the classic user token
+  # (with 'public_repo' access), and not the default github-actions token.
+  # By using a personal access token, the git-push triggers our 'checks'
+  # workflow to run. (The normal GH_TOKEN=${{ github.token }} inhibits
+  # workflow events.)
 
   git push -q -u ${remote_name} "HEAD:refs/heads/${branch_name}" 2> /dev/null
 
   print_prog "✓\n"
 }
 
-# Look for the org/proj remote name.
+# Look for the GH.com/org/proj remote name.
+# - We assume it's the one using the git@ SSH creds,
+#   or has github.com/ in its path.
 git_upstream_remote () {
   git remote -v \
     | grep \
@@ -208,71 +228,115 @@ git_upstream_remote () {
 
 # ***
 
+# We use 2 different GH tokens for git and `gh` commands:
+# - We used User PAT for git-checkout so that git-commit triggers
+#   workflow events (and our 'checks' in particular, so PR checks
+#   pass, auto-merge trigger). When authenticated by the default
+#   github.token, git-push inhibits workflow events.
+# - In the function below, the User PAT is used to create the PR,
+#   but the GH token is used to approve it. This gets around the
+#   Branch protection approval-required rule, if it's set.
+#   - Note if the tokens were reversed -- if the GH token creates PR
+#     and the User PAT approves the PR, then the PR-closed workflow
+#     will not run (for the reason stated above, because the GH token
+#     inhibits workflow events).
+#   - Furthermore, because GH token created the PR, GH token owns the
+#     auto-merge, and Git history shows it. E.g., GH commit history
+#     shows "user authored and github-actions[bot] committed", vs.
+#     what you'd probably like to see, e.g., "user committed". Indeed,
+#     in the Git history, the Committer is the git-commit user from
+#     this script, and the Author is whoever owns the auto-merge PR..
+
+# REFER/CXREF:
+#   If you do want to trigger a workflow from within a workflow run, you can
+#   use a GitHub App installation access token or a personal access token
+#   instead of GITHUB_TOKEN to trigger events that require a token.
+# https://docs.github.com/en/actions/using-workflows/triggering-a-workflow#triggering-a-workflow-from-a-workflow
+# https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
+
 gh_pr_create_and_auto_merge_when_checks_finish () {
-  local label_name="poetry.lock"
+  gh_label_create
 
-  print_prog "gh label create ${label_name}...\n"
+  local new_pr_url
+  new_pr_url="$(gh_pr_create)"
 
+  gh_pr_set_auto_merge_delete_rebase "${new_pr_url}"
+
+  gh_pr_approve "${new_pr_url}"
+
+  print_prog "New PR\n  ${new_pr_url}\n"
+}
+
+gh_label_create () {
+  print_prog "gh label create ${UPDEPS_LABEL_NAME}...\n"
+
+  # Here's the label that dependabot uses, for reference:
+  #
+  #   gh label create \
+  #     "dependencies" \
+  #     --description "Pull requests that update a dependency file" \
+  #     --color 0366d6
+
+  GH_TOKEN=${USER_TOKEN} \
   gh label create -f \
-    "${label_name}" \
+    "${UPDEPS_LABEL_NAME}" \
     --description "Pull requests that update poetry.lock" \
     --color 74e34f
+}
 
-  # ***
-
+gh_pr_create () {
   local pr_title="Build: Bump poetry.lock (bump all)"
   local pr_body="Cascading release"
   local new_pr_url
 
-  # --base is new branch's tracking branch, aka default branching
-  # (assuming running from GH Action that checked out the default
-  # branch).
-
-  # PR is by 'github-actions' bot user.
-
   print_prog "gh pr create --title \"${pr_title}\" --body \"${pr_body}\"\n"
+
+  # Create PR from user PAT so on auto-merge, it triggers workflow events.
 
   new_pr_url="$(
     GH_TOKEN=${USER_TOKEN} \
     gh pr create \
       --title "${pr_title}" \
       --body "${pr_body}" \
-      --label "${label_name}" \
+      --label "${UPDEPS_LABEL_NAME}" \
     | tail -1
   )"
 
-  # ***
+  printf "%s" "${new_pr_url}"
+}
+
+gh_pr_set_auto_merge_delete_rebase () {
+  local new_pr_url="$1"
 
   print_prog "gh pr merge \"${new_pr_url}\" --auto --delete-branch --rebase\n"
 
   GH_TOKEN=${USER_TOKEN} \
   gh pr merge "${new_pr_url}" --auto --delete-branch --rebase
+}
 
-  # ***
+# CXREF: https://github.com/doblabs/easy-as-pypi/settings/actions
+#   ✓ Allow GitHub Actions to create and approve pull requests
+# - Albeit trying to run from a user terminal:
+#     failed to create review: GraphQL:
+#       Can not approve your own pull request (addPullRequestReview)
+#   Because Branch protection rules require one reviewer, who cannot
+#   be creater.
+#   - So always be truthy (|| true), becayse this may fail when run
+#     locally, i.e., from user terminal and not from GH Actions, if
+#     Branch protection rules require at least 1 reviewer (because
+#     users cannot approve their own PRs, and when run locally,
+#     pr-create and pr-review run as same user most likely).
+gh_pr_approve () {
+  local new_pr_url="$1"
 
   print_prog "gh pr review --approve \"${new_pr_url}\" --comment \"LGTM!\"\n"
 
-  # CXREF: https://github.com/doblabs/easy-as-pypi/settings/actions
-  #   ✓ Allow GitHub Actions to create and approve pull requests
-  # - Albeit trying to run from a user terminal:
-  #     failed to create review: GraphQL:
-  #       Can not approve your own pull request (addPullRequestReview)
-  #   Because Branch protection rules require one reviewer, who cannot
-  #   be creater.
-
-  # Always be truthy. This may fail when run locally, i.e., from user
-  # terminal and not from GH Actions, if Branch protection rules require
-  # at least 1 reviewer (because users cannot approve their own PRs,
-  # and when run locally pr-create and pr-review run as same user most
-  # likely).
+  # Approve PR using github-actions bot, to bypass anti-self-approve
+  # branch protection rule.
 
   GH_TOKEN=${GBOT_TOKEN} \
   gh pr review "${new_pr_url}" --approve --body "LGTM!" \
     || true
-
-  # ***
-
-  print_prog "New PR\n  ${new_pr_url}\n"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
