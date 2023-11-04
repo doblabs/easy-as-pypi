@@ -15,6 +15,8 @@ on:
   # Via GitHub Actions website button
   workflow_dispatch:
 
+run-name: 👣 — 2.) Cascade Updater
+
 env:
   # USYNC: https://github.com/actions/python-versions/releases
   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
