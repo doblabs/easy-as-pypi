@@ -33,11 +33,40 @@ jobs:
         env:
           GITHUB_OBJ: ${{ toJson(github) }}
 
-      - name: Dump PR labels
+      # github.event.pull_request.labels
+      #   [
+      #     {
+      #       "color": "74e34f",
+      #       "default": false,
+      #       "description": "Pull requests that update poetry.lock",
+      #       "id": 6167414326,
+      #       "name": "poetry.lock",
+      #       "node_id": "LA_kwDOJnqmuc8AAAABb5tGNg",
+      #       "url":
+      #         "https://api.github.com/repos/doblabs/easy-as-pypi/labels/poetry.lock"
+      #     }
+      #   ],
+      - name: Dump PR labels objects
         run: echo "${GITHUB_OBJ}"
         shell: bash
         env:
           GITHUB_OBJ: ${{ toJson(github.event.pull_request.labels) }}
+
+      - name: Dump PR labels names
+        run: echo "names: ${GITHUB_OBJ}"
+        shell: bash
+        env:
+          GITHUB_OBJ: ${{ toJson(github.event.pull_request.labels.*.name) }}
+
+      - name: Has poetry.lock label
+        run: echo "has/1: ${GITHUB_OBJ}"
+        shell: bash
+        env:
+          GITHUB_OBJ: ${{ contains(github.event.pull_request.labels.*.name, 'poetry.lock') }}
+
+      - name: Has poetry.lock label
+        run: echo "has/2: ${{ contains(github.event.pull_request.labels.*.name, 'poetry.lock') }}"
+        shell: bash
 
   # ***
 
