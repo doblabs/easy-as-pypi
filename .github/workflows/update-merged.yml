@@ -17,6 +17,9 @@ on:
     types:
       - closed
 
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
 run-name: 👣 — 3.) Cascade Versioner
 
 # env:
@@ -24,113 +27,62 @@ run-name: 👣 — 3.) Cascade Versioner
 #   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
 #   PYTHON_VERSION: 3.11
 
+# The workflow runs on *all* closed PRs, so we need to filter.
+#
+# - We'll skip the job itself if the PR is obviously inactionable:
+#
+#   - Check that the PR was merged. If not, there's nothing to do.
+#
+#   - Look for the poetry.lock tag, added by .github/bin/update-poetry.
+#
+# - We'll run the job but fail if the tagged and merged PR looks fishy:
+#
+#   - Verify the tag name matches the .github/bin/update-poetry format.
+#     E.g.,
+#
+#       $ jq .event.pull_request.head.ref pull_request.json
+#       "update-deps/202311041112/9f9255a89e96"
+#
+#       $ jq .head_ref pull_request.json
+#       "update-deps/202311041112/9f9255a89e96"
+#
+# - There are a few more items we could verify, but currently don't:
+#
+#   - Verify it's the same user that update-poetry uses to make the PR.
+#     E.g.,
+#
+#       $ jq .event.pull_request.user.login pull_request.json
+#       "user"
+#
+#       # DUNNO: Are these the workflow actors? Do they always match
+#       #   the PR user? Does the workflow runs as user who committed
+#       #   HEAD? I should read up, and test with separate GH user.
+#       $ jq .actor pull_request.json
+#       "user"
+#       $ jq .triggering_actor pull_request.json
+#       "user"
+#
+#   - Verify the auto-merge properties:
+#
+#       $ jq .event.pull_request.auto_merge.enabled_by.login pull_request.json
+#       "user"
+#
+#       $ jq .event.pull_request.auto_merge.merge_method pull_request.json
+#       "rebase"
+#
+#   - Verify PR title and body
+#
+#       $ jq .event.pull_request.title pull_request.json
+#       "Build: Bump poetry.lock (bump all)"
+#
+#       $ jq .event.pull_request.body pull_request.json
+#       "Cascading release"
 jobs:
-  blather:
-    name: Blather
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump github object
-        run: echo "${GITHUB_OBJ}"
-        shell: bash
-        env:
-          GITHUB_OBJ: ${{ toJson(github) }}
 
-      # github.event.pull_request.labels
-      #   [
-      #     {
-      #       "color": "74e34f",
-      #       "default": false,
-      #       "description": "Pull requests that update poetry.lock",
-      #       "id": 6167414326,
-      #       "name": "poetry.lock",
-      #       "node_id": "LA_kwDOJnqmuc8AAAABb5tGNg",
-      #       "url":
-      #         "https://api.github.com/repos/doblabs/easy-as-pypi/labels/poetry.lock"
-      #     }
-      #   ],
-      - name: Dump PR labels objects
-        run: echo "${GITHUB_OBJ}"
-        shell: bash
-        env:
-          GITHUB_OBJ: ${{ toJson(github.event.pull_request.labels) }}
+  verify-merged-pr:
 
-      - name: Dump PR labels names
-        run: echo "names ${GITHUB_OBJ}"
-        shell: bash
-        env:
-          GITHUB_OBJ: ${{ toJson(github.event.pull_request.labels.*.name) }}
-
-      - name: Has poetry.lock label
-        run: echo "has/1 ${GITHUB_OBJ}"
-        shell: bash
-        env:
-          GITHUB_OBJ: "${{
-            contains(github.event.pull_request.labels.*.name, 'poetry.lock')
-          }}"
-
-      - name: Has poetry.lock label
-        run: |
-          echo "has/2 ${{
-            contains(github.event.pull_request.labels.*.name, 'poetry.lock')
-          }}"
-        shell: bash
-
-  # ***
-
-  # The workflow runs on *all* closed PRs, so we need to filter.
-  #
-  # - We'll skip the job itself if the PR is obviously inactionable:
-  #
-  #   - Check that the PR was merged. If not, there's nothing to do.
-  #
-  #   - Look for the poetry.lock tag, added by .github/bin/update-poetry.
-  #
-  # - We'll run the job but fail if the tagged and merged PR looks fishy:
-  #
-  #   - Verify the tag name matches the .github/bin/update-poetry format.
-  #     E.g.,
-  #
-  #       $ jq .event.pull_request.head.ref pull_request.json
-  #       "update-deps/202311041112/9f9255a89e96"
-  #
-  #       $ jq .head_ref pull_request.json
-  #       "update-deps/202311041112/9f9255a89e96"
-  #
-  # - There are a few more items we could verify, but currently don't:
-  #
-  #   - Verify it's the same user that update-poetry uses to make the PR.
-  #     E.g.,
-  #
-  #       $ jq .event.pull_request.user.login pull_request.json
-  #       "user"
-  #
-  #       # DUNNO: Are these the workflow actors? Do they always match
-  #       #   the PR user? Does the workflow runs as user who committed
-  #       #   HEAD? I should read up, and test with separate GH user.
-  #       $ jq .actor pull_request.json
-  #       "user"
-  #       $ jq .triggering_actor pull_request.json
-  #       "user"
-  #
-  #   - Verify the auto-merge properties:
-  #
-  #       $ jq .event.pull_request.auto_merge.enabled_by.login pull_request.json
-  #       "user"
-  #
-  #       $ jq .event.pull_request.auto_merge.merge_method pull_request.json
-  #       "rebase"
-  #
-  #   - Verify PR title and body
-  #
-  #       $ jq .event.pull_request.title pull_request.json
-  #       "Build: Bump poetry.lock (bump all)"
-  #
-  #       $ jq .event.pull_request.body pull_request.json
-  #       "Cascading release"
-
-  if_merged:
-
-    if: github.event.pull_request.merged == true
+    if: github.event_name != 'workflow_dispatch'
+      && github.event.pull_request.merged == true
       && contains(github.event.pull_request.labels.*.name, 'poetry.lock')
 
     runs-on: ubuntu-latest
@@ -145,7 +97,29 @@ jobs:
         env:
           HEAD_REF: ${{ github.head_ref }}
 
-      # ***
+      # Steps are designed to exit nonzero to fail, so if we made it
+      # this far, we're verified.
+
+      # FIXME/2023-11-04 17:43: VERIFY
+      - run: false
+
+    # outputs:
+    #   bump_worthy: ${{ steps.run-update-poetry.outputs.is_new_pr }}
+
+# ***
+
+  bump-version-maybe:
+
+    runs-on: ubuntu-latest
+
+    needs: [verify-merged-pr]
+
+    if: always()
+      && (github.event_name == 'workflow_dispatch'
+          || needs.verify-merged-pr.result == 'success'
+         )
+
+    steps:
 
       - name: Checkout this repo
         uses: actions/checkout@v3
