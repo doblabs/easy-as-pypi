@@ -6,8 +6,27 @@
 
 ---
 
+# Beneath each org/repo: key is a list of downstream projects, with
+# generally all but one of the downstream projects comment-disabled.
+# In this way we'll chain project releases together, one-by-one, as
+# opposed to notifying *every* downstream project for each project.
+# (Otherwise some downstream projects would unnecessarily run more
+# times than we need (which is once each).)
+# - Note where the whole list of downstream projects is disabled
+#   and a closer downstream project is listed instead, so that
+#   we visit every project once in its stream order, e.g.,:
+#     easy-as-pypi → easy-as-pypi-appdirs → easy-as-pypi-config →
+#       easy-as-pypi-getver → easy-as-pypi-termio  → nark →
+#         dob-bright → dob-prompt → dob-viewer → dob
+#   - I.e., if you release easy-as-pypi, then we'll visit each
+#     project as listed until we eventually update and release
+#     dob.
 
 # ***
+
+# These projects are not based on easy-as-pypi boilerplate, so
+# releasing one of these causes its closest downstream user to be
+# notified (so we skip over the beginning of the easy-as-pypi chain).
 
 doblabs/ansi-escape-room:
   - doblabs/easy-as-pypi-termio
