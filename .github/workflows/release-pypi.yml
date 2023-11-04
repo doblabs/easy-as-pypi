@@ -97,8 +97,9 @@ jobs:
       # MEH: We could support HEAD not being tagged (e.g., user wants to
       # tag and release previous commit) if we looked instead for highest
       # version tag. But it's a handful of shell code to copy here.
-      # - CXREF: ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
-      #     git_latest_version_tag
+      # - CXREF: https://github.com/landonb/sh-git-nubs#🌰
+      #     ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
+      #       git_latest_version_tag
       - name: Fail if VERSION_TAG undiscoverable
         run: exit 1
         if: env.VERSION_TAG == ''
