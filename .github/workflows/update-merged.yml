@@ -17,6 +17,8 @@ on:
     types:
       - closed
 
+run-name: 👣 — 3.) Cascade Versioner
+
 # env:
 #   # USYNC: https://github.com/actions/python-versions/releases
 #   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
@@ -76,11 +78,15 @@ jobs:
   # ***
 
   if_merged:
+
     if: github.event.pull_request.merged == true
+      && contains(github.event.pull_request.labels.*.name, 'poetry.lock')
+
     runs-on: ubuntu-latest
+
     steps:
       - run: |
-          echo "The PR was merged"
+          echo "The PR was merged, and labeled poetry.lock"
 
       # FIXME: Inspect dump for something to ID PR as update-deps.
       #
@@ -89,7 +95,46 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          # ref: ${{ github.event.repository.default_branch }}
           # Fetch all history, so rev-parse HEAD is real HEAD,
           # and we get tag history.
           fetch-depth: 0
+          # FIXME/2023-11-04 05:47: We may need user token
+          # so git-push tag triggers release workflow.
+          token: ${{ secrets.USER_PAT }}
+          #
+          #
+          path: 'versionee'
+
+      - name: Checkout git-bump
+        uses: actions/checkout@v3
+        with:
+          repository: 'landonb/git-bump-version-tag'
+          # The branch, tag or SHA to checkout. Defaults to default branch.
+          #  ref: ''
+          # Relative path under $GITHUB_WORKSPACE to place the repository
+          path: 'versioner'
+
+      # '/home/runner/work/easy-as-pypi/easy-as-pypi/'
+      - name: Dump github.workspace
+        run: echo "${{ github.workspace }}"
+
+      - name: Dump paths...
+        run: |
+          echo ls -la "${{ github.workspace }}"
+          ls -la "${{ github.workspace }}"
+          # echo ls -la "/home/runner/work/easy-as-pypi"
+          # ls -la "/home/runner/work/easy-as-pypi"
+          # echo ls -la "/home/runner/work"
+          # ls -la "/home/runner/work"
+          #
+          echo ls -la "${{ github.workspace }}/versionee"
+          ls -la "${{ github.workspace }}/versionee"
+          echo ls -la "${{ github.workspace }}/versioner"
+          ls -la "${{ github.workspace }}/versioner"
+
+      - name: Bump it...
+        run: |
+          export PATH="$(pwd)/versioner/bin:${PATH}"
+          cd ./versionee/
+          git bump s
