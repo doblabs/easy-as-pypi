@@ -1,0 +1,46 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release Cascade Versioner
+
+on:
+
+# FIXME/2023-11-03 16:47: We want pull_request vs. pull_request_target, right?
+# - I think pull_request is the (more) secure version.
+
+  # CXREF: https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#
+  #          running-your-pull_request-workflow-when-a-pull-request-merges
+  pull_request:
+    types:
+      - closed
+
+# env:
+#   # USYNC: https://github.com/actions/python-versions/releases
+#   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+#   PYTHON_VERSION: 3.11
+
+jobs:
+  blather:
+    name: Blather
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump github.event
+        run: echo "${{ toJson(github.event) }}"
+
+  # ***
+
+  if_merged:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+    - run: |
+        echo "The PR was merged"
+
+
+        # FIXME: Dump object, look for something to ID PR as update-deps
+        # pull_request.sender
+

@@ -1,0 +1,296 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+# FIXME/2023-11-03 13:43:
+#   Build: CI: Improve: Add downstream dependency update workflow
+
+name: Release Cascade Updater
+
+on:
+  # Via update-cascade.yml
+  repository_dispatch:
+    types: [update-deps]
+
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
+jobs:
+  poetry-update:
+    name: Update organizational dependencies
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # SAVVY: How we'd access args if we needed to add any:
+      #  - run: |
+      #      echo "github.event.client_payload.sha: ${{ github.event.client_payload.sha }}"
+      #      echo "github.event.client_payload.ref: ${{ github.event.client_payload.ref }}"
+
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # Fetch all history, so rev-parse HEAD is real HEAD.
+          fetch-depth: 0
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      # - name: Install poetry-dynamic-versioning
+      #   run: poetry self add "poetry-dynamic-versioning[plugin]"
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Run bin/update-poetry
+        id: run-update-poetry
+        run: |
+          echo "is_new_pr=$(./.github/workflows/bin/update-poetry)" \
+            >> $GITHUB_OUTPUT
+
+    outputs:
+      is_new_pr: ${{ steps.run-update-poetry.outputs.is_new_pr }}
+
+  # ***
+
+  # If no PR, continue cascade; otherwise another workflow will.
+  update-cascade:
+    name: Continue the release cascade if no PR
+
+    uses: ./.github/workflows/update-cascade.yml
+    secrets: inherit
+
+    needs: poetry-update
+
+    if: needs.poetry-update.outputs.is_new_pr != 'true'
+
+# FIXME/2023-11-03 16:43: Need PR-complete workflow
+
+
+
+
+
+      # # Meh: We could restrict to updating just our org's repos,
+      # # e.g., `poetry update doblabs/<pkg> doblabs/<pkg> ...`,
+      # # but no reason not to update everything.
+      # - name: Poetry update --lock
+      #   run: poetry update --lock
+      #
+      # - name: Check git-status
+      #   id: check-git-status
+      #   run: echo "git_status_output=$(git status --porcelain=v1)" >> $GITHUB_OUTPUT
+
+# ANNUL/2023-11-03 14:38: No, wait: If we change jobs, we lose the local repo w/ changes, ha.
+  #
+  #   outputs:
+  #     git_status_output: ${{ steps.check-git-status.outputs.git_status_output }}
+  #
+  # # ***
+  #
+  # commit-changes:
+  #   name: Commit poetry-update changes
+  #
+  #   runs-on: ubuntu-latest
+  #
+  #   needs: poetry-update
+  #
+  #   if: needs.poetry-update.outputs.git_status_output != ''
+  #
+  #   env:
+  #     GIT_STATUS_OUTPUT: ${{ needs.poetry-update.outputs.git_status_output }}
+  #
+  #   steps:
+
+      # - name: Overly cautious git-status check (expect 0 or 1 changes)
+      #   run: |
+      #     [ $(git status --porcelain=v1 | wc -l) -le 1 ] \
+      #       || exit 1
+      #
+      # - name: Overly cautious git-status check (expect only poetry.lock)
+      #   run: |
+      #     [ -z "$(git status --porcelain=v1)" ] \
+      #       || [ "$(git status --porcelain=v1)" = " M poetry.lock" ] \
+      #       || exit 1
+
+      # - name: Commit changes
+      #   if: steps.check-git-status.outputs.git_status_output != ''
+      #   # FIXME/2023-11-03: Make the strings below user-configurable,
+      #   # including: Branch name, Commit message, PR name/title.
+      #   run: |
+      #     TTTtt0 () {
+      #       echo "$(date '+%Y%m%d%H%M')"
+      #     }
+      #     shorten_string () {
+      #       local string="$1"
+      #       local maxlen="${2:-12}"
+      #       # "  [Ugh, fix syntax highlight issue]
+      #       printf "${string}" | sed -E 's/^(.{'${maxlen}'}).*/\1/g'
+      #     }
+      #     git_HEAD_commit_sha () {
+      #       git rev-parse HEAD
+      #     }
+      #     branch_name="update-deps/$(TTTtt0)/$(shorten_sha "$(git_HEAD_commit_sha)")"
+      #     #
+      #     git checkout -b "${branch_name}"
+      #     #
+      #     git add poetry.lock
+      #     #
+      #     git commit -m "Build: Deps: Update poetry.lock [update-deps cascade]"
+
+
+
+        # - Run ``poetry update <deps>`` and commit changes, if any
+        #   (``poetry.lock`` and ``pyproject.toml``).
+        #
+        #
+        # FIXME/2023-11-03 02:28: You'll have to see if po-update includes all groups by default, else:
+        #   --without: The dependency groups to ignore.
+        #   --with: The optional dependency groups to include.
+        #   --only: The only dependency groups to include.
+        #   --no-dev : Do not update the development dependencies. (Deprecated, use --without dev or --only main instead)
+        # FIXME: You probably want --lock:
+        #   --lock : Do not perform install (only update the lockfile).
+        #
+        # FIXME: How do you want to determine package list?
+        # - From config?
+        # - Or parse toml file for known org/ names?
+        # FIXME/2023-11-03 02:33: NO WAIT: I think you can just update tool.poetry.dependencies, and not dev libs...
+        # - SPIKE: How is this different than letting dependabot work?
+        #   - It is more proactive...
+        #
+        #   - FIXME/2023-11-03 02:34: Look at dependabot PR and see if it uses Poetry!!!
+        #
+        #   - Otherwise we'd run something like:
+        #
+        #       poetry update --lock pkg1 pkg2 etc.
+        #       # OR MAYBE THIS WORKS:
+        #       poetry update --lock --only main
+        #
+        #     but I'm not sure best place to store that list...
+        #
+        # FIXME/2023-11-03 02:35: How would you update development dependencies,
+        # knowing that you cannot keep pyproject.toml synced via `meld` if you
+        # need to keep poetry.lock synced. Or maybe you can, and you just need
+        # to run `poetry lock` after manually updating the toml.
+        #
+        #
+        # - Check if HEAD is version tagged.
+        #   - If it is, kick off next cascade.
+        #     - This means po-update was no-op; and there are no outstanding
+        #       changes to release (like an ``updateDeps`` commit from first
+        #       step, above).
+        #   - If HEAD is not version-tagged, means there was an ``updateDeps``
+        #     commit and/or po-update created changes; or there were other
+        #     commits user pushed earlier but hadn't versioned.
+        #     - Look at latest version tag:
+        #       - If last version was alpha, ``git bump a``,
+        #         otherwise ``git bump p``.
+        #     - The cascade action is done, but
+        #       the release script will cascade
+        #       after Smoke test, as EAPP did.
+        #
+
+
+
+# MAYBE/2023-11-03 16:13: Or does this come during PR-complete workflow?
+      # - name: Checkout git-bump
+      #   uses: actions/checkout@v3
+      #   with:
+      #     repository: 'landonb/git-bump-version-tag'
+      #     # The branch, tag or SHA to checkout. Defaults to default branch.
+      #     #  ref: ''
+      #     # Relative path under $GITHUB_WORKSPACE to place the repository
+      #     #  path: ''
+
+
+
+
+
+# DUNNO/2023-10-09 00:29: What was my thinking here? B/c repo-dispatch
+# is not what I want.
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#repository_dispatch
+#
+# I think workflow_dispatch is what you want... especially from within
+# the same org...
+#
+# (Notwithstanding *how* you trigger this workflow,
+#  automating the individual steps is gonna be the
+#  difficult, possibly "impossible", part. (I'm sure
+#  I can get most of it, but coordinating a PR with
+#  checks, and hoping I could automate PR approval...
+#  or maybe skip the effin' PR? That could work, but
+#  feels amateurish. But you still need to coordinate
+#  checks with whatever you do, PR or just merging...
+#  though I wonder if you can just invoke checks after
+#  you merge and push code, probably do it all from
+#  here, then you don't have to spin... so no PR then??
+#  I mean, do you really need a PR?? Especially if it's
+#  going to be auto-approved?
+#
+# - You could use `gh` to manage pull requests.
+#   See also:
+#     https://github.com/marketplace/actions/create-pull-request
+#     https://github.com/peter-evans/create-pull-request
+#
+# - MAYBE: automerge?
+#   https://github.com/peter-evans/enable-pull-request-automerge
+#
+#    - name: Enable Pull Request Automerge
+#      run: gh pr merge --merge --auto "1"
+#      env:
+#        GH_TOKEN: ${{ secrets.PAT }}
+#
+#        https://cli.github.com/manual/gh_pr_merge
+#
+#   - So if that's the case...
+#     - You could watch 'push' to 'release'?
+#       OH! PR will only work if I use feature branch...
+#       Anyway, yeah, watch 'push' event?
+#     - There's also 'pull_request' 'closed',
+#       except how would you know it was the PR you wanted to release?
+#       - The PR event has an auto_merge property... if that was true, just assume.
+#         - There's also commit_title, commit_message.
+#
+# https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request
+# https://docs.github.com/en/webhooks/webhook-events-and-payloads#pull_request
+#
+#
+# So then...
+# - NTHEN:
+#   - Checkout code
+#   - Run po-update
+#       *but only on doblabs upstream packages*
+#   - What about updating EAPP boilerplate??
+#     - Then I could propagate bp changes more easily...
+#       - The only local op. would be `git p` pull-rebase I bet...
+#         which you could automate with OMR.
+#   - Then: git-add, git-commit, git-push...
+#   - DUNNO:
+#     - So would you make a PR?
+#       - Would you auto-approve the PR?
+#     - How do you wait for checks to pass?
+#       - You can react to checks workflow,
+#         DUNNO: but how would you identify
+#         a PR for a checks run?
+#       - SPIKE: Maybe the internet knows how to automate GH PRs, incl. checks.
+#   - DUNNO: Final automation step is adding version tag,
+#     just like I do from my local terminal... I wonder if
+#     I could get git-bump running on GHA, probably...
+#     though that's overkill, isn't it? You could probably
+#     just get the latest version and increment the last
+#     number, using the simple grep/sed you already got.
+# - FIXME: Automate previous *locally*, using shell script,
+#          and then you could write the workflow (update this file).

@@ -904,7 +904,7 @@ remove_faithful_file () {
   if [ -f "${local_file}" ]; then
     what_happn="perished"
 
-    git rm "${local_file}"
+    git rm -q "${local_file}"
   fi
 
   # The calls below (print_canon_scoped_head and stage_follower) will only
