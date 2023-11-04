@@ -59,7 +59,7 @@ source_dep_git_put_wise () {
 
   local put_wise_bin="$(dirname "$(realpath "$(command -v git-put-wise)")")"
 
-  # CXREF: https://github.com/landonb/sh-git-nubs
+  # CXREF: https://github.com/landonb/sh-git-nubs#🌰
   #   ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
   . "${put_wise_bin}/../deps/sh-git-nubs/bin/git-nubs.sh"
 
@@ -142,7 +142,8 @@ update_faithful_file () {
   if ${success} && ! must_pass_checks_and_ensure_cache \
     "${canon_base_absolute}" "${canon_file_absolute}" "${local_file}" \
   ; then
-    # Soft-fail.
+    # Soft-fail. Note that must_pass_checks_and_ensure_cache only returns
+    # nonzero if canon file has changes (if anything else wrong, it exits).
     success=false
   fi
 
@@ -172,13 +173,7 @@ update_faithful_file () {
   fi
 
   if ! ${success}; then
-    # Skip `cache_file_cleanup`, but mark failed, so caller can continue
-    # calling update-faithful-file and eventually update-faithful-finish.
-    # Then all the successes and failures are printed in one go, and the
-    # user can fix everything and will find success on their second run.
-    cache_file_mark_failed "${canon_head}" "${canon_file_absolute}"
-
-    git reset HEAD > /dev/null
+    handle_failed_state "${canon_head}" "${canon_file_absolute}"
 
     return 1
   fi
@@ -197,9 +192,16 @@ must_pass_checks_and_ensure_cache () {
 
   cache_file_ensure_exists
 
+  if [ -z "${canon_base_absolute}" ] && [ -z "${canon_file_absolute}" ]; then
+    # Path via remove-faithful-file (don't care about rest).
+    return 0
+  fi
+
+  # Exit if canon path not a directory.
   must_canon_base_is_dir "${canon_base_absolute}"
 
   if [ -n "${canon_file_absolute}" ]; then
+    # Exit if not file and exists.
     must_be_file "${canon_file_absolute}" "reference"
 
     if [ -n "$(
@@ -212,11 +214,13 @@ must_pass_checks_and_ensure_cache () {
       # fault, not follower's.
       >&2 error "ERROR: The canon reference file has uncommitted changes: “${canon_file_absolute}”"
 
+      # Rather than exit, let caller cleanup (e.g., unstage changes).
       return 1
     fi
   fi
 
   if [ -n "${local_file}" ]; then
+    # Exit if exists but not file.
     must_be_file_or_absent "${local_file}" "local"
 
     # For template render or canon copy, ensure directory path exists.
@@ -825,7 +829,10 @@ stage_follower () {
 
   if ${update_status}; then
     # Note when what_happn="here yet", local_file unchanged, but Git don't care.
-    git add "${local_file}"
+    if [ -e "${local_file}" ]; then
+      git add "${local_file}"
+    fi
+    # else, remove-faithful-file ran git-rm.
 
     # Cache the canon HEAD (it might already be cached, in which
     # case this recreates the cache file, with a new mod. date).
@@ -875,6 +882,44 @@ git_project_root_absolute () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+remove-faithful-file () {
+  remove_faithful_file "$@"
+}
+
+remove_faithful_file () {
+  local local_file="$1"
+  local canon_base_absolute="${2:-${UPDEPS_CANON_BASE_ABSOLUTE}}"
+
+  if ! must_pass_checks_and_ensure_cache "" "" "${local_file}"; then
+    # Soft-fail only happens in canon file has changes, but there was
+    # no such file indicated in the args, so this is unexpected path.
+    # - If any other check didn't pass, function exited.
+    >&2 echo "ERROR: Unxpected path: This must-pass cmd soft-failed:"
+    >&2 echo "  must_pass_checks_and_ensure_cache \"\" \"\" \"${local_file}\""
+
+    return 1
+  fi
+
+  local what_happn="foregone"
+  if [ -f "${local_file}" ]; then
+    what_happn="perished"
+
+    git rm "${local_file}"
+  fi
+
+  # The calls below (print_canon_scoped_head and stage_follower) will only
+  # use the absolute file path to determine the absolute canon directory. I
+  # know.
+  local canon_fake_absolute="${canon_base_absolute}/ignored"
+
+  local canon_head
+  canon_head="$(print_canon_scoped_head "${canon_fake_absolute}")"
+
+  stage_follower "${local_file}" "${canon_head}" "${canon_fake_absolute}" "${what_happn}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 render-faithful-file () {
   render_document_from_template "$@"
 }
@@ -899,8 +944,14 @@ render_document_from_template () {
 
   # ***
 
-  must_pass_checks_and_ensure_cache \
-    "${canon_base_absolute}" "${canon_tmpl_absolute}" "${dst_file}"
+  if ! must_pass_checks_and_ensure_cache \
+    "${canon_base_absolute}" "${canon_tmpl_absolute}" "${dst_file}" \
+  ; then
+    # Only fails if canon file has changes (if anything else wrong, exited).
+    handle_failed_state "${canon_head}" "${canon_tmpl_absolute}"
+
+    return 1
+  fi
 
   # ***
 
@@ -996,7 +1047,7 @@ print_tmpl_src_data () {
 
 # ***
 
-UPDEPS_VENV_PREFIX="update-deps-venv-"
+UPDEPS_VENV_PREFIX="update-faithful-venv-"
 
 venv_activate_and_prepare () {
   # If Python environment looks like one we created, we're good.
@@ -1095,7 +1146,7 @@ update-faithful-begin () {
   local skip_venv_activate="${2:-false}"
 
   if [ -n "${canon_base_absolute}" ]; then
-    UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute}"
+    UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute:-/}"
   fi
 
   must_pass_checks_and_ensure_cache "${UPDEPS_CANON_BASE_ABSOLUTE}" "" ""
@@ -1188,9 +1239,11 @@ Deps: Update faithfuls
     | git commit -q -F -
 }
 
-# Deps: Update faithfuls
+# The latest update-faithful commit looks something like this:
 #
-# - Source: easy-as-pypi @ 0477f4de66eb35f15f651af906dfb0936a2089a1
+#   Deps: Update faithfuls
+#
+#   - Source: easy-as-pypi @ 0477f4de66eb35f15f651af906dfb0936a2089a1
 latest_commit_read_canon_head () {
   local local_file="$1"
 
@@ -1199,6 +1252,21 @@ latest_commit_read_canon_head () {
     | tail -1 \
     | sed '/^- Source: .* @ /!d' \
     | sed 's/^- Source: .* @ //'
+}
+
+# ***
+
+handle_failed_state () {
+  local canon_head="$1"
+  local canon_file_absolute="$2"
+
+  # Skip `cache_file_cleanup`, but mark failed, so caller can continue
+  # calling update-faithful-file and eventually update-faithful-finish.
+  # Then all the successes and failures are printed in one go, and the
+  # user can fix everything and will find success on their second run.
+  cache_file_mark_failed "${canon_head}" "${canon_file_absolute}"
+
+  git reset HEAD > /dev/null
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
