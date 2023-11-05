@@ -17,13 +17,20 @@
 name: "CodeQL Code Scanning"
 
 on:
-  push:
-    branches: [release]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    # - (lb): I assume that means 'pull_request' branches must
-    #         be a subset of 'push' branches.
-    branches: [release]
+
+  # ISOFF/2023-11-04: This is the longest-running workflow, and doesn't
+  # offer much value, at least not to small, slow-moving projects. Cron
+  # weekly is good enough!
+  #
+  #   push:
+  #     branches: [release]
+  #
+  #   pull_request:
+  #     # The branches below must be a subset of the branches above
+  #     # - (lb): I assume that means 'pull_request' branches must
+  #     #         be a subset of 'push' branches.
+  #     branches: [release]
+
   schedule:
     # 6p every Monday.
     - cron: '0 18 * * 1'
