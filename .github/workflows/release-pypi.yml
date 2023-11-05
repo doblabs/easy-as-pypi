@@ -435,10 +435,11 @@ jobs:
       # REFER: https://cli.github.com/manual/gh_workflow_run
       - name: Run external smoke-test workflow
         run: |
-          # USYNC: 'PyPI Smoke test'
-          #
-          echo "gh workflow run 'PyPI Smoke test'"
-          gh workflow run 'PyPI Smoke test' \
+          # USYNC: Use the same name as the workflow.
+          # - Search for: 'PyPI Smoke test'
+          workflow_name="PyPI Smoke test"
+          echo "gh workflow run \"${workflow_name}\""
+          gh workflow run "${workflow_name}" \
             -f "INDEX_PIP=${INDEX_PIP}" \
             -f "INDEX_PIPX=${INDEX_PIPX}" \
             -f "PACKAGE_NAME=${PACKAGE_NAME}" \
