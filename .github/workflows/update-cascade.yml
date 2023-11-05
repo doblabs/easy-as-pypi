@@ -1,0 +1,78 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release Cascade — Dispatch
+
+on:
+  # Via release-smoke-test.yml
+  workflow_call:
+
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
+run-name: 👣 — Cascade — 1.) Dispatch
+
+jobs:
+  identify-downstream-repos:
+    name: "Find Cascade repos"
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # CXREF: https://github.com/actions/checkout
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # CXREF: https://github.com/marketplace/actions/yq-portable-yaml-processor
+      - name: Probe Yaml config
+        id: probe_yaml
+        uses: mikefarah/yq@master
+        # Some notes:
+        # - 'cmd' runs in a container (from /github/workspace, per `pwd),
+        #   and has `yq` installed, but not same as `pip install yq`. So
+        #   different args/behavior, e.g., this `yq` defaults Yaml output,
+        #   whereas PyPI `yq` defaults Json.
+        #   - Therefore use relative path (not "{{ github.workspace }}/...").
+        # - The '--indent 0' simply makes one-line JSON output, easier for
+        #   debugging/tracing.
+        # - The config file is Yaml so it can be commented (and so we didn't
+        #   have to look for an hjson loader to use commented JSON instead).
+        # - github.repository is org/repo, e.g., 'doblabs/easy-as-pypi'.
+        with:
+          cmd: |
+            yq --tojson --indent "0" '."${{ github.repository }}"' \
+              ".github/doblabs-dependencies.yml"
+
+    outputs:
+      probe_yaml_outputs_result: ${{ steps.probe_yaml.outputs.result }}
+
+  # ***
+
+  dispatch-downstream-repos:
+    name: Dispatch downstream repos
+
+    needs: identify-downstream-repos
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        repo: "${{
+          fromJSON(needs.identify-downstream-repos.outputs.probe_yaml_outputs_result)
+        }}"
+
+    steps:
+      # CXREF: https://github.com/marketplace/actions/repository-dispatch
+      - name: Dispatch to "${{ matrix.repo }}"
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          # Personal access token created for *my user* with public_repo permissions.
+          token: ${{ secrets.PAT__PUBLIC_REPO }}
+          repository: ${{ matrix.repo }}
+          # REFER: Uncomment and adjust to send data:
+          #  client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
+          event-type: update-deps

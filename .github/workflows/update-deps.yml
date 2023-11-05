@@ -1,0 +1,88 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release Cascade — Update
+
+on:
+  # Via update-cascade.yml
+  repository_dispatch:
+    types: [update-deps]
+
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
+run-name: 👣 — Cascade — 2.) Update deps (via ${{
+  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
+
+env:
+  # USYNC: https://github.com/actions/python-versions/releases
+  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  PYTHON_VERSION: 3.11
+
+jobs:
+  poetry-update:
+    name: Update lock deps
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # SAVVY: How we'd access repository_dispatch args if we needed to add any:
+      #  - run: |
+      #      echo "event.client_payload.sha: ${{ github.event.client_payload.sha }}"
+      #      echo "event.client_payload.ref: ${{ github.event.client_payload.ref }}"
+
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # Use the user token, not ${{ github.token }}, so that
+          # git-push triggers workflow events. (Though TBH I don't
+          # remember if it's the token setting here or the one on
+          # bin/update-poetry, below that does this.)
+          #  token: ${{ github.token }}
+          token: ${{ secrets.USER_PAT }}
+
+      - name: Install poetry
+        run: pipx install poetry
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        id: setup-python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'poetry'
+
+      - name: Run bin/update-poetry
+        id: run-update-poetry
+        run: |
+          is_new_pr="$( \
+            REPO_ORG_PROJ="${{ github.repository }}" \
+            ./.github/bin/update-poetry
+          )"
+          echo "is_new_pr=${is_new_pr}" >> $GITHUB_OUTPUT
+        env:
+          # Send both tokens so update-poetry can run gh and self-approve PR.
+          USER_TOKEN: ${{ secrets.USER_PAT }}
+          GBOT_TOKEN: ${{ github.token }}
+
+    outputs:
+      is_new_pr: ${{ steps.run-update-poetry.outputs.is_new_pr }}
+
+  # ***
+
+  # If no PR, continue cascade; otherwise update-merged.yml workflow
+  # will continue cascade after PR is merged, and new package version
+  # is released.
+  update-cascade:
+    name: "Cascade maybe"
+
+    uses: ./.github/workflows/update-cascade.yml
+    secrets: inherit
+
+    needs: poetry-update
+
+    if: needs.poetry-update.outputs.is_new_pr == 'false'
