@@ -165,7 +165,9 @@ update_deps_easy_as_pypi () {
 
   # *** Done
 
-  update-faithful-finish
+  local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
+
+  update-faithful-finish "${sourcerer}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
