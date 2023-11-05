@@ -1,0 +1,162 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: Release Cascade — Version
+
+on:
+
+  # CXREF:
+  # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#
+  #          running-your-pull_request-workflow-when-a-pull-request-merges
+  # - Note pull_request, not pull_request_target, because (don't need/want) permissions.
+  pull_request:
+    types:
+      - closed
+
+  # Via GitHub Actions website button
+  workflow_dispatch:
+
+run-name: 👣 — 3.) Cascade — Version
+
+# env:
+#   # USYNC: https://github.com/actions/python-versions/releases
+#   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+#   PYTHON_VERSION: 3.11
+
+# The workflow runs on *all* closed PRs, so we need to filter.
+#
+# - We'll skip the job itself if the PR is obviously inactionable:
+#
+#   - Check that the PR was merged. If not, there's nothing to do.
+#
+#   - Look for the poetry.lock tag, added by .github/bin/update-poetry.
+#
+# - We'll run the job but fail if the tagged and merged PR looks fishy:
+#
+#   - Verify the tag name matches the .github/bin/update-poetry format.
+#     E.g.,
+#
+#       $ jq .event.pull_request.head.ref pull_request.json
+#       "update-deps/202311041112/9f9255a89e96"
+#
+#       $ jq .head_ref pull_request.json
+#       "update-deps/202311041112/9f9255a89e96"
+#
+# - There are a few more items we could verify, but currently don't:
+#
+#   - Verify it's the same user that update-poetry uses to make the PR.
+#     E.g.,
+#
+#       $ jq .event.pull_request.user.login pull_request.json
+#       "user"
+#
+#       # DUNNO: Are these the workflow actors? Do they always match
+#       #   the PR user? Does the workflow runs as user who committed
+#       #   HEAD? I should read up, and test with separate GH user.
+#       $ jq .actor pull_request.json
+#       "user"
+#       $ jq .triggering_actor pull_request.json
+#       "user"
+#
+#   - Verify the auto-merge properties:
+#
+#       $ jq .event.pull_request.auto_merge.enabled_by.login pull_request.json
+#       "user"
+#
+#       $ jq .event.pull_request.auto_merge.merge_method pull_request.json
+#       "rebase"
+#
+#   - Verify PR title and body
+#
+#       $ jq .event.pull_request.title pull_request.json
+#       "Build: Bump poetry.lock (bump all)"
+#
+#       $ jq .event.pull_request.body pull_request.json
+#       "Cascading release"
+jobs:
+
+  verify-merged-pr:
+
+    if: github.event_name != 'workflow_dispatch'
+      && github.event.pull_request.merged == true
+      && contains(github.event.pull_request.labels.*.name, 'poetry.lock')
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: echo "The PR was merged, and labeled poetry.lock"
+
+      # Verify tag name looks like one of ours.
+      - name: Verify tag name format — “${{ github.head_ref }}”
+        run: |
+          echo "${HEAD_REF}" | grep -E -e "^update-deps/[0-9]{12}/[0-9a-f]{12}$"
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+
+  #   # Steps are designed to exit nonzero to fail, so if we made it
+  #   # this far, the PR looks like one of ours.
+
+  # ***
+
+  bump-version-maybe:
+
+    runs-on: ubuntu-latest
+
+    needs: [verify-merged-pr]
+
+    if: always()
+      && (github.event_name == 'workflow_dispatch'
+          || needs.verify-merged-pr.result == 'success'
+         )
+
+    steps:
+
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          # Fetch all history, so rev-parse HEAD is real HEAD,
+          # and we get tag history, so git-bump can read version.
+          fetch-depth: 0
+          # Use user token, not default github.token, so git-push tag
+          # triggers release workflow.
+          token: ${{ secrets.USER_PAT }}
+          # By default, checkout installs within ${{ github.workspace }},
+          # i.e., it won't checkout to a new directory, it'll just occupy
+          # the workspace, e.g., '/home/runner/work/easy-as-pypi/easy-as-pypi'.
+          # - And then if you run checkout again without a 'path', it clobbers
+          #   the same location. So we need to use 'path' to use checkout twice.
+          # - Here we install project repo to "${{ github.workspace }}/versionee",
+          #   e.g., '/home/runner/work/easy-as-pypi/easy-as-pypi/versionee'.
+          # - Not that you need to know all that, just that the repo will be in the
+          #   root workspace dir at versionee/ and git-bump will be at versioner/.
+          path: 'versionee'
+
+      # ***
+
+      - name: Checkout git-bump
+        uses: actions/checkout@v3
+        with:
+          repository: 'landonb/git-bump-version-tag'
+          # INERT: Pin the version. But we own the tool, so trust in HEAD.
+          #  ref: ''
+          # Relative path under $GITHUB_WORKSPACE to place the repository.
+          path: 'versioner'
+
+      - name: Install Dunamai
+        run: pipx install dunamai
+
+      - name: Prepare committer
+        run: |
+          cd ./versionee/
+          git config user.email "${UPDEPS_USER_EMAIL:-landonb@users.noreply.github.com}"
+          git config user.name "${UPDEPS_USER_NAME:-release-bot}"
+
+      - name: Bump it...
+        run: |
+          export PATH="$(pwd)/versioner/bin:${PATH}"
+          cd ./versionee/
+          git bump-version-tag l
