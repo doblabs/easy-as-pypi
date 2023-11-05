@@ -153,6 +153,7 @@ update_deps_easy_as_pypi () {
   update-faithful-file ".github/workflows/release-smoke-test.yml"
   update-faithful-file ".github/workflows/update-cascade.yml"
   update-faithful-file ".github/workflows/update-deps.yml"
+  update-faithful-file ".github/workflows/update-deps-poetry.yml"
   update-faithful-file ".github/workflows/update-merged.yml"
 
   # *** .pyproject-doc8/ files
