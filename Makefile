@@ -1,6 +1,6 @@
 # vim:tw=0:ts=2:sw=2:noet:ft=make
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/doblabs/ <varies>
+# Project: https://github.com/<varies>
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 

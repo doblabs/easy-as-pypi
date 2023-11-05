@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim:tw=0:ts=4:sw=4:et:norl:ft=python:nospell
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/doblabs/ <varies>
+# Project: https://github.com/<varies>
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 

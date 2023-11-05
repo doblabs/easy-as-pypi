@@ -1,5 +1,5 @@
 # Author: Landon Bouma <https://tallybark.com/>
-# Project: https://github.com/doblabs/ <varies>
+# Project: https://github.com/<varies>
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
