@@ -159,4 +159,7 @@ jobs:
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
+          # LATER/2023-11-04: Remove tracing
+          set -x
           git bump-version-tag l
+          set +x
