@@ -38,19 +38,6 @@ env:
   PYTHON_VERSION: "3.11"
 
 jobs:
-
-  blather:
-    name: Blather
-    runs-on: ubuntu-latest
-    steps:
-      - name: Dump github.event
-        run: echo "${GITHUB_EVENT}"
-        shell: bash
-        env:
-          GITHUB_EVENT: ${{ toJson(github.event) }}
-
-  # ***
-
   pip-smoke-test:
     name: pip Smoke test PyPI release
 
