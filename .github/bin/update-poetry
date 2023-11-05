@@ -36,7 +36,7 @@ source_deps () {
   #   https://github.com/landonb/ohmyrepos#😤
   # $0 on GHA: ./.github/bin/update-poetry
   # pwd on GHA: /home/runner/work/easy-as-pypi/easy-as-pypi
-  . "$(dirname "$(realpath "$0")")/../../deps/git-update-faithful/lib/update-faithful.sh"
+  . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
 
   # INERT/2023-11-03: See git-nubs if you start adding too much Git.
   # # CXREF: https://github.com/landonb/sh-git-nubs#🌰
