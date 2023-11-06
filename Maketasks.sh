@@ -27,7 +27,15 @@ make_develop () {
 
   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
-  poetry -C ${EDITABLE_DIR} install --with dist,i18n,lint,test,docstyle,docs,extras
+  # Don't assume user's pyproject.toml's poetry.group's match ours.
+  local install_with="${PO_INSTALL_WITH}"
+  if test -z "${install_with}"; then
+    # Specific to EAPP's pyproject.toml, and *many* of its followers
+    # (but not all).
+    install_with="--with dist,i18n,lint,test,docstyle,docs,extras"
+  fi
+
+  poetry -C ${EDITABLE_DIR} install ${install_with}
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

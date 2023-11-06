@@ -1197,6 +1197,13 @@ whoami:
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # Optional project and private Makefiles to override any of the above.
+# e.g., maybe you need to override EAPP's poetry-install --with list:
+#
+#   develop: editables editable
+#       @. "$(MAKETASKS_SH)" && \
+#           PO_INSTALL_WITH="--with docs,tests,typing" \
+#           make_develop ...
+#   ...
 
 # Derived project Makefile.
 MAKEFILE_PROJECT_AFTER ?= Makefile.project.after
