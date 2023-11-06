@@ -2,9 +2,9 @@
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
-
 # Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
 
+# REFER: Project metadata: https://peps.python.org/pep-0621/
 [tool.poetry]
 name = "easy-as-pypi"
 version = "0.0.0"
