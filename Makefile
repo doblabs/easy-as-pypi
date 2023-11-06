@@ -1194,3 +1194,17 @@ whoami:
 	@echo $(PACKAGE_NAME)
 .PHONY: whoami
 
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# Optional project and private Makefiles to override any of the above.
+
+# Derived project Makefile.
+MAKEFILE_PROJECT_AFTER ?= Makefile.project.after
+
+-include $(MAKEFILE_PROJECT_AFTER)
+
+# Private user Makefile.
+MAKEFILE_LOCAL_AFTER ?= Makefile.local.after
+
+-include $(MAKEFILE_LOCAL_AFTER)
+
