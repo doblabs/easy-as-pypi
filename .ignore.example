@@ -35,8 +35,19 @@
 *.py[cod]
 __pycache__/
 
-# Editable pyproject.toml and .venv-<project> — `make develop`.
-/.pyproject-editable/
+# Poetry.
+/poetry.lock
+/.pyproject-*/poetry.lock
+
+# `make docs` (make_docs_html) venv.
+/.pyproject-doc8/.venv/
+# `make develop`-generated editable build (for ./.venv-<project>).
+# USYNC: EDITABLE_DIR (Makefile)
+/.pyproject-editable/poetry.lock
+/.pyproject-editable/pyproject.toml
+# All and any venv: .venv-<project>/, .venv-doc8/, .venv-docs/,
+#                   .pyproject-doc8/.venv/, &c.
+# USYNC: VENV_NAME (Makefile)
 .venv*/
 
 # DX artifacts.
