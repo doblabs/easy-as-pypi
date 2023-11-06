@@ -857,8 +857,12 @@ isort_check_only:
 # - CXREF: *PEP 257 - Docstring Conventions*:
 #     https://www.python.org/dev/peps/pep-0257/
 
+MAKE_LINT_SKIP_PYDOCSTYLE ?= false
+
 pydocstyle: _depends_active_venv
-	@pydocstyle $(SOURCE_DIR)/ tests/
+	@if ! $(MAKE_LINT_SKIP_PYDOCSTYLE); then \
+		pydocstyle $(SOURCE_DIR)/ tests/; \
+	fi;
 .PHONY: pydocstyle
 
 # ***
