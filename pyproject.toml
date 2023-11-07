@@ -391,8 +391,6 @@ format = "%(path)s %(row)d:%(col)d: %(code)s %(text)s"
 extend_exclude = [
     # The build directory, if not ignored, has 50 or so lintable files.
     "build/",
-    # Not our code.
-    "docs/_themes/sphinx_rtd_theme/",
     # Not ignoring .tox adds tens of Ks files.
     ".tox/",
     # These directories don't contain any lintable files for flake8 to
