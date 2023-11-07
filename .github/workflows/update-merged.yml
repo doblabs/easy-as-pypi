@@ -24,18 +24,13 @@ on:
 
 # ***
 
-# env:
-#   # USYNC: https://github.com/actions/python-versions/releases
-#   # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
-#   PYTHON_VERSION: 3.11
-
 # The workflow runs on *all* closed PRs, so we need to filter.
 #
 # - We'll skip the job itself if the PR is obviously inactionable:
 #
 #   - Check that the PR was merged. If not, there's nothing to do.
 #
-#   - Look for the poetry.lock tag, added by .github/bin/update-poetry.
+#   - Look for the 'poetry.lock' tag, added by .github/bin/update-poetry.
 #
 # - We'll run the job but fail if the tagged and merged PR looks fishy:
 #
@@ -47,6 +42,11 @@ on:
 #
 #       $ jq .head_ref pull_request.json
 #       "update-deps/202311041112/9f9255a89e96"
+#
+#     - Where pull_request.json is a local copy of a ${{ github }} dump:
+#
+#       - run: echo "${GITHUB_OBJ}"
+#         env: GITHUB_OBJ: ${{ toJson(github) }}
 #
 # - There are a few more items we could verify, but currently don't:
 #
@@ -99,8 +99,8 @@ jobs:
         env:
           HEAD_REF: ${{ github.head_ref }}
 
-  #   # Steps are designed to exit nonzero to fail, so if we made it
-  #   # this far, the PR looks like one of ours.
+      # The verify-merged-pr steps are designed to exit nonzero to fail,
+      # and then the next, bump job will check verify-merged-pr.result.
 
   # ***
 
