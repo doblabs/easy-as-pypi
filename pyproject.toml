@@ -18,11 +18,6 @@ maintainers = ["Tally Bark LLC <doblabs@tallybark.com>"]
 license = "MIT"
 readme = "README.rst"
 
-# Note that Poetry looks for packages under src/ by default, but
-# we could specify it explicitly, e.g.,
-#
-#   packages = [{include = "the_package_name", from = "src"}]
-
 homepage = "https://github.com/doblabs/easy-as-pypi"
 repository = "https://github.com/doblabs/easy-as-pypi"
 documentation = "https://easy-as-pypi.readthedocs.io/en/latest"
@@ -69,6 +64,11 @@ include = [
     { path = "tests/", format = "sdist" },
     # Omitting: Makefile, dotfiles, docs/, etc.
 ]
+
+# Note that Poetry looks for packages under src/ by default, but
+# we could specify the path explicitly, e.g.,
+#
+#   packages = [{include = "the_package_name", from = "src"}]
 
 # ***
 
