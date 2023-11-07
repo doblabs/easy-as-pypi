@@ -11,6 +11,18 @@
 extends: default
 
 rules:
+  # While consistent comment indentation itself not a bad thing,
+  # this rule is. It won't let you *follow* indented config with
+  # a comment unless you dedent that comment to the level of the
+  # *next* config in the file. E.g., if you commented the last
+  # config in a file, this rule would force you to dedent that
+  # comment to the first column, like this:
+  #   foo:           -->    foo:            -->     foo:
+  #     bar:         -->      bar:          -->       bar:
+  #       baz:       -->        # baz:      -->     # baz
+  #         - bat    -->        #   -bat    -->     #   -bat
+  comments-indentation: disable
+
   line-length:
     # USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
     max: 88
