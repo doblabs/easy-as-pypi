@@ -57,6 +57,8 @@ on:
       - "**/*.rst"
       - "docs/**"
 
+# ***
+
 permissions:
   pull-requests: write
 

@@ -16,6 +16,8 @@ on:
     types:
       - completed
 
+# ***
+
 jobs:
   test:
     name: Run tests & display coverage
