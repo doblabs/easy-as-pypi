@@ -110,7 +110,23 @@ package_name = project_dist.replace('-', '_')
 
 # Pull the GH org from the repository URL.
 # E.g., project_ghuser = 'doblabs'
-project_ghuser = os.path.basename(os.path.dirname(meta["tool"]["poetry"]["repository"]))
+repository_url = ''
+try:
+    repository_url = meta["tool"]["poetry"]["repository"]
+except KeyError:
+    try:
+        repository_url = meta["tool"]["poetry"]["homepage"]
+    except KeyError:
+        try:
+            repository_url = meta["tool"]["poetry"]["urls"]["repository"]
+        except KeyError:
+            try:
+                repository_url = meta["tool"]["poetry"]["urls"]["homepage"]
+            except KeyError:
+                print("\nERROR: docs/conf.py cannot find pyproject.toml 'repository' or 'homepage' URL")
+
+                raise
+project_ghuser = os.path.basename(os.path.dirname(repository_url))
 project_ghrepo = project_dist
 
 # E.g., project_auth = 'Landon Bouma <email>'
