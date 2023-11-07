@@ -133,36 +133,59 @@ build-backend = "poetry_dynamic_versioning.backend"
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
 
-# - In the old days of setuptools and wheel, one could use setuptools_scm
-#   to have the build automatically detect the version from your VCS.
-#   - Here's the Poetry equivalent, as a plugin.
-#     https://github.com/mtkennerly/poetry-dynamic-versioning
-#     https://pypi.org/project/poetry-dynamic-versioning
+# HSTRY: Pre-Poetry, most devs used setuptools and distutils to release.
+# And savvy developers used the setuptools_scm plugin to ease the version
+# burden, so they wouldn't have to manually change the `setup.py` version
+# value for every release. Instead, setuptools_scm would find the latest
+# application version from the VCS tags, and it would use that on build.
+#
+# - Here's the Poetry equivalent, poetry-dynamic-versioning:
+#
+#   https://github.com/mtkennerly/poetry-dynamic-versioning
+#   https://pypi.org/project/poetry-dynamic-versioning
+#
+# Note that poetry-dynamic-versioning is not as as wired into the build
+# as setuptools_scm was: poetry-dynamic-versioning edits files in-place
+# during the build, so you might see a flutter in your editor if you've
+# got this file buffered.
 
-# From poetry-dynamic-versioning docs: "If the base group is not included, then
-# this will be interpreted as a named preset from the Dunamai Pattern class.
-# This includes: default, default-unprefixed (makes the v prefix optional)."
-# - The base group being the major version number.
-# - But really I mean to point out that if you have non v-prefixed version
-#   tags, if you don't change 'pattern', you'll see, on `poetry check`:
+# RTFD_: We set 'pattern' below to support v-less versions (e.g., '1.2.3'):
+#          pattern = "default-unprefixed"
 #
-#     The pattern did not match any tags
+# - By default, the plugin only supports v-prefixed tags (e.g., 'v1.2.3').
+# - If the plugin cannot find a matching tag, it'll kill the Poetry task,
+#   such as poetry-check, -build, -install, and spit out a bunch of regex.
+# - BWARE: The plugin output is not super obvious, or at least if wasn't
+#   to me as a new user, when I simply had `enable = true` below and
+#   had not learned about nor had added the `pattern =` line yet.
+#   - E.g., here's what I saw trying to build with v-less tags:
 #
-#     Pattern:
-#     (?x)                                                          (?# ignore whitespace)
-#         ^v((?P<epoch>\d+)!)?(?P<base>\d+(\.\d+)*)                 (?# v1.2.3 or v1!2000.1.2)
-#         ([-._]?((?P<stage>[a-zA-Z]+)[-._]?(?P<revision>\d+)?))?   (?# b0)
-#         (\+(?P<tagged_metadata>.+))?$                             (?# +linux)
+#       The pattern did not match any tags
 #
-#     Tags:
-#     ['1.0.13', '1.0.12', '1.0.11', '1.0.10', '1.0.9', '1.0.8', ...]
+#       Pattern:
+#       (?x)                                                          (?# ignore whitespace)
+#           ^v((?P<epoch>\d+)!)?(?P<base>\d+(\.\d+)*)                 (?# v1.2.3 or v1!2000.1.2)
+#           ([-._]?((?P<stage>[a-zA-Z]+)[-._]?(?P<revision>\d+)?))?   (?# b0)
+#           (\+(?P<tagged_metadata>.+))?$                             (?# +linux)
 #
-# https://github.com/mtkennerly/poetry-dynamic-versioning/issues/111
+#       Tags:
+#       ['1.0.13', '1.0.12', '1.0.11', '1.0.10', '1.0.9', '1.0.8', ...]
+#
+#     So, if you see you a message like this, it means the plugin
+#     could not identify a version tag to use.
+#
+#   - REFER: I was also not the only one confused by this:
+#     https://github.com/mtkennerly/poetry-dynamic-versioning/issues/111
+#
+#   - REFER: For even more TMI: The 'pattern' names ('default' and
+#     'default-unprefixed') and regex are from Dunamai:
+#     https://github.com/mtkennerly/dunamai/blob/c52cad8/dunamai/__init__.py#L113
 
 [tool.poetry-dynamic-versioning]
 
 enable = true
 
+# See long comment above.
 pattern = "default-unprefixed"
 
 vcs = "git"
@@ -182,12 +205,12 @@ tag-branch = "release"
 # Just the one file, src/<pkg>/__init__.py.
 files = ["src/*/__init__.py"]
 
-# Default patterns:
-#  patterns = ["(^__version__\s*(?::.*?)?=\s*['\"])[^'\"]*(['\"])"]
-# which causes "Unescaped '\' in a string", but double-escaping,
-#  patterns = ["(^__version__\\s*(?::.*?)?=\\s*['\\"])[^'\\"]*(['\\"])"]
-# causes "Expected newline or end of document after a statement".
-# - Oh well, default is what we want.
+# The default 'patterns' pattern is the non-escaped value:
+#  patterns_unescaped = ["(^__version__\s*(?::.*?)?=\s*['\"])[^'\"]*(['\"])"]
+# which needs to be double-escaped and triple-double-quote-escaped
+# to work in Toml (that is, this pattern works if you want to tinker):
+#  patterns = ["(^__version__\\s*(?::.*?)?=\\s*['\\\"])[^'\\\"]*(['\\\"])"]
+# Fortunately the default 'patterns' pattern is usually perfect.
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
