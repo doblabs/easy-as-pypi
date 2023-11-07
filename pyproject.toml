@@ -856,6 +856,10 @@ pdbr = ">=0.8.5"
 #   https://mg.pov.lt/restview/
 restview = ">=3.0.1"
 
+# ***
+
+[tool.poetry.extras]
+readthedocs = [ "tomli", "sphinx", "sphinx-rtd-theme" ]
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
@@ -938,7 +942,4 @@ click = "^8.0.0"
 #
 # TRACK/2023-05-07: Keep tabs on cachecontrol; remove this kludge eventually.
 urllib3 = "<2"
-
-[tool.poetry.extras]
-readthedocs = [ "tomli", "sphinx", "sphinx-rtd-theme" ]
 
