@@ -18,10 +18,6 @@ maintainers = ["Tally Bark LLC <doblabs@tallybark.com>"]
 license = "MIT"
 readme = "README.rst"
 
-homepage = "https://github.com/doblabs/easy-as-pypi"
-repository = "https://github.com/doblabs/easy-as-pypi"
-documentation = "https://easy-as-pypi.readthedocs.io/en/latest"
-
 # REFER: https://pypi.org/classifiers/
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -87,9 +83,35 @@ coc_contact_email = "tallybark+doblabs -at- gmail.com"
 # ***
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/doblabs/easy-as-pypi/issues"
-"Documentation" = "https://easy-as-pypi.readthedocs.io/en/latest"
-"Source Code" = "https://github.com/doblabs/easy-as-pypi"
+
+# HOWTO: Add project URLs to this table. If you use special keywords in
+# the name or certain domains in the URL, PyPI will treat them specially
+# or at least iconify them.
+# - These names are special:
+#     "download"
+#     "home", "homepage", "home page"
+#     "changelog", "change log", "changes", "release notes",
+#         "news", "what's new", "history"
+#     "docs*", "documentation*"
+#     "bug*", "issue*", "tracker*", "report*"
+#     "funding*", "donate*", "donation*", "sponsor*"
+# - REFER: See the source for specifics:
+#     https://github.com/pypi/warehouse/blob/main/warehouse/templates/packaging/detail.html
+# - THANX: Here's also a nice graphic:
+#     https://daniel.feldroy.com/posts/2023-08-pypi-project-urls-cheatsheet
+
+homepage = "https://github.com/doblabs/easy-as-pypi"
+
+# Include 'repository' unless same as homepage.
+#  repository = "https://github.com/doblabs/easy-as-pypi"
+
+history = "https://github.com/doblabs/easy-as-pypi/blob/release/HISTORY.rst"
+
+documentation = "https://easy-as-pypi.readthedocs.io/en/latest"
+
+issues = "https://github.com/doblabs/easy-as-pypi/issues"
+
+download = "https://pypi.org/project/easy-as-pypi/#files"
 
 # ================================================================= #
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
