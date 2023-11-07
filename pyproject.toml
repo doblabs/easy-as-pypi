@@ -4,8 +4,10 @@
 # License: MIT
 # Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
 
-# REFER: Project metadata: https://peps.python.org/pep-0621/
 [tool.poetry]
+# REFER: https://peps.python.org/pep-0621/
+#   https://packaging.python.org/en/latest/specifications/declaring-project-metadata/
+
 name = "easy-as-pypi"
 version = "0.0.0"
 description = "Bootstrapping your next Python CLI made easy as PyPI"
@@ -46,8 +48,6 @@ keywords = [
     "skeleton",
     "cookiecutter",
 ]
-
-# ***
 
 # The poetry build excludes __pycache__ folders and whatever is ignored
 # by git (.gitignore), and it honors the 'include' and 'exclude' attrs.
@@ -98,11 +98,14 @@ coc_contact_email = "tallybark+doblabs -at- gmail.com"
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 # ================================================================= #
 
-# The default Poetry build-system is these two lines:
+# The standard Poetry build system is these two lines:
+#
 #   requires = ["poetry-core"]
 #   build-backend = "poetry.core.masonry.api"
+#
 # But we use poetry-dynamic-versioning so we don't have to maintain
 # the `version` variable atop this file.
+
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning"]
 build-backend = "poetry_dynamic_versioning.backend"
@@ -138,20 +141,28 @@ build-backend = "poetry_dynamic_versioning.backend"
 # https://github.com/mtkennerly/poetry-dynamic-versioning/issues/111
 
 [tool.poetry-dynamic-versioning]
+
 enable = true
+
 pattern = "default-unprefixed"
+
 vcs = "git"
+
 # Leave style = "pep440", not "semver", to maybe PyPI normalization.
+#  style = "pep440"
+
 # USYNC: The main/default GH branch: 'release'.
 tag-branch = "release"
 
 [tool.poetry-dynamic-versioning.substitution]
-# Default files:
+
+# Default 'files':
 #  files = ["*.py", "*/__init__.py", "*/__version__.py", "*/_version.py"]
 # - Note these paths only look one deep. You could recurse with **, e.g.:
 #    files = ["**/__init__.py"]
 # Just the one file, src/<pkg>/__init__.py.
 files = ["src/*/__init__.py"]
+
 # Default patterns:
 #  patterns = ["(^__version__\s*(?::.*?)?=\s*['\"])[^'\"]*(['\"])"]
 # which causes "Unescaped '\' in a string", but double-escaping,
@@ -189,7 +200,7 @@ files = ["src/*/__init__.py"]
 #                     (p/P), or (A)ll.  (w)arnings are enabled by default
 #                     (see --disable-warnings),  'N' can be used to reset
 #                     the list. (default: 'fE').
-#
+
 [tool.pytest.ini_options]
 addopts = "--tb=short --strict-markers -ra"
 
@@ -817,8 +828,10 @@ restview = ">=3.0.1"
 
 [tool.poetry.dependencies]
 
+# *** Python dep
+
 # Python versions supported (required).
-# Because flake8, start at 3.8.1.
+# - flake8 requires Python >=3.8.1.
 python = "^3.8.1"
 
 # *** App deps
@@ -875,6 +888,8 @@ click = "^8.0.0"
 #
 # TRACK/2023-05-07: Keep tabs on cachecontrol; remove this kludge eventually.
 urllib3 = "<2"
+
+# *** RTD (opt-in) deps
 
 # For Readthedocs build process.
 tomli = { version = ">=2.0.1", optional = true }
