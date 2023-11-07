@@ -44,16 +44,11 @@ keywords = [
     "cookiecutter",
 ]
 
-# The poetry build excludes __pycache__ folders and whatever is ignored
-# by git (.gitignore), and it honors the 'include' and 'exclude' attrs.
+# poetry build excludes __pycache__ dirs
+# and whatever Git ignores (.gitignore).
+# Here we add files to the source dist.
 #
-#   https://python-poetry.org/docs/pyproject/#include-and-exclude
-#
-# E.g.,
-#   include = [
-#       { path = "tests", format = "sdist" },
-#       { path = "for_wheel.txt", format = ["sdist", "wheel"] }
-#   ]
+# REFER: https://python-poetry.org/docs/pyproject/#include-and-exclude
 
 include = [
     # Included by default:
@@ -63,6 +58,8 @@ include = [
     { path = "*.rst", format = "sdist" },
     { path = "tests/", format = "sdist" },
     # Omitting: Makefile, dotfiles, docs/, etc.
+    # Learning: How you can inflate the wheel:
+    #  { path = "for_wheel.txt", format = ["sdist", "wheel"] }
 ]
 
 # Note that Poetry looks for packages under src/ by default, but
