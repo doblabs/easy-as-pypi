@@ -12,6 +12,11 @@
 
 name: Publish release to PyPI
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
+#  Release on PyPI — ${{ github.ref_name }}
+# run-name: 🚀 — 🥧² — ${{ github.ref_name }}
+run-name: 🥧² — PyPI — ${{ github.ref_name }}
+
 # This workflow reacts to the 'release' event, which sets:
 #   GITHUB_SHA — Last commit in the tagged release
 #   GITHUB_REF — Tag ref of release refs/tags/<tag_name>
@@ -46,11 +51,6 @@ on:
     types: [published]
 
   workflow_dispatch:
-
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
-#  Release on PyPI — ${{ github.ref_name }}
-# run-name: 🚀 — 🥧² — ${{ github.ref_name }}
-run-name: 🥧² — PyPI — ${{ github.ref_name }}
 
 env:
   # USYNC: https://github.com/actions/python-versions/releases

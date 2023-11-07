@@ -7,14 +7,14 @@
 
 name: Release Cascade — Dispatch
 
+run-name: 👣 — Cascade — 1.) Dispatch
+
 on:
   # Via release-smoke-test.yml
   workflow_call:
 
   # Via GitHub Actions website button
   workflow_dispatch:
-
-run-name: 👣 — Cascade — 1.) Dispatch
 
 jobs:
   identify-downstream-repos:

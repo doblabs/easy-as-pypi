@@ -8,14 +8,14 @@
 
 name: Checks — Version Tag (and GH Rel)
 
+# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
+# - The example adds “by @${{ github.actor }}”, but that's in the byline below the title, too.
+run-name: 📢 — GitHub — ${{ github.ref_name }}
+
 on:
   push:
     tags:
       - "v?[0-9]+.[0-9]+.[0-9]+*"
-
-# https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
-# - The example adds “by @${{ github.actor }}”, but that's in the byline below the title, too.
-run-name: 📢 — GitHub — ${{ github.ref_name }}
 
 # In the unlikely event user removed a release tag and reapplied it,
 # kill outstanding jobs from previous workflow on same version (ref).
