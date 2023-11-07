@@ -9,6 +9,8 @@
 # - Search for: 'PyPI Smoke test'
 name: PyPI Smoke test
 
+run-name: 🎒 — Smoke test — ${{ inputs.VERSION }} ... & Cascade dispatch
+
 on:
   workflow_dispatch:
     inputs:
@@ -24,8 +26,6 @@ on:
       VERSION:
         required: true
         type: string
-
-run-name: 🎒 — Smoke test — ${{ inputs.VERSION }} ... & Cascade dispatch
 
 env:
   # Lest: "The `python-version` input is not set. The version

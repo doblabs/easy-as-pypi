@@ -7,6 +7,9 @@
 
 name: Release Cascade — Update
 
+run-name: 👣 — Cascade — 2.) Update deps (via ${{
+  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
+
 on:
   # Via update-cascade.yml
   repository_dispatch:
@@ -14,9 +17,6 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
-
-run-name: 👣 — Cascade — 2.) Update deps (via ${{
-  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
 
 env:
   # USYNC: https://github.com/actions/python-versions/releases
