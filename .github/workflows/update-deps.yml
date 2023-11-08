@@ -60,19 +60,20 @@ jobs:
 
       - name: Run bin/update-poetry
         id: run-update-poetry
+        # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
         run: |
-          is_new_pr="$( \
+          new_pr_num="$( \
             REPO_ORG_PROJ="${{ github.repository }}" \
             ./.github/bin/update-poetry
           )"
-          echo "is_new_pr=${is_new_pr}" >> $GITHUB_OUTPUT
+          echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
           # Send both tokens so update-poetry can run gh and self-approve PR.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
 
     outputs:
-      is_new_pr: ${{ steps.run-update-poetry.outputs.is_new_pr }}
+      new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
 
   # ***
 
@@ -87,4 +88,4 @@ jobs:
 
     needs: poetry-update
 
-    if: needs.poetry-update.outputs.is_new_pr == 'false'
+    if: needs.poetry-update.outputs.new_pr_num == ''
