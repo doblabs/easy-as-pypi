@@ -54,10 +54,22 @@ jobs:
 
   # ***
 
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+
+    uses: ./.github/workflows/ci-tags-record-and-report.yml
+
+    with:
+      inhibit-cascade: 'keep'
+
+  # ***
+
   dispatch-downstream-repos:
     name: Dispatch downstream repos
 
-    needs: identify-downstream-repos
+    needs: [identify-downstream-repos, wrangle-ci-tags]
+
+    if: needs.wrangle-ci-tags.outputs.old_inhibit_cascade == 'false'
 
     runs-on: ubuntu-latest
 
