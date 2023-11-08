@@ -65,14 +65,7 @@ print_prog () {
 update_poetry_update () {
   assert_git_status_tidy
 
-  print_prog "poetry update... "
-
-  # Meh: We could restrict to updating just our org's repos,
-  # e.g., `poetry update doblabs/<pkg> doblabs/<pkg> ...`,
-  # but no reason not to update everything.
-  poetry update -q --lock
-
-  print_prog "✓\n"
+  poetry_update_lock
 
   assert_git_status_0_or_1_changes
 
@@ -99,6 +92,19 @@ update_poetry_update () {
     echo "$(basename "${NEW_PR_URL}")"
   fi
   # else, print nothing, means po-update was a no-op.
+}
+
+# ***
+
+poetry_update_lock () {
+  print_prog "poetry update... "
+
+  # Meh: We could restrict to updating just our org's repos,
+  # e.g., `poetry update doblabs/<pkg> doblabs/<pkg> ...`,
+  # but no reason not to update everything.
+  poetry update -q --lock
+
+  print_prog "✓\n"
 }
 
 # ***
