@@ -224,10 +224,6 @@ push_branch () {
 # - We don't default to the sole remote if that's all there is.
 #   We're looking for a specific github.com/<org>/<proj> remote.
 git_upstream_remote () {
-# FIXME/2023-11-04: Remove this trace:
->&2 echo git remote -v
->&2 git remote -v
->&2 echo
 
   if [ -z "${REPO_ORG_PROJ}" ]; then
     >&2 echo "ERROR: Please set REPO_ORG_PROJ before calling update-poetry"
