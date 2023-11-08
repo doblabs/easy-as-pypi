@@ -17,6 +17,15 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      increment-version:
+        description: 'Increment version'
+        type: boolean
+        default: true
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
 
 # ***
 
@@ -77,6 +86,25 @@ jobs:
 
   # ***
 
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+
+    needs: poetry-update
+
+    if: needs.poetry-update.result == 'success'
+      && github.event_name == 'workflow_dispatch'
+
+    # steps:
+    #   - name: Manage CI tags
+    uses: ./.github/workflows/ci-tags-record-and-report.yml
+
+    with:
+      inhibit-cascade: ${{ ! inputs.cascade-dispatch }}
+      ignore-pr-merged-event: ${{ ! inputs.increment-version }}
+      ignore-pr-merged-number: ${{ fromJSON(needs.poetry-update.outputs.new_pr_num) || 0 }}
+
+  # ***
+
   # If no PR, continue cascade; otherwise update-merged.yml workflow
   # will continue cascade after PR is merged, and new package version
   # is released.
@@ -88,4 +116,8 @@ jobs:
 
     needs: poetry-update
 
-    if: needs.poetry-update.outputs.new_pr_num == ''
+    if: |
+      needs.poetry-update.result == 'success'
+        && needs.poetry-update.outputs.new_pr_num == ''
+        && (github.event_name != 'workflow_dispatch'
+            || inputs.cascade-dispatch == 'true')
