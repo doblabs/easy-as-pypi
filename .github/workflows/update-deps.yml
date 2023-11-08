@@ -7,8 +7,8 @@
 
 name: Release Cascade — Update
 
-run-name: 👣 — Cascade — 2.) Update deps (via ${{
-  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
+run-name: 👣 — Cascade — 2.) Update deps ${{
+  github.event_name == 'workflow_dispatch' && '(via User)' || '' }})
 
 on:
   # Via update-cascade.yml
@@ -17,6 +17,15 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      increment-version:
+        description: 'Increment version'
+        type: boolean
+        default: true
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
 
 # ***
 
@@ -60,20 +69,87 @@ jobs:
 
       - name: Run bin/update-poetry
         id: run-update-poetry
-        # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
+        # Run poetry-update.
+        # - DEVXX: Set UPDEPS_FAKE_UPDATE=true to fake poetry.lock update,
+        #          e.g., if you're testing inter-workflow flow.
         run: |
           new_pr_num="$( \
+            UPDEPS_FAKE_UPDATE=true \
+            UPDEPS_WAIT_APPROVE=true \
             REPO_ORG_PROJ="${{ github.repository }}" \
             ./.github/bin/update-poetry
           )"
+
+          git checkout -q -
+          pr_head_ref="$(git rev-parse HEAD)"
+
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
+          echo "pr_head_ref=${pr_head_ref}" >> $GITHUB_OUTPUT
         env:
-          # Send both tokens so update-poetry can run gh and self-approve PR.
+          # USER_TOKEN used to call gh-label (manage 'poetry.lock' label).
+          # If UPDEPS_WAIT_APPROVE=false, USER_TOKEN used on gh-pr-create
+          # and gh-pr-merge, and GBOT_TOKEN used on gh-pr-review.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
+      pr_head_ref: ${{ steps.run-update-poetry.outputs.pr_head_ref }}
+
+  # ***
+
+  # There's a race condition between PR-approve and the wrangle-ci-tags job.
+  # - This is unlikely to happen in practice: wrangle-ci-tags will likely
+  #   *always* finish before checks pass and the PR is merged.
+  # - But there's never a good reason to knowingly create a race condition.
+  # - So we used UPDEPS_WAIT_APPROVE previously to tell update-poetry not to
+  #   approve, so we can ensure our tags are there before the PR is merged.
+
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+
+    needs: poetry-update
+
+    if: needs.poetry-update.result == 'success'
+      && github.event_name == 'workflow_dispatch'
+
+    # steps:
+    #   - name: Manage CI tags
+    uses: ./.github/workflows/ci-tags-record-and-report.yml
+
+    with:
+      inhibit-cascade: ${{ ! inputs.cascade-dispatch }}
+      ignore-pr-merged-event: ${{ ! inputs.increment-version }}
+      ignore-pr-merged-number: "${{
+        fromJSON(needs.poetry-update.outputs.new_pr_num) || 0
+      }}"
+
+  # ***
+
+  # CXREF: UPDEPS_WAIT_APPROVE usage.
+
+  pr-enable-auto-merge-and-approve:
+    name: PR enable auto-merge and approve
+
+    needs: [poetry-update, wrangle-ci-tags]
+
+    if: needs.poetry-update.result == 'success'
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Finish bin/update-poetry
+        run: ./.github/bin/update-poetry "${NEW_PR_NUM}"
+        env:
+          # Send both tokens so update-poetry can run gh and self-approve PR.
+          USER_TOKEN: ${{ secrets.USER_PAT }}
+          GBOT_TOKEN: ${{ github.token }}
+          NEW_PR_NUM: ${{ needs.poetry-update.outputs.new_pr_num }}
 
   # ***
 
@@ -88,4 +164,8 @@ jobs:
 
     needs: poetry-update
 
-    if: needs.poetry-update.outputs.new_pr_num == ''
+    if: |
+      needs.poetry-update.result == 'success'
+        && needs.poetry-update.outputs.new_pr_num == ''
+        && (github.event_name != 'workflow_dispatch'
+            || inputs.cascade-dispatch == 'true')
