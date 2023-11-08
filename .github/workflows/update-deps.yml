@@ -7,8 +7,8 @@
 
 name: Release Cascade — Update
 
-run-name: 👣 — Cascade — 2.) Update deps (via ${{
-  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
+run-name: 👣 — Cascade — 2.) Update deps ${{
+  github.event_name == 'workflow_dispatch' && '(via User)' }})
 
 on:
   # Via update-cascade.yml
@@ -17,6 +17,15 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      increment-version:
+        description: 'Increment version'
+        type: boolean
+        default: true
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
 
 # ***
 
@@ -60,13 +69,18 @@ jobs:
 
       - name: Run bin/update-poetry
         id: run-update-poetry
-        # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
+        # Run poetry-update.
+        # - DEVXX: Set UPDEPS_FAKE_UPDATE=true to fake poetry.lock update,
+        #          e.g., if you're testing inter-workflow flow.
         run: |
           new_pr_num="$( \
+            UPDEPS_FAKE_UPDATE=true \
             REPO_ORG_PROJ="${{ github.repository }}" \
             ./.github/bin/update-poetry
           )"
+          pr_head_ref="$(git rev-parse HEAD)"
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
+          echo "pr_head_ref=${pr_head_ref}" >> $GITHUB_OUTPUT
         env:
           # Send both tokens so update-poetry can run gh and self-approve PR.
           USER_TOKEN: ${{ secrets.USER_PAT }}
@@ -74,6 +88,29 @@ jobs:
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
+      pr_head_ref: ${{ steps.run-update-poetry.outputs.pr_head_ref }}
+
+  # ***
+
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+
+    needs: poetry-update
+
+    if: needs.poetry-update.result == 'success'
+      && github.event_name == 'workflow_dispatch'
+
+    # steps:
+    #   - name: Manage CI tags
+    uses: ./.github/workflows/ci-tags-record-and-report.yml
+
+    with:
+      head-ref: ${{ needs.poetry-update.outputs.pr_head_ref }}
+      inhibit-cascade: ${{ ! inputs.cascade-dispatch }}
+      ignore-pr-merged-event: ${{ ! inputs.increment-version }}
+      ignore-pr-merged-number: "${{
+        fromJSON(needs.poetry-update.outputs.new_pr_num) || 0
+      }}"
 
   # ***
 
@@ -88,4 +125,8 @@ jobs:
 
     needs: poetry-update
 
-    if: needs.poetry-update.outputs.new_pr_num == ''
+    if: |
+      needs.poetry-update.result == 'success'
+        && needs.poetry-update.outputs.new_pr_num == ''
+        && (github.event_name != 'workflow_dispatch'
+            || inputs.cascade-dispatch == 'true')
