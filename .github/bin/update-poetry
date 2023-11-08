@@ -78,9 +78,7 @@ update_poetry_update () {
 
   assert_git_status_only_poetry_lock_changed_if_any
 
-  if test -z "$(git status --porcelain=v1)"; then
-    echo "false"
-  else
+  if test -n "$(git status --porcelain=v1)"; then
     local branch_name
     branch_name="$(print_branch_name)"
 
@@ -93,12 +91,14 @@ update_poetry_update () {
 
     push_branch "${branch_name}"
 
+    local NEW_PR_URL
     gh_pr_create_and_auto_merge_when_checks_finish
 
     resume_old_branch_and_cleanup "${branch_name}"
 
-    echo "true"
+    echo "$(basename "${NEW_PR_URL}")"
   fi
+  # else, print nothing, means po-update was a no-op.
 }
 
 # ***
@@ -282,14 +282,13 @@ git_upstream_remote_deduce () {
 gh_pr_create_and_auto_merge_when_checks_finish () {
   gh_label_create
 
-  local new_pr_url
-  new_pr_url="$(gh_pr_create)"
+  NEW_PR_URL="$(gh_pr_create)"
 
-  gh_pr_set_auto_merge_delete_rebase "${new_pr_url}"
+  gh_pr_set_auto_merge_delete_rebase "${NEW_PR_URL}"
 
-  gh_pr_approve "${new_pr_url}"
+  gh_pr_approve "${NEW_PR_URL}"
 
-  print_prog "New PR\n  ${new_pr_url}\n"
+  print_prog "New PR\n  ${NEW_PR_URL}\n"
 }
 
 gh_label_create () {
