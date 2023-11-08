@@ -89,6 +89,7 @@ update_poetry_update () {
 
     resume_old_branch_and_cleanup "${branch_name}"
 
+    # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
     echo "$(basename "${NEW_PR_URL}")"
   fi
   # else, print nothing, means po-update was a no-op.
