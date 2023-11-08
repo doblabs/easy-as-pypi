@@ -154,7 +154,7 @@ resume_old_branch_and_cleanup () {
   git checkout -q -
 
   # Delete local branch when this script is run from user terminal (not from GHA).
-  if test -z "${GITHUB_ACTIONS}"; then
+  if ! ${CI:-false}; then
     # FIXME: Might need Big D.
     # Ignore stderr message that -q doesn't inhibit:
     #   warning: deleting branch 'foo' that has been merged to
@@ -170,10 +170,8 @@ poetry_update_commit_changes () {
 
   print_prog "git commit... "
 
-  # REFER/2023-11-04: I found GITHUB_ACTIONS when inspecting GHA runtime
-  #                   with `env`, not sure if it's documented.
 
-  if ${GITHUB_ACTIONS:-false} \
+  if ${CI:-false} \
     && test -z "$(git config user.email)" \
     && test -z "$(git config user.name)" \
   ; then
@@ -296,11 +294,19 @@ gh_pr_create_and_auto_merge_when_checks_finish () {
 
   NEW_PR_URL="$(gh_pr_create)"
 
-  gh_pr_set_auto_merge_delete_rebase "${NEW_PR_URL}"
-
-  gh_pr_approve "${NEW_PR_URL}"
+  if ! ${UPDEPS_WAIT_APPROVE:-false}; then
+    gh_pr_auto_merge_and_approve_when_checks_finish "${NEW_PR_URL}"
+  fi
 
   print_prog "New PR\n  ${NEW_PR_URL}\n"
+}
+
+gh_pr_auto_merge_and_approve_when_checks_finish () {
+  local pr_ref="$1"
+
+  gh_pr_set_auto_merge_delete_rebase "${pr_ref}"
+
+  gh_pr_approve "${pr_ref}"
 }
 
 gh_label_create () {
@@ -342,16 +348,16 @@ gh_pr_create () {
 }
 
 gh_pr_set_auto_merge_delete_rebase () {
-  local new_pr_url="$1"
+  local pr_ref="$1"
 
   # Note that --delete-branch has no effect, or at least it was ineffective
   # until I enabled "Automatically delete head branches" (Settings > General),
   # which makes it sound like it's still probably effectiveless.
 
-  print_prog "gh pr merge \"${new_pr_url}\" --auto --delete-branch --rebase\n"
+  print_prog "gh pr merge \"${pr_ref}\" --auto --delete-branch --rebase\n"
 
   GH_TOKEN=${USER_TOKEN} \
-  gh pr merge "${new_pr_url}" --auto --delete-branch --rebase
+  gh pr merge "${pr_ref}" --auto --delete-branch --rebase
 }
 
 # CXREF: https://github.com/doblabs/easy-as-pypi/settings/actions
@@ -367,15 +373,15 @@ gh_pr_set_auto_merge_delete_rebase () {
 #     users cannot approve their own PRs, and when run locally,
 #     pr-create and pr-review run as same user most likely).
 gh_pr_approve () {
-  local new_pr_url="$1"
+  local pr_ref="$1"
 
-  print_prog "gh pr review --approve \"${new_pr_url}\" --comment \"LGTM!\"\n"
+  print_prog "gh pr review --approve \"${pr_ref}\" --comment \"LGTM!\"\n"
 
   # Approve PR using github-actions bot, to bypass anti-self-approve
   # branch protection rule.
 
   GH_TOKEN=${GBOT_TOKEN} \
-  gh pr review "${new_pr_url}" --approve --body "LGTM!" \
+  gh pr review "${pr_ref}" --approve --body "LGTM!" \
     || true
 }
 
@@ -416,12 +422,19 @@ assert_git_status_only_poetry_lock_changed_if_any () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 main () {
+  new_pr_ref="$1"
+
   set -e
 
   source_deps
 
-  update_poetry_update "$@"
+  if [ -z "${new_pr_ref}" ]; then
+    update_poetry_update
+  else
+    gh_pr_auto_merge_and_approve_when_checks_finish "${new_pr_ref}"
+  fi
 }
+
 
 # Run the command iff being executed.
 if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
