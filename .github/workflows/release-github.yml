@@ -84,10 +84,11 @@ jobs:
       # ***
 
       # Checkout the default branch and check the version tag is on HEAD.
-      # - This is mostly a paranoid check. We could support releasing
+      # - This is an overly suspicious check. We could support releasing
       #   whatever commit was tagged, but until a developer presents us
       #   with a compelling use case for such a situation, we don't
       #   support it.
+
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
