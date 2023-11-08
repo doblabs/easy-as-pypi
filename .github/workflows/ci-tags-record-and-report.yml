@@ -1,0 +1,141 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: CI tag specialist
+
+on:
+  workflow_call:
+    inputs:
+      inhibit-cascade:
+        type: string
+        required: false
+      ignore-pr-merged-event:
+        type: boolean
+        required: false
+      ignore-pr-merged-number:
+        type: number
+        default: 0
+        required: false
+
+    # Map the workflow outputs to job outputs
+    outputs:
+      old_inhibit_cascade:
+        description: "The old inhibit-cascade value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
+      old_ignore_pr_merged_event:
+        description: "The old ignore-pr-merged-event value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-ignore-pr-merged-event }}
+
+# ***
+
+env:
+  TAG_NAME_INHIBIT_CASCADE: "ci-tag-inhibit-cascade"
+  TAG_NAME_IGNORE_PR: "ci-tag-ignore-pr-merged-event"
+
+jobs:
+
+  manage-ci-tags:
+    name: CI tags
+
+    runs-on: ubuntu-latest
+
+    # Map the job outputs to step outputs
+    outputs:
+      old-inhibit-cascade: "${{
+        steps.manage-tag-do-cascade.outputs.old_inhibit_cascade
+      }}"
+      old-ignore-pr-merged-event: "${{
+        steps.manage-tag-ignore-pr.outputs.old_ignore_pr_merged_event
+      }}"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # The ci-tags must be on HEAD, or they're invalid
+          # (and can be deleted).
+          # - We don't delete abandoned tags here, but if we
+          #   wanted to, or if we wanted to honor non-HEAD
+          #   ci-tags, we'd want the complete history:
+          #  fetch-depth: 0
+
+      # ***
+
+      - name: "Process tag '${{ env.TAG_NAME_INHIBIT_CASCADE }}'"
+        id: manage-tag-do-cascade
+        run: |
+          was_enabled=false
+
+          >&2 echo "inputs.inhibit-cascade: ${{ inputs.inhibit-cascade }}"
+
+          tag_name="${{ env.TAG_NAME_INHIBIT_CASCADE }}"
+
+          name_match_head="$(git tag -l --points-at HEAD "${tag_name}")"
+
+          if [ "${name_match_head}" = "${tag_name}" ]; then
+            was_enabled=true
+          fi
+
+          if [ "${{ inputs.inhibit-cascade }}" = "true" ]; then
+            if ! ${was_enabled}; then
+              git tag -f "${tag_name}"
+              git push -f "origin" "refs/tags/${tag_name}"
+            fi
+          elif [ "${{ inputs.inhibit-cascade }}" = "false" ]; then
+            if ${was_enabled}; then
+              git tag -d "${tag_name}"
+              git push "origin" ":refs/tags/${tag_name}"
+            fi
+          # else, [ "${{ inputs.inhibit-cascade }}" = "keep" ], or whatever,
+          # useful for reading value only.
+          fi
+
+          echo "old_inhibit_cascade=${was_enabled}" >> "$GITHUB_OUTPUT"
+
+      # ***
+
+      - name: "Process tag '${{ env.TAG_NAME_IGNORE_PR }}'"
+        id: manage-tag-ignore-pr
+        run: |
+          was_enabled=false
+
+          >&2 echo "ignore-pr-merged-event: ${{ inputs.ignore-pr-merged-event }}"
+          >&2 echo "ignore-pr-merged-number: ${{ inputs.ignore-pr-merged-number }}"
+
+          test "${{ inputs.ignore-pr-merged-number }}" -ne 0 \
+            || exit 0
+
+          tag_name="${{
+            env.TAG_NAME_IGNORE_PR
+          }}-${{ inputs.ignore-pr-merged-number }}"
+
+          name_match_head="$(git tag -l --points-at HEAD "${tag_name}")"
+
+          >&2 echo "git tag -l --points-at HEAD \"${tag_name}\""
+          >&2 echo "name_match_head: ${name_match_head}"
+
+          if [ "${name_match_head}" = "${tag_name}" ]; then
+            was_enabled=true
+          fi
+
+          if [ "${{ inputs.ignore-pr-merged-event }}" = "true" ]; then
+            >&2 echo "was_enabled: ${was_enabled}"
+            if ! ${was_enabled}; then
+              git tag -f "${tag_name}"
+              git push -f "origin" "refs/tags/${tag_name}"
+            fi
+          elif [ "${{ inputs.ignore-pr-merged-event }}" = "false" ]; then
+            if ${was_enabled}; then
+              git tag -d "${tag_name}"
+              git push "origin" ":refs/tags/${tag_name}"
+            fi
+          fi
+
+          echo "old_ignore_pr_merged_event=${was_enabled}" >> "$GITHUB_OUTPUT"
+
+      # ***
