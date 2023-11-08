@@ -21,6 +21,23 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      bump-part:
+        description: 'Bump part'
+        type: choice
+        # It is intentional that this only lets users bump patch or alpha.
+        # It is encouraged that users push tags using `git-bump-version-tag`
+        # from their terminal rather than using this workflow_dispatch.
+        options:
+          - patch
+          - alpha
+          - least
+        default: 'least'
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
+        required: false
 
 # ***
 
@@ -90,7 +107,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "The PR was merged, and labeled poetry.lock"
+      - run: echo "The PR was merged, and it's labeled 'poetry.lock'"
+
+      - run: |
+          echo "Will this work for not workflow_dispatch?"
+          echo "cascade-dispatch: ${{ inputs.cascade-dispatch }}"
 
       # Verify tag name looks like one of ours.
       - name: Verify tag name format — “${{ github.head_ref }}”
@@ -104,18 +125,60 @@ jobs:
 
   # ***
 
-  bump-version-maybe:
+  wrangle-ci-tags:
+    name: Wrangle CI tags
 
-    runs-on: ubuntu-latest
-
-    needs: [verify-merged-pr]
+    needs: verify-merged-pr
 
     if: always()
       && (github.event_name == 'workflow_dispatch'
           || needs.verify-merged-pr.result == 'success'
          )
 
+    uses: ./.github/workflows/ci-tags-record-and-report.yml
+
+    with:
+      inhibit-cascade: "${{
+        github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch || false
+      }}"
+      ignore-pr-merged-event: false
+      ignore-pr-merged-number: ${{ github.event.pull_request.number || 0 }}
+
+    secrets: inherit
+
+  # ***
+
+  bump-version-maybe:
+
+    runs-on: ubuntu-latest
+
+    needs: [verify-merged-pr, wrangle-ci-tags]
+
+    if: always()
+      && (github.event_name == 'workflow_dispatch'
+          || needs.verify-merged-pr.result == 'success'
+         )
+      && needs.wrangle-ci-tags.outputs.old_ignore_pr_merged_event == 'false'
+
     steps:
+
+      - name: Dump
+        run: |
+          echo "BUMP_PART: ${BUMP_PART}"
+          echo "CASCADE_RELEASE: ${CASCADE_RELEASE}"
+          echo "OLD_INHIBIT: ${OLD_INHIBIT}"
+          echo "OLD_IGNORE: ${OLD_IGNORE}"
+
+          exit 1
+        env:
+          BUMP_PART: ${{ inputs.bump-part }}
+          # FIXME: Need to leave workflow artifact for cascade workflow,
+          # or we need to tag HEAD with a state tag, of sorts.
+          CASCADE_RELEASE: ${{ inputs.cascade-dispatch }}
+          OLD_INHIBIT: ${{ needs.wrangle-ci-tags.outputs.old_inhibit_cascade }}
+          OLD_IGNORE: ${{ needs.wrangle-ci-tags.outputs.old_ignore_pr_merged_event }}
+
+      # *** exited
 
       - name: Checkout this repo
         uses: actions/checkout@v3
@@ -161,4 +224,8 @@ jobs:
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
-          git bump-version-tag l
+          # By default, runs:
+          #  git bump-version-tag l
+          git bump-version-tag "${BUMP_PART}"
+        env:
+          BUMP_PART: ${{ inputs.bump-part }}
