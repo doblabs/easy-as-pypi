@@ -60,7 +60,7 @@ jobs:
 
       - name: Run bin/update-poetry
         id: run-update-poetry
-        # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
+        # Run poetry-update.
         # DEVXX: Set UPDEPS_FAKE_UPDATE=true to fake poetry.lock update,
         #          e.g., if you're testing inter-workflow flow.
         run: |
@@ -71,7 +71,9 @@ jobs:
           )"
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
-          # Send both tokens so update-poetry can run gh and self-approve PR.
+          # USER_TOKEN used to call gh-label (manage 'poetry.lock' label).
+          # - USER_TOKEN used on gh-pr-create and gh-pr-merge, and
+          #   GBOT_TOKEN used on gh-pr-review.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
 
