@@ -22,6 +22,12 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
+        required: false
 
 # ***
 
@@ -106,16 +112,39 @@ jobs:
 
   # ***
 
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+
+    # Note that inhibit-cascade only applies if version/release not inhibited.
+    # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
+    #   USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+    if: (github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch)
+      || (contains(github.event.pull_request.labels.*.name, 'poetry.lock')
+        && contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
+        && contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
+      ))
+
+    uses: ./.github/workflows/ci-tags-wrangle.yml
+
+    with:
+      inhibit-cascade: true
+
+  # ***
+
   bump-version-maybe:
 
     runs-on: ubuntu-latest
 
-    needs: [verify-merged-pr]
+    needs: [verify-merged-pr, wrangle-ci-tags]
 
+    # USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
     if: always()
       && (github.event_name == 'workflow_dispatch'
           || needs.verify-merged-pr.result == 'success'
          )
+      && ! contains(
+        github.event.pull_request.labels.*.name, 'ci-inhibit-version'
+      )
 
     steps:
       - name: Checkout this repo
