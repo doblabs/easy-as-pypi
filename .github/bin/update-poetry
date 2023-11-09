@@ -5,13 +5,19 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-UPDEPS_LABEL_NAME_POETRY_LOCK="poetry.lock"
-UPDEPS_LABEL_DESC_POETRY_LOCK="Pull requests that update poetry.lock"
-UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
-UPDEPS_LABEL_DESC_INHIBIT_VERSION="Tells CI not to version after auto-merge"
-UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
-UPDEPS_LABEL_DESC_INHIBIT_CASCADE="Tells CI not to cascade after release"
-UPDEPS_LABELS_COLOR="74e34f"
+UPDEPS_LABEL_NAME_POETRY_LOCK="${UPDEPS_LABEL_NAME_POETRY_LOCK:-\
+poetry.lock}"
+UPDEPS_LABEL_DESC_POETRY_LOCK="${UPDEPS_LABEL_DESC_POETRY_LOCK:-\
+Pull requests that update poetry.lock}"
+UPDEPS_LABEL_NAME_INHIBIT_VERSION="${UPDEPS_LABEL_NAME_INHIBIT_VERSION:-\
+ci-inhibit-version}"
+UPDEPS_LABEL_DESC_INHIBIT_VERSION="${UPDEPS_LABEL_DESC_INHIBIT_VERSION:-\
+Tells CI not to version after auto-merge}"
+UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
+ci-inhibit-cascade}"
+UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
+Tells CI not to cascade after release}"
+UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 
 # FIXME/2023-11-04: Let user set these, somehow.
 UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
@@ -20,8 +26,7 @@ UPDEPS_USER_NAME="update-poetry"
 # The UPDEPS_REPO_ORG_PROJ environ will be inferred at runtime.
 # - You can also set from workflow, e.g.,
 #     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
-#
-#  UPDEPS_REPO_ORG_PROJ=
+UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
 # DEVXX: How you might test locally (but note PR self-approve fails):
 __UPDEPS__CPYST__="
