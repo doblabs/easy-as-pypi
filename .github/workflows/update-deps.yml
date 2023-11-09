@@ -87,6 +87,10 @@ jobs:
           #   GBOT_TOKEN used on gh-pr-review.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
+          # Organization variables.
+          UPDEPS_USER_EMAIL: ${{ vars.UPDEPS_USER_EMAIL }}
+          UPDEPS_USER_NAME: ${{ vars.UPDEPS_USER_NAME }}
+          UPDEPS_USER_NAME_UPDEPS: ${{ vars.UPDEPS_USER_NAME_UPDEPS }}
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
