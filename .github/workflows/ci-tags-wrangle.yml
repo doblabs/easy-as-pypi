@@ -76,6 +76,8 @@ jobs:
           ref: ${{ github.event.repository.default_branch }}
           # For 'branch' tags, fetch all history, for `git branch --list`.
           fetch-depth: ${{ (matrix.tag_scope == 'HEAD') && 1 || 0 }}
+          # To fetch tags, either fetch-depth=0, and/or fetch-tags=true.
+          fetch-tags: true
 
       # ***
 
