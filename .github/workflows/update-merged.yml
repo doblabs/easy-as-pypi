@@ -8,7 +8,7 @@
 name: Release Cascade — Version
 
 run-name: 👣 — Cascade — 3.) Version ${{
-  github.event_name == 'workflow_dispatch' && '(via User)' || '' }})
+  github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
 
@@ -134,11 +134,10 @@ jobs:
 
     with:
       inhibit-cascade: "${{
-        github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch || false
+        (contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
+          && contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade'))
+        || (github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch)
       }}"
-      ignore-pr-merged-event: false
-      ignore-pr-merged-number: ${{ github.event.pull_request.number || 0 }}
-
     secrets: inherit
 
   # ***
@@ -153,7 +152,7 @@ jobs:
       && (github.event_name == 'workflow_dispatch'
           || needs.verify-merged-pr.result == 'success'
          )
-      && needs.wrangle-ci-tags.outputs.old_ignore_pr_merged_event == 'false'
+      && ! contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
 
     steps:
 
@@ -178,6 +177,7 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v3
         with:
+          ref: ${{ github.event.repository.default_branch }}
           # Fetch all history, so rev-parse HEAD is real HEAD,
           # and we get tag history, so git-bump can read version.
           fetch-depth: 0

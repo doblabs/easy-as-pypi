@@ -13,22 +13,12 @@ on:
       inhibit-cascade:
         type: string
         required: false
-      ignore-pr-merged-event:
-        type: boolean
-        required: false
-      ignore-pr-merged-number:
-        type: number
-        default: 0
-        required: false
 
     # Map the workflow outputs to job outputs
     outputs:
       old_inhibit_cascade:
         description: "The old inhibit-cascade value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
-      old_ignore_pr_merged_event:
-        description: "The old ignore-pr-merged-event value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-ignore-pr-merged-event }}
 
 # ***
 
@@ -44,9 +34,6 @@ jobs:
       old-inhibit-cascade: "${{
         steps.manage-ci-tag.outputs.old_inhibit_cascade
       }}"
-      old-ignore-pr-merged-event: "${{
-        steps.manage-ci-tag.outputs.old_ignore_pr_merged_event
-      }}"
 
     strategy:
       matrix:
@@ -56,26 +43,23 @@ jobs:
           # - So we'll hardcode the tag names here.
 
           - tag_name: "ci-tag-inhibit-cascade"
-            # Note that inputs.inhibit-cascade is a string.
+            # Note that inputs.inhibit-cascade is a string, "true"/"false"
+            # creates/deletes it, any other string leaves it.
             tag_setting: ${{ inputs.inhibit-cascade }}
+            # A "HEAD" tag is only valid if on HEAD commit; otherwise
+            # a "branch" tag is valid if it's on any commit in the branch.
+            tag_scope: "HEAD"
             output_name: "old_inhibit_cascade"
             skip_if: false
 
-          - tag_name: "ci-tag-ignore-pr-merged-event-${{
-              inputs.ignore-pr-merged-number
-            }}"
-            # Note that inputs.ignore-pr-merged-event is a bool.
-            tag_setting: ${{ inputs.ignore-pr-merged-event }}
-            output_name: "old_ignore_pr_merged_event"
-            skip_if: ${{ inputs.ignore-pr-merged-number == 0 }}
 
     steps:
       - name: Checkout repo @ ${{ inputs.head-ref }}
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
-          # Fetch all history, for `git branch --list`.
-          fetch-depth: 0
+          # For 'branch' tags, fetch all history, for `git branch --list`.
+          fetch-depth: "${{ (matrix.tag_scope == 'HEAD') && 1 || 0 }}"
 
       # ***
 
@@ -93,16 +77,24 @@ jobs:
 
           was_enabled=false
 
-          # Note that branch name pattern is ^strict$ w/out wildcards.
-          # SAVVY: If tag doesn't exists, dies:
-          #   error: malformed object name refs/tags/foo
-          if branch_tag_match="$(
-            git branch --list --contains "refs/tags/${{ matrix.tag_name }}" \
-              "${{ github.event.repository.default_branch }}" \
-              2> /dev/null
-          )"; then
-            if [ -n "${branch_tag_match}" ]; then
+          if ${{ matrix.tag_scope == 'HEAD' }}; then
+            head_tag_match="$(git tag -l --points-at HEAD "${tag_name}")"
+
+            if [ -n "${head_tag_match}" ]; then
               was_enabled=true
+            fi
+          else
+            # Note that branch name pattern is ^strict$ w/out wildcards.
+            # SAVVY: If tag doesn't exists, dies:
+            #   error: malformed object name refs/tags/foo
+            if branch_tag_match="$(
+              git branch --list --contains "refs/tags/${{ matrix.tag_name }}" \
+                "${{ github.event.repository.default_branch }}" \
+                2> /dev/null
+            )"; then
+              if [ -n "${branch_tag_match}" ]; then
+                was_enabled=true
+              fi
             fi
           fi
 

@@ -9,12 +9,18 @@
 # - Should workflow pass it in?
 # - What about running locally?
 # USAGE: From GHA, e.g.,
-#   REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
-REPO_ORG_PROJ="${REPO_ORG_PROJ:-doblabs/easy-as-pypi}"
+#   UPO_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
+UPO_REPO_ORG_PROJ="${UPO_REPO_ORG_PROJ:-doblabs/easy-as-pypi}"
 
 # FIXME/2023-11-03: Make the strings in functions below user-configurable,
 # including: Branch name, Commit message, PR name/title.
-UPDEPS_LABEL_NAME="poetry.lock"
+UPDEPS_LABEL_NAME_POETRY_LOCK="poetry.lock"
+UPDEPS_LABEL_DESC_POETRY_LOCK="Pull requests that update poetry.lock"
+UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
+UPDEPS_LABEL_DESC_INHIBIT_VERSION="Tells CI not to version after auto-merge"
+UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+UPDEPS_LABEL_DESC_INHIBIT_CASCADE="Tells CI not to cascade after release"
+UPDEPS_LABELS_COLOR="74e34f"
 
 # FIXME/2023-11-04: Let user set these, somehow.
 UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
@@ -238,9 +244,8 @@ push_branch () {
 # - We don't default to the sole remote if that's all there is.
 #   We're looking for a specific github.com/<org>/<proj> remote.
 git_upstream_remote () {
-
-  if [ -z "${REPO_ORG_PROJ}" ]; then
-    >&2 echo "ERROR: Please set REPO_ORG_PROJ before calling update-poetry"
+  if [ -z "${UPO_REPO_ORG_PROJ}" ]; then
+    >&2 echo "ERROR: Please set UPO_REPO_ORG_PROJ before calling update-poetry"
 
     exit 1
   fi
@@ -249,7 +254,7 @@ git_upstream_remote () {
     # Note that we're ignoring the tracking branch. We want our GH
     # org/proj repo. Which we didn't find.
     >&2 echo "ERROR: Could not determine the upstream GitHub remote"
-    >&2 echo "- We checked REPO_ORG_PROJ (“${REPO_ORG_PROJ}”)"
+    >&2 echo "- We checked UPO_REPO_ORG_PROJ (“${UPO_REPO_ORG_PROJ}”)"
     >&2 echo "  against these remotes:"
     >&2 echo git remote -v
 
@@ -260,8 +265,8 @@ git_upstream_remote () {
 git_upstream_remote_deduce () {
   git remote -v \
     | grep \
-        -e "[[:space:]]git@.*:${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
-        -e "github.com/${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "[[:space:]]git@.*:${UPO_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "github.com/${UPO_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
     | sed 's/^\([^[:space:]]\+\).*/\1/'
 }
 
@@ -294,9 +299,12 @@ git_upstream_remote_deduce () {
 # https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens
 
 gh_pr_create_and_auto_merge_when_checks_finish () {
-  gh_label_create
+  gh_label_create_poetry_lock_label
 
-  NEW_PR_URL="$(gh_pr_create)"
+  local pr_ci_labels=""
+  pr_ci_labels="$(print_pr_ci_labels)"
+
+  NEW_PR_URL="$(gh_pr_create "${pr_ci_labels}")"
 
   if ! ${UPDEPS_WAIT_APPROVE:-false}; then
     gh_pr_auto_merge_and_approve_when_checks_finish "${NEW_PR_URL}"
@@ -313,24 +321,47 @@ gh_pr_auto_merge_and_approve_when_checks_finish () {
   gh_pr_approve "${pr_ref}"
 }
 
-gh_label_create () {
-  print_prog "gh label create ${UPDEPS_LABEL_NAME}...\n"
+gh_label_create_poetry_lock_label () {
+  gh_label_create \
+    "${UPDEPS_LABEL_NAME_POETRY_LOCK}" \
+    "${UPDEPS_LABEL_DESC_POETRY_LOCK}"
+}
 
-  # Here's the label that dependabot uses, for reference:
-  #
-  #   gh label create \
-  #     "dependencies" \
-  #     --description "Pull requests that update a dependency file" \
-  #     --color 0366d6
+gh_label_create () {
+  local label_name="$1"
+  local label_desc="$2"
+
+  print_prog "gh label create \"${label_name}\"...\n"
 
   GH_TOKEN=${USER_TOKEN} \
   gh label create -f \
-    "${UPDEPS_LABEL_NAME}" \
-    --description "Pull requests that update poetry.lock" \
-    --color 74e34f
+    "${label_name}" \
+    --description "${label_desc}" \
+    --color "${UPDEPS_LABELS_COLOR}"
+}
+
+# Meh: This feels like TMBL — Too Much Business Logic — than maybe belongs here.
+print_pr_ci_labels () {
+  if ${UPDEPS_TAG_INHIBIT_VERSION:-false}; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_INHIBIT_VERSION}" \
+      "${UPDEPS_LABEL_DESC_INHIBIT_VERSION}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_VERSION} "
+  fi
+
+  if ${UPDEPS_TAG_INHIBIT_CASCADE:-false}; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_INHIBIT_CASCADE}" \
+      "${UPDEPS_LABEL_DESC_INHIBIT_CASCADE}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_CASCADE} "
+  fi
 }
 
 gh_pr_create () {
+  local pr_ci_labels="$1"
+
   local pr_title="Build: Bump poetry.lock (bump all)"
   local pr_body="Cascading release"
   local new_pr_url
@@ -344,7 +375,8 @@ gh_pr_create () {
     gh pr create \
       --title "${pr_title}" \
       --body "${pr_body}" \
-      --label "${UPDEPS_LABEL_NAME}" \
+      --label "${UPDEPS_LABEL_NAME_POETRY_LOCK}" \
+      ${pr_ci_labels} \
     | tail -1
   )"
 
