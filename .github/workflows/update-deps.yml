@@ -26,6 +26,11 @@ on:
         description: 'Start the cascade!'
         type: boolean
         default: false
+      prerelease:
+        description: 'Pre-release cascade'
+        type: boolean
+        default: false
+        required: false
 
 # ***
 
@@ -78,6 +83,7 @@ jobs:
             UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" \
             UPDEPS_LABEL_INHIBIT_VERSION="${{ ! inputs.increment-version }}" \
             UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}" \
+            UPDEPS_LABEL_PRERELEASE="${PRERELEASE}" \
             ./.github/bin/update-poetry
           )"
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
@@ -91,6 +97,10 @@ jobs:
           UPDEPS_USER_EMAIL: ${{ vars.UPDEPS_USER_EMAIL }}
           UPDEPS_USER_NAME: ${{ vars.UPDEPS_USER_NAME }}
           UPDEPS_USER_NAME_UPDEPS: ${{ vars.UPDEPS_USER_NAME_UPDEPS }}
+          # Input value.
+          PRERELEASE: ${{
+            github.event_name == 'workflow_dispatch'
+            && inputs.prerelease || github.event.client_payload.prerelease }}
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}

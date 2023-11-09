@@ -17,6 +17,10 @@ UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
 Tells CI not to cascade after release}"
+UPDEPS_LABEL_NAME_PRERELEASE="${UPDEPS_LABEL_NAME_PRERELEASE:-\
+ci-prerelease}"
+UPDEPS_LABEL_DESC_PRERELEASE="${UPDEPS_LABEL_DESC_PRERELEASE:-\
+Tells CI to use prerelease versions}"
 UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 
 # CXREF: These are GH organization variables that GHA injects into env:
@@ -41,6 +45,7 @@ __UPDEPS__CPYST__="
   UPDEPS_FAKE_UPDATE=true \
   UPDEPS_LABEL_INHIBIT_VERSION=true \
   UPDEPS_LABEL_INHIBIT_CASCADE=true \
+  UPDEPS_LABEL_PRERELEASE=true \
     ./.github/bin/update-poetry
 "
 
@@ -417,6 +422,14 @@ print_pr_ci_labels () {
       "${UPDEPS_LABEL_DESC_INHIBIT_CASCADE}"
 
     printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_CASCADE} "
+  fi
+
+  if ${UPDEPS_LABEL_PRERELEASE:-false}; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_PRERELEASE}" \
+      "${UPDEPS_LABEL_DESC_PRERELEASE}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_PRERELEASE} "
   fi
 }
 
