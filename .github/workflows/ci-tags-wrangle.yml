@@ -1,0 +1,138 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+name: CI tag specialist
+
+on:
+  workflow_call:
+    inputs:
+      inhibit-cascade:
+        type: string
+        required: false
+      inhibit-cascade-always:
+        type: string
+        required: false
+
+    # Maps workflow outputs to job outputs.
+    outputs:
+      old_inhibit_cascade:
+        description: "The old ci-inhibit-cascade value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
+      old_inhibit_cascade_always:
+        description: "The old ci-inhibit-cascade-always value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade-always }}
+
+# ***
+
+jobs:
+
+  manage-ci-tags:
+    name: CI tags
+
+    runs-on: ubuntu-latest
+
+    # Maps job outputs to step outputs.
+    outputs:
+      old-inhibit-cascade: "${{
+        steps.manage-ci-tag.outputs.old_inhibit_cascade
+      }}"
+      old-inhibit-cascade-always: "${{
+        steps.manage-ci-tag.outputs.old_inhibit_cascade_always
+      }}"
+
+    strategy:
+      matrix:
+        include:
+          # SAVVY: GHA disallows 'env' use in matrix:
+          #          "Unrecognized named-value: 'env'."
+          # - So we'll hardcode the tag names here.
+
+          # USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+          - tag_name: "ci-inhibit-cascade"
+            # Note that inputs.inhibit-cascade is a string: "true"/"false"
+            # creates/deletes the tag, any other string leaves it be.
+            tag_setting: ${{ inputs.inhibit-cascade }}
+            # A "HEAD" tag is only valid if on HEAD commit.
+            tag_scope: "HEAD"
+            output_name: "old_inhibit_cascade"
+            skip_if: false
+
+          # USYNC: MAYBE/2023-11-08 21:46: Add option to git-bump, or something local.
+          - tag_name: "ci-inhibit-cascade-always"
+            tag_setting: ${{ inputs.inhibit-cascade-always }}
+            # A "branch" tag is valid if it's on any commit in the branch.
+            tag_scope: "branch"
+            output_name: "old_inhibit_cascade_always"
+            skip_if: false
+
+    steps:
+      - name: Checkout repo @ ${{ inputs.head-ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          # For 'branch' tags, fetch all history, for `git branch --list`.
+          fetch-depth: ${{ (matrix.tag_scope == 'HEAD') && 1 || 0 }}
+          # To fetch tags, either fetch-depth=0, and/or fetch-tags=true.
+          fetch-tags: true
+
+      # ***
+
+      - name: "Manage tag '${{ matrix.tag_name }}'"
+        id: manage-ci-tag
+        run: |
+          >&2 echo "manage-ci-tag @ $(git rev-parse HEAD)"
+          >&2 echo "tag name: ${{ matrix.tag_name }}"
+          >&2 echo "new value: ${{ matrix.tag_setting }}"
+          >&2 echo "skip_if ?: ${{ matrix.skip_if }}"
+
+          if ${{ matrix.skip_if }}; then
+            exit 0
+          fi
+
+          was_enabled=false
+
+          if ${{ matrix.tag_scope == 'HEAD' }}; then
+            # Currently just the ci-inhibit-cascade tag.
+            head_tag_match="$(git tag -l --points-at HEAD "${{ matrix.tag_name }}")"
+
+            if [ -n "${head_tag_match}" ]; then
+              was_enabled=true
+            fi
+          else
+            # Currently just the ci-inhibit-cascade-always tag.
+            # SAVVY: The branch name pattern is ^strict$ w/out wildcards.
+            # SAVVY: If tag doesn't exists, dies:
+            #   error: malformed object name refs/tags/foo
+            if branch_tag_match="$(
+              git branch --list --contains "refs/tags/${{ matrix.tag_name }}" \
+                "${{ github.event.repository.default_branch }}" \
+                2> /dev/null
+            )"; then
+              if [ -n "${branch_tag_match}" ]; then
+                was_enabled=true
+              fi
+            fi
+          fi
+
+          if [ "${{ matrix.tag_setting }}" = "true" ]; then
+            if ! ${was_enabled}; then
+              git tag -f "${{ matrix.tag_name }}"
+              git push -f "origin" "refs/tags/${{ matrix.tag_name }}"
+            fi
+          elif [ "${{ matrix.tag_setting }}" = "false" ]; then
+            # Only need to delete branch tag if was_enabled, because
+            # otherwise already doesn't exist.
+            # - Always delete HEAD-only tag, in case stale one persists.
+            if ${was_enabled} || ${{ matrix.tag_scope == 'HEAD' }}; then
+              git tag -d "${{ matrix.tag_name }}" 2> /dev/null
+              git push "origin" ":refs/tags/${{ matrix.tag_name }}"
+            fi
+          fi
+
+          >&2 echo "${{ matrix.output_name }}: ${was_enabled}"
+
+          echo "${{ matrix.output_name }}=${was_enabled}" >> "$GITHUB_OUTPUT"
