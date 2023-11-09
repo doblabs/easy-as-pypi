@@ -5,6 +5,8 @@
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
+"""Sphinx docs builder."""
+
 # Boilerplate documentation build configuration file,
 # (Originally) created by sphinx-quickstart on Tue Jul 9 22:26:36 2013
 # (and since somewhat modified to a make more palatable boilerplate).
@@ -22,6 +24,8 @@
 import os
 # import shlex
 import sys
+from collections.abc import MutableMapping
+
 from pkg_resources import get_distribution
 
 # import sphinx_rtd_theme
@@ -123,7 +127,8 @@ except KeyError:
             try:
                 repository_url = meta["tool"]["poetry"]["urls"]["homepage"]
             except KeyError:
-                print("\nERROR: docs/conf.py cannot find pyproject.toml 'repository' or 'homepage' URL")
+                print("\nERROR: docs/conf.py cannot find pyproject.toml "
+                      "'repository' or 'homepage' URL")
 
                 raise
 project_ghuser = os.path.basename(os.path.dirname(repository_url))
@@ -391,7 +396,9 @@ html_context = {
     # - MAYBE: Replace hardcoded value with {{ template.value }},
     #          or maybe use `git rev-parse --abbrev-ref=loose HEAD`.
     #    import subprocess
-    #    completed_proc = subprocess.run(['git', 'rev-parse', '--abbrev-ref=loose', 'HEAD'], capture_output=True)
+    #    completed_proc = subprocess.run([
+    #       'git', 'rev-parse', '--abbrev-ref=loose', 'HEAD'
+    #    ], capture_output=True)
     #    completed_proc.stdout.decode().strip()
     'github_version': 'release/',
     # Path in the checkout to the docs root.
