@@ -23,6 +23,17 @@ on:
   # Via GitHub Actions website button
   workflow_dispatch:
     inputs:
+      bump-part:
+        description: 'Bump part'
+        type: choice
+        # It is intentional that this only lets users bump patch or alpha.
+        # It is encouraged that users push tags using `git-bump-version-tag`
+        # from their terminal rather than using this workflow_dispatch.
+        options:
+          - patch
+          - alpha
+          - least
+        default: 'least'
       cascade-dispatch:
         description: 'Start the cascade!'
         type: boolean
@@ -191,4 +202,8 @@ jobs:
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
-          git bump-version-tag l
+          # By default, runs:
+          #  git bump-version-tag l
+          git bump-version-tag "${BUMP_PART}"
+        env:
+          BUMP_PART: ${{ inputs.bump-part }}
