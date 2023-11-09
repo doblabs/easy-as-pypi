@@ -777,7 +777,7 @@ linty: _depends_active_venv black flake8 isort
 # ***
 
 black: _depends_active_venv
-	@black $(SOURCE_DIR) docs/conf.py
+	@black $(SOURCE_DIR) tests/ docs/conf.py
 .PHONY: black
 
 # ***
