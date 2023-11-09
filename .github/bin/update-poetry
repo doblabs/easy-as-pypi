@@ -424,6 +424,11 @@ main () {
 }
 
 # Run the command iff being executed.
+# - BWARE: When called from GitHub Action, runs from shim, e.g.,
+#     $0: /home/runner/work/_temp/8c8bbc2e-a785-491c-80e2-2ea36c0a21a3.sh
+#   So this check doesn't work.
+#   - Specifically, if you `. ./.github/bin/update-poetry` from a workflow,
+#     this script still runs main.
 if ! $(printf %s "$0" | grep -q -E '(^-?|\/)(ba|da|fi|z)?sh$' -); then
   main "$@"
 fi
