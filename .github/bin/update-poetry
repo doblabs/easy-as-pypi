@@ -26,8 +26,8 @@ UPDEPS_USER_NAME="update-poetry"
 # DEVXX: How you might test locally (but note PR self-approve fails):
 __UPDEPS__CPYST__="
   UPDEPS_FAKE_UPDATE=true \
-  UPDEPS_TAG_INHIBIT_VERSION=true \
-  UPDEPS_TAG_INHIBIT_CASCADE=true \
+  UPDEPS_LABEL_INHIBIT_VERSION=true \
+  UPDEPS_LABEL_INHIBIT_CASCADE=true \
     ./.github/bin/update-poetry
 "
 
@@ -398,7 +398,7 @@ gh_label_create () {
 
 # Meh: This feels like TMBL — Too Much Business Logic — than maybe belongs here.
 print_pr_ci_labels () {
-  if ${UPDEPS_TAG_INHIBIT_VERSION:-false}; then
+  if ${UPDEPS_LABEL_INHIBIT_VERSION:-false}; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_INHIBIT_VERSION}" \
       "${UPDEPS_LABEL_DESC_INHIBIT_VERSION}"
@@ -406,7 +406,7 @@ print_pr_ci_labels () {
     printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_VERSION} "
   fi
 
-  if ${UPDEPS_TAG_INHIBIT_CASCADE:-false}; then
+  if ${UPDEPS_LABEL_INHIBIT_CASCADE:-false}; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_INHIBIT_CASCADE}" \
       "${UPDEPS_LABEL_DESC_INHIBIT_CASCADE}"
