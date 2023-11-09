@@ -153,6 +153,7 @@ jobs:
           || needs.verify-merged-pr.result == 'success'
          )
       && ! contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
+      # && needs.wrangle-ci-tags.outputs.old_ignore_pr_merged_event == 'false'
 
     steps:
 
@@ -161,7 +162,7 @@ jobs:
           echo "BUMP_PART: ${BUMP_PART}"
           echo "CASCADE_RELEASE: ${CASCADE_RELEASE}"
           echo "OLD_INHIBIT: ${OLD_INHIBIT}"
-          echo "OLD_IGNORE: ${OLD_IGNORE}"
+          echo "OLD_INHIBIT_ALWAYS: ${OLD_INHIBIT_ALWAYS}"
 
           exit 1
         env:
@@ -170,7 +171,7 @@ jobs:
           # or we need to tag HEAD with a state tag, of sorts.
           CASCADE_RELEASE: ${{ inputs.cascade-dispatch }}
           OLD_INHIBIT: ${{ needs.wrangle-ci-tags.outputs.old_inhibit_cascade }}
-          OLD_IGNORE: ${{ needs.wrangle-ci-tags.outputs.old_ignore_pr_merged_event }}
+          OLD_INHIBIT_ALWAYS: ${{ needs.wrangle-ci-tags.outputs.old_inhibit_cascade_always }}
 
       # *** exited
 
