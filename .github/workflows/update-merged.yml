@@ -159,7 +159,7 @@ jobs:
 
     steps:
       - name: Checkout this repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           # Fetch all history, so rev-parse HEAD is real HEAD,
           # and we get tag history, so git-bump can read version.
@@ -181,7 +181,7 @@ jobs:
       # ***
 
       - name: Checkout git-bump
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: 'landonb/git-bump-version-tag'
           # INERT: Pin the version. But we own the tool, so trust in HEAD.
