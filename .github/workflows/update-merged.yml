@@ -215,7 +215,42 @@ jobs:
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
           # By default, runs:
-          #  git bump-version-tag l
+          #  git bump-version-tag least
+          echo "git bump-version-tag \"${BUMP_PART}\""
           git bump-version-tag "${BUMP_PART}"
         env:
-          BUMP_PART: ${{ inputs.bump-part }}
+          # Uses bump-part input if workflow_dispatch;
+          # or looks for special CI label if pull_request;
+          # finally falls-back 'least' (which is bump's default).
+          # - SAVVY: If you start a normal version release cascade but then
+          #   reach a project on pre-release, this bump, because 'least',
+          #   will maintain that pre-release. And then on the next cascade
+          #   dispatch, the prerelease will propagate to the next repo.
+          #   Which seems like a good thing: If one project in the chain
+          #   is on pre-release, then everything downstream should also
+          #   be considered alpha. Alternatively, if the cascade didn't turn
+          #   prerelease on, the prerelease project wouldn't get updated
+          #   in downstream projects, but maybe upstreamer projects would.
+          #   So perhaps it'd be fine to not propagate prerelease when
+          #   encountered along the cascade -- but the CI isn't quite
+          #   plumbed for that case. Rather than update-cascade.yml use
+          #   the PRERELEASE flag passed around (based off the current
+          #   version tag), update-merged.yml would have to add a
+          #   'ci-prerelease' or 'ci-prerelease-cascade' tag to the repo,
+          #   based on the 'ci-prelease' PR label that update-deps.yml
+          #   added (based on the PRERELEASE input from update-cascade.yml).
+          #   Then update-cascade would have to read that tag.
+          #   - TL;DR: If you don't want one prerelease project to make the
+          #     rest of the cascade prerelease versions, you need to add a
+          #     new 'ci-prerelease' tag to ci-tags-wrangle.yml that will be
+          #     set in update-merged.yml (based on same-named PR label),
+          #     and that will be read in update-cascade.yml (and dispatch
+          #     to next repo's update-deps.yml).
+          #     - DEBAR: Do not change from Normal to Prerelease cascade
+          #              when cascade reaches a Prerelease project.
+          # USYNC: UPDEPS_LABEL_NAME_PRERELEASE="ci-prerelease"
+          BUMP_PART: ${{
+            inputs.bump-part
+            || (contains(github.event.pull_request.labels.*.name, 'ci-prerelease')
+                && 'alpha')
+            || 'least' }}
