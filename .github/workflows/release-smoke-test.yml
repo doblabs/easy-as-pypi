@@ -211,7 +211,8 @@ jobs:
     needs: [pip-smoke-test, pipx-smoke-test]
 
     # Note the 'if' is skipped if any needs were skipped, unless always.
-    if: always()
+    if: ${{ ! cancelled()
       && needs.pip-smoke-test.result == 'success'
       && (needs.pipx-smoke-test.result == 'success'
-          || needs.pipx-smoke-test.result == 'skipped')
+          || needs.pipx-smoke-test.result == 'skipped'
+      ) }}
