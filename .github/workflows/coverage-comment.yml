@@ -35,19 +35,6 @@ jobs:
       # comments (to avoid publishing multiple comments in the same PR)
       contents: write
     steps:
-      # github.event.workflow_run is empty...
-      - name: FIXME Just curious
-        run: |
-          echo "github.event: ${{ github.event }}"
-          # Next 2 unset.
-          echo "github.event.workflow_run: ${{ github.event.workflow_run }}"
-          echo "GITHUB_PR_RUN_ID: ${{ github.event.workflow_run.id }}"
-      - name: Dump github.event
-        run: echo "${GITHUB_EVENT}"
-        shell: bash
-        env:
-          GITHUB_EVENT: ${{ toJson(github.event) }}
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
