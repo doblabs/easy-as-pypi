@@ -17,6 +17,15 @@ on:
 
   # Via GitHub Actions website button
   workflow_dispatch:
+    inputs:
+      increment-version:
+        description: 'Increment version'
+        type: boolean
+        default: true
+      cascade-dispatch:
+        description: 'Start the cascade!'
+        type: boolean
+        default: false
 
 # ***
 
@@ -67,6 +76,8 @@ jobs:
           new_pr_num="$( \
             UPDEPS_FAKE_UPDATE=false \
             UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" \
+            UPDEPS_LABEL_INHIBIT_VERSION="${{ ! inputs.increment-version }}" \
+            UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}" \
             ./.github/bin/update-poetry
           )"
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
@@ -93,4 +104,8 @@ jobs:
 
     needs: poetry-update
 
-    if: needs.poetry-update.outputs.new_pr_num == ''
+    if: |
+      needs.poetry-update.result == 'success'
+        && needs.poetry-update.outputs.new_pr_num == ''
+        && (github.event_name != 'workflow_dispatch'
+            || inputs.cascade-dispatch == 'true')
