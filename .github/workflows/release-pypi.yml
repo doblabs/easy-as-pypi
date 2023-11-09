@@ -117,8 +117,8 @@ jobs:
 
       - name: Check if prerelease
         run: |
-          echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
-            || echo "PRERELEASE=true" >> "$GITHUB_ENV"
+          (echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
+           && echo "PRERELEASE=false" || echo "PRERELEASE=true") >> "$GITHUB_ENV"
 
       - name: Probe version
         run: |
@@ -142,13 +142,13 @@ jobs:
             && pipx_pip_args="" \
             || pipx_pip_args="--pip-args=${extra_index_arg}"
           #
-          [ -z "${PRERELEASE}" ] \
+          ! $PRERELEASE \
             && index_url_pip="" \
             || index_url_pip="--index-url ${test_pypi_url} ${extra_index_arg}"
           echo "INDEX_PIP=$index_url_pip" >> "$GITHUB_ENV"
           #
           # yamllint disable-line rule:line-length
-          [ -z "${PRERELEASE}" ] \
+          ! $PRERELEASE \
             && index_url_pipx="" \
             || index_url_pipx="--index-url ${test_pypi_url} ${pipx_pip_args}"
           echo INDEX_PIPX=$index_url_pipx >> "$GITHUB_ENV"
@@ -156,7 +156,7 @@ jobs:
 
       - name: Announcement
         run: |
-          [ -z "${PRERELEASE}" ] \
+          ! $PRERELEASE \
             && prerelease_msg="" \
             || prerelease_msg=" (prerelease)"
           echo "Pushing $VERSION_TAG to PyPI${prerelease_msg}"
@@ -226,7 +226,7 @@ jobs:
       #       run: |
       #         # poetry config pypi-token.pypi $PYPI_TOKEN
       #         repository=""
-      #         if [ -n "$PRERELEASE" ]; then
+      #         if $PRERELEASE; then
       #           poetry config repositories.testpypi https://test.pypi.org/legacy/
       #           repository="--repository testpypi"
       #         fi
@@ -446,7 +446,8 @@ jobs:
             -f "INDEX_PIP=${INDEX_PIP}" \
             -f "INDEX_PIPX=${INDEX_PIPX}" \
             -f "PACKAGE_NAME=${PACKAGE_NAME}" \
-            -f "VERSION=${VERSION}"
+            -f "VERSION=${VERSION}" \
+            -f "PRERELEASE=${PRERELEASE}"
           #
           # echo "... | gh workflow run release-smoke-test.yml --json"
           # # Doesn't like double-quotes outside, singles inside:
@@ -471,5 +472,6 @@ jobs:
           INDEX_PIPX: ${{ needs.prepare-publish.outputs.INDEX_PIPX }}
           PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
           VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
+          PRERELEASE: ${{ needs.prepare-publish.outputs.PRERELEASE }}
 
 # ***
