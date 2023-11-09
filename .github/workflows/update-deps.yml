@@ -7,8 +7,8 @@
 
 name: Release Cascade — Update
 
-run-name: 👣 — Cascade — 2.) Update deps (via ${{
-  github.event_name == 'workflow_dispatch' && 'User' || 'Upstream' }})
+run-name: 👣 — Cascade — 2.) Update deps ${{
+  github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
   # Via update-cascade.yml
