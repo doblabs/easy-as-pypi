@@ -149,7 +149,7 @@ jobs:
     needs: [verify-merged-pr, wrangle-ci-tags]
 
     # USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
-    if: always()
+    if: ! cancelled()
       && (github.event_name == 'workflow_dispatch'
           || needs.verify-merged-pr.result == 'success'
          )
