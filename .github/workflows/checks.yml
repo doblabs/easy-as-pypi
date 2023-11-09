@@ -88,7 +88,7 @@ jobs:
 
       # CXREF: https://github.com/actions/checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # CXREF: https://github.com/actions/setup-python
       - name: Set up Python ${{ matrix.python-version }}
@@ -212,7 +212,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install poetry
         run: pipx install poetry
@@ -243,7 +243,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -320,7 +320,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install poetry
         run: pipx install poetry
@@ -350,7 +350,7 @@ jobs:
 
       # CXREF: https://github.com/actions/checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       # CXREF: https://github.com/actions/setup-python
       - name: Set up Python ${{ env.PYTHON_VERSION }}
@@ -385,7 +385,7 @@ jobs:
 
       # CXREF: https://github.com/actions/checkout
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install poetry
         run: pipx install poetry
@@ -438,7 +438,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -499,7 +499,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -561,7 +561,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -614,7 +614,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -683,7 +683,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
@@ -763,7 +763,7 @@ jobs:
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
 
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Install poetry
         run: pipx install poetry
