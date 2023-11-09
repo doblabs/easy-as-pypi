@@ -154,7 +154,12 @@ resume_old_branch_and_cleanup () {
   git checkout -q -
 
   # Delete local branch when this script is run from user terminal (not from GHA).
-  if test -z "${GITHUB_ACTIONS}"; then
+  # - SAVVY: Use 'CI' environ to detect CI environment — this is the first
+  #   environ that GH documents. Other candidates include 'GITHUB_ACTIONS'
+  #   and 'GITHUB_ACTION'.
+  #   - REFER:
+  # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
+  if ! ${CI:-false}; then
     # FIXME: Might need Big D.
     # Ignore stderr message that -q doesn't inhibit:
     #   warning: deleting branch 'foo' that has been merged to
@@ -170,10 +175,8 @@ poetry_update_commit_changes () {
 
   print_prog "git commit... "
 
-  # REFER/2023-11-04: I found GITHUB_ACTIONS when inspecting GHA runtime
-  #                   with `env`, not sure if it's documented.
-
-  if ${GITHUB_ACTIONS:-false} \
+  # See comment above: GHA defines CI=true.
+  if ${CI:-false} \
     && test -z "$(git config user.email)" \
     && test -z "$(git config user.name)" \
   ; then
