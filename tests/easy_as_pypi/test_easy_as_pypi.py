@@ -11,4 +11,3 @@ class TestOneAndDone(object):
         """Make sure that invoking the command passes without exception."""
         result = runner()
         assert result.exit_code == 0
-
