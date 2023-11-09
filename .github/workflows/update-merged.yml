@@ -84,6 +84,7 @@ jobs:
 
   verify-merged-pr:
 
+    # USYNC: UPDEPS_LABEL_NAME_POETRY_LOCK="poetry.lock"
     if: github.event_name != 'workflow_dispatch'
       && github.event.pull_request.merged == true
       && contains(github.event.pull_request.labels.*.name, 'poetry.lock')
@@ -91,7 +92,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - run: echo "The PR was merged, and labeled poetry.lock"
+      - run: echo "The PR was merged, and it's labeled 'poetry.lock'"
 
       # Verify tag name looks like one of ours.
       - name: Verify tag name format — “${{ github.head_ref }}”
