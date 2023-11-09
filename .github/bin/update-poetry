@@ -5,13 +5,6 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# FIXME/2023-11-04 04:43: Customize this for each project.
-# - Should workflow pass it in?
-# - What about running locally?
-# USAGE: From GHA, e.g.,
-#   REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
-REPO_ORG_PROJ="${REPO_ORG_PROJ:-doblabs/easy-as-pypi}"
-
 # FIXME/2023-11-03: Make the strings in functions below user-configurable,
 # including: Branch name, Commit message, PR name/title.
 UPDEPS_LABEL_NAME="poetry.lock"
@@ -19,6 +12,12 @@ UPDEPS_LABEL_NAME="poetry.lock"
 # FIXME/2023-11-04: Let user set these, somehow.
 UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
 UPDEPS_USER_NAME="update-poetry"
+
+# The UPDEPS_REPO_ORG_PROJ environ will be inferred at runtime.
+# - You can also set from workflow, e.g.,
+#     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
+#
+#  UPDEPS_REPO_ORG_PROJ=
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -65,6 +64,12 @@ print_prog () {
 update_poetry_update () {
   assert_git_status_tidy
 
+  local branch_name
+  branch_name="$(print_branch_name)"
+
+  local remote_name
+  remote_name="$(git_upstream_remote)"
+
   poetry_update_lock
 
   assert_git_status_0_or_1_changes
@@ -72,17 +77,11 @@ update_poetry_update () {
   assert_git_status_only_poetry_lock_changed_if_any
 
   if test -n "$(git status --porcelain=v1)"; then
-    local branch_name
-    branch_name="$(print_branch_name)"
-
-    local remote_name
-    remote_name="$(git_upstream_remote)"
-
     prepare_branch "${branch_name}" "${remote_name}"
 
     poetry_update_commit_changes "${branch_name}"
 
-    push_branch "${branch_name}"
+    push_branch "${branch_name}" "${remote_name}"
 
     local NEW_PR_URL
     gh_pr_create_and_auto_merge_when_checks_finish
@@ -208,9 +207,7 @@ poetry_update_commit_changes () {
 
 push_branch () {
   local branch_name="$1"
-
-  local remote_name
-  remote_name="$(git_upstream_remote)"
+  local remote_name="$2"
 
   print_prog "git push '${remote_name}'... "
 
@@ -239,20 +236,72 @@ push_branch () {
 # - We don't default to the sole remote if that's all there is.
 #   We're looking for a specific github.com/<org>/<proj> remote.
 git_upstream_remote () {
+  if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
+    local repo_url
 
-  if [ -z "${REPO_ORG_PROJ}" ]; then
-    >&2 echo "ERROR: Please set REPO_ORG_PROJ before calling update-poetry"
+    repo_url="$(print_upstream_remote_url)"
 
-    exit 1
+    if [ -n "${repo_url}" ]; then
+      # Trim, e.g., https://github.com/doblabs/easy-as-pypi → doblabs/easy-as-pypi
+      # - Result is same as ${{ github.repository }}
+      UPDEPS_REPO_ORG_PROJ="$(
+        echo "${repo_url}" | sed 's#^.*/\([^/]*/[^/]*\)$#\1#'
+      )"
+
+      if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
+        >&2 echo "ERROR: Could not deduce project repo from URL: ${repo_url}"
+
+        exit 1
+      fi
+    else
+      >&2 echo "ERROR: Could not deduce remote URL from remotes or pyproject.toml"
+      >&2 echo "- Check pyproject.toml values for 'repository' or 'homepage'"
+      >&2 echo "  from [tool.poetry] or [tool.poetry.urls]"
+      >&2 echo "- Check \`git remote get-url origin\`"
+
+      exit 1
+    fi
   fi
 
   if ! git_upstream_remote_deduce; then
     # Note that we're ignoring the tracking branch. We want our GH
     # org/proj repo. Which we didn't find.
     >&2 echo "ERROR: Could not determine the upstream GitHub remote"
-    >&2 echo "- We checked REPO_ORG_PROJ (“${REPO_ORG_PROJ}”)"
+    >&2 echo "- We checked UPDEPS_REPO_ORG_PROJ (“${UPDEPS_REPO_ORG_PROJ}”)"
     >&2 echo "  against these remotes:"
     >&2 echo git remote -v
+
+    exit 1
+  fi
+}
+
+print_upstream_remote_url () {
+  if ${CI:-false}; then
+    git remote get-url "origin"
+  else
+    print_upstream_remote_url_from_pyproject_toml
+  fi
+}
+
+print_upstream_remote_url_from_pyproject_toml () {
+  if ! insist_cmd 'tomlq'; then
+    >&2 echo "ERROR: Could not deduce upstream remote"
+    >&2 echo "- Please run from venv with \`tomlq\` installed"
+    >&2 echo "- Or set the 'UPDEPS_REPO_ORG_PROJ' environ"
+
+    exit 1
+  fi
+
+  if true \
+    && ! tomlq -r -e ".tool.poetry.repository" "pyproject.toml" \
+    && ! tomlq -r -e ".tool.poetry.urls.repository" "pyproject.toml" \
+    && ! tomlq -r -e ".tool.poetry.homepage" "pyproject.toml" \
+    && ! tomlq -r -e ".tool.poetry.urls.homepage" "pyproject.toml" \
+  ; then
+    >&2 echo "ERROR: Could not deduce remote URL from pyproject.toml"
+    >&2 echo "- pyproject.toml is missing 'repository' or 'homepage'"
+    >&2 echo "  from [tool.poetry] or [tool.poetry.urls]"
+    >&2 echo "- You can also set 'UPDEPS_REPO_ORG_PROJ' environ directly"
 
     exit 1
   fi
@@ -261,8 +310,8 @@ git_upstream_remote () {
 git_upstream_remote_deduce () {
   git remote -v \
     | grep \
-        -e "[[:space:]]git@.*:${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
-        -e "github.com/${REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "[[:space:]]git@.*:${UPDEPS_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "github.com/${UPDEPS_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
     | sed 's/^\([^[:space:]]\+\).*/\1/'
 }
 
