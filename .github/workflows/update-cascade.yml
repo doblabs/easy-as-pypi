@@ -78,6 +78,9 @@ jobs:
         }}"
 
     steps:
+      - name: Die
+        run: exit 1
+
       # CXREF: https://github.com/marketplace/actions/repository-dispatch
       - name: Dispatch to "${{ matrix.repo }}"
         uses: peter-evans/repository-dispatch@v2
