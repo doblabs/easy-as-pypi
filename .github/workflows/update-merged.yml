@@ -194,9 +194,21 @@ jobs:
 
       - name: Prepare committer
         run: |
+          assert_git_email_known_ci () {
+            test -n "${UPDEPS_USER_EMAIL}" \
+              && return 0 || true
+
+            >&2 echo "ERROR: Please set UPDEPS_USER_EMAIL " \
+              "organization or project variable"
+
+            exit 1
+          }
+          assert_git_email_known_ci
+
           cd ./versionee/
-          git config user.email "${UPDEPS_USER_EMAIL:-landonb@users.noreply.github.com}"
-          git config user.name "${UPDEPS_USER_NAME:-release-bot}"
+          git config user.email "${UPDEPS_USER_EMAIL}"
+          git config user.name \
+            "${UPDEPS_USER_NAME_VERSION:-${UPDEPS_USER_NAME:-release-bot}}"
 
       - name: Bump it...
         run: |
