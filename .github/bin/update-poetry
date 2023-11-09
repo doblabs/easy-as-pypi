@@ -19,9 +19,11 @@ UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
 Tells CI not to cascade after release}"
 UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 
-# FIXME/2023-11-04: Let user set these, somehow.
-UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
-UPDEPS_USER_NAME="update-poetry"
+# CXREF: These are GH organization variables that GHA injects into env:
+#   https://github.com/organizations/doblabs/settings/variables/actions
+# - If you're running locally, git-config values will be used instead.
+UPDEPS_USER_EMAIL="${UPDEPS_USER_EMAIL}"
+UPDEPS_USER_NAME="${UPDEPS_USER_NAME:-update-poetry}"
 
 # Optional: Customizable Git and GitHub message.
 UPDEPS_COMMIT_MESSAGE="${UPDEPS_COMMIT_MESSAGE:-\
@@ -86,6 +88,8 @@ print_prog () {
 
 update_poetry_update () {
   assert_git_status_tidy
+
+  assert_git_email_known
 
   local branch_name
   branch_name="$(print_branch_name)"
@@ -198,17 +202,7 @@ poetry_update_commit_changes () {
   print_prog "git commit... "
 
   # See comment above: GHA defines CI=true.
-  if ${CI:-false} \
-    && test -z "$(git config user.email)" \
-    && test -z "$(git config user.name)" \
-  ; then
-    # We could use git's -c option, e.g.,
-    #   local commit_user=""
-    #   commit_user="-c user.email=\"${email}\" -c user.name=\"${name}\""
-    # but then we'd need to use eval because of the embedded quotes, e.g.,
-    #   # Using eval, because of the possibly empty string commit_user.
-    #   eval "git ${commit_user} commit -q -m "..."
-    # So we'll go the cleaner route.
+  if ${CI:-false}; then
     git config user.email "${UPDEPS_USER_EMAIL}"
     git config user.name "${UPDEPS_USER_NAME}"
   fi
@@ -490,6 +484,32 @@ gh_pr_approve () {
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+assert_git_email_known () {
+  if ${CI:-false}; then
+    assert_git_email_known_ci
+  else
+    assert_git_email_known_interactive
+  fi
+}
+
+assert_git_email_known_ci () {
+  test -n "${UPDEPS_USER_EMAIL}" \
+    && return 0 || true
+
+  >&2 echo "ERROR: Please set UPDEPS_USER_EMAIL organization or project variable"
+
+  exit 1
+}
+
+assert_git_email_known_interactive () {
+  test -n "$(git config user.email)" \
+    && return 0 || true
+
+  >&2 echo "ERROR: Who are you? \`git config user.email\` says you're nobody"
+
+  exit 1
+}
 
 assert_git_status_tidy () {
   test -z "$(git status --porcelain=v1)" \
