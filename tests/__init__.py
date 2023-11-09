@@ -4,4 +4,3 @@
 # License: MIT
 
 """Tests for the ``easy-as-pypi`` package."""
-
