@@ -288,7 +288,7 @@ print_upstream_remote_url () {
 }
 
 print_upstream_remote_url_from_pyproject_toml () {
-  if ! insist_cmd 'tomlq'; then
+  if ! insist_cmd 'tomlqXXX'; then
     >&2 echo "ERROR: Could not deduce upstream remote"
     >&2 echo "- Please run from venv with \`tomlq\` installed"
     >&2 echo "- Or set the 'UPDEPS_REPO_ORG_PROJ' environ"
