@@ -20,6 +20,12 @@ on:
 # ***
 
 jobs:
+  wrangle-ci-tags:
+    name: Wrangle CI tags
+    uses: ./.github/workflows/ci-tags-wrangle.yml
+
+  # ***
+
   identify-downstream-repos:
     name: "Find Cascade repos"
 
@@ -55,16 +61,10 @@ jobs:
 
   # ***
 
-  wrangle-ci-tags:
-    name: Wrangle CI tags
-    uses: ./.github/workflows/ci-tags-wrangle.yml
-
-  # ***
-
   dispatch-downstream-repos:
     name: Dispatch downstream repos
 
-    needs: [identify-downstream-repos, wrangle-ci-tags]
+    needs: [wrangle-ci-tags, identify-downstream-repos]
 
     if: needs.wrangle-ci-tags.outputs.old_inhibit_cascade == 'false'
       && needs.wrangle-ci-tags.outputs.old_inhibit_cascade_always == 'false'
