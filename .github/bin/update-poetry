@@ -342,16 +342,16 @@ gh_pr_create () {
 }
 
 gh_pr_set_auto_merge_delete_rebase () {
-  local new_pr_url="$1"
+  local pr_ref="$1"
 
   # Note that --delete-branch has no effect, or at least it was ineffective
   # until I enabled "Automatically delete head branches" (Settings > General),
   # which makes it sound like it's still probably effectiveless.
 
-  print_prog "gh pr merge \"${new_pr_url}\" --auto --delete-branch --rebase\n"
+  print_prog "gh pr merge \"${pr_ref}\" --auto --delete-branch --rebase\n"
 
   GH_TOKEN=${USER_TOKEN} \
-  gh pr merge "${new_pr_url}" --auto --delete-branch --rebase
+  gh pr merge "${pr_ref}" --auto --delete-branch --rebase
 }
 
 # CXREF: https://github.com/doblabs/easy-as-pypi/settings/actions
@@ -367,15 +367,15 @@ gh_pr_set_auto_merge_delete_rebase () {
 #     users cannot approve their own PRs, and when run locally,
 #     pr-create and pr-review run as same user most likely).
 gh_pr_approve () {
-  local new_pr_url="$1"
+  local pr_ref="$1"
 
-  print_prog "gh pr review --approve \"${new_pr_url}\" --comment \"LGTM!\"\n"
+  print_prog "gh pr review --approve \"${pr_ref}\" --comment \"LGTM!\"\n"
 
   # Approve PR using github-actions bot, to bypass anti-self-approve
   # branch protection rule.
 
   GH_TOKEN=${GBOT_TOKEN} \
-  gh pr review "${new_pr_url}" --approve --body "LGTM!" \
+  gh pr review "${pr_ref}" --approve --body "LGTM!" \
     || true
 }
 
