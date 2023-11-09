@@ -115,10 +115,10 @@ try:
     repository_url = meta["tool"]["poetry"]["repository"]
 except KeyError:
     try:
-        repository_url = meta["tool"]["poetry"]["homepage"]
+        repository_url = meta["tool"]["poetry"]["urls"]["repository"]
     except KeyError:
         try:
-            repository_url = meta["tool"]["poetry"]["urls"]["repository"]
+            repository_url = meta["tool"]["poetry"]["homepage"]
         except KeyError:
             try:
                 repository_url = meta["tool"]["poetry"]["urls"]["homepage"]
