@@ -23,6 +23,12 @@ UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 UPDEPS_USER_EMAIL="landonb@users.noreply.github.com"
 UPDEPS_USER_NAME="update-poetry"
 
+# Optional: Customizable Git and GitHub message.
+UPDEPS_COMMIT_MESSAGE="${UPDEPS_COMMIT_MESSAGE:-\
+Build: Deps: Update poetry.lock [update-deps cascade]}"
+UPDEPS_PR_TITLE="${UPDEPS_PR_TITLE:-Build: Bump poetry.lock (bump all)}"
+UPDEPS_PR_BODY="${UPDEPS_PR_BODY:-Cascading release}"
+
 # The UPDEPS_REPO_ORG_PROJ environ will be inferred at runtime.
 # - You can also set from workflow, e.g.,
 #     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
@@ -207,7 +213,7 @@ poetry_update_commit_changes () {
     git config user.name "${UPDEPS_USER_NAME}"
   fi
 
-  git commit -q -m "Build: Deps: Update poetry.lock [update-deps cascade]"
+  git commit -q -m "${UPDEPS_COMMIT_MESSAGE}"
 
   print_prog "✓\n"
 }
@@ -426,8 +432,8 @@ print_pr_ci_labels () {
 gh_pr_create () {
   local pr_ci_labels="$1"
 
-  local pr_title="Build: Bump poetry.lock (bump all)"
-  local pr_body="Cascading release"
+  local pr_title="${UPDEPS_PR_TITLE}"
+  local pr_body="${UPDEPS_PR_BODY}"
   local new_pr_url
 
   print_prog "gh pr create --title \"${pr_title}\" --body \"${pr_body}\"" \
