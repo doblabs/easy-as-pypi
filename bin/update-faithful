@@ -30,7 +30,7 @@ update_deps_easy_as_pypi () {
   # The *-faithful-* workflow expects that this executable lives at
   #   /path/to/easy-as-pypi/bin/update-deps
   # such that the canon path (aka path to this project) is 1 directory up.
-  local canon_path_absolute="$(realpath "$(dirname "$0")/..")"
+  local canon_base_absolute="$(realpath "$(dirname "$0")/..")"
 
   # If we didn't use the render-faithful-file feature, we could skip the
   # venv. (We could also skip the update-faithful-begin altogether, which
@@ -40,7 +40,7 @@ update_deps_easy_as_pypi () {
 
   # SAVVY: How you might test a subset of this file operation:
   #
-  #   UPDEPS_CANON_BASE_ABSOLUTE="${canon_path_absolute}"
+  #   UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute}"
   #   render-faithful-file "docs/index.rst"
   #   update-faithful-file ".github/dependabot.yml"
   #   >&2 echo "STOP!"
@@ -53,7 +53,7 @@ update_deps_easy_as_pypi () {
   # activates the venv for render-faithful-file, and manages a UX
   # progress message, in the spirit of other OMR messaging (like
   # the `infuse` method).
-  update-faithful-begin "${canon_path_absolute}" "${skip_venv_activate}"
+  update-faithful-begin "${canon_base_absolute}" "${skip_venv_activate}"
 
   # *** Top-level ./ files
 
