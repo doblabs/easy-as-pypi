@@ -89,6 +89,10 @@ print_tmpl_src_data () {
   fi
 
   local eapp_version="$(git latest-version 2> /dev/null)"
+  local eapp_version
+  if ! eapp_version="$(git bump current 2> /dev/null)"; then
+    eapp_version="$(git latest-version 2> /dev/null)"
+  fi
 
   echo "\
 {
