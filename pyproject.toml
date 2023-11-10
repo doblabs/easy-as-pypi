@@ -75,9 +75,8 @@ easy-as-pypi = "easy_as_pypi:cli"
 # ***
 
 [tool.easy-as-pypi]
-copyright_years = "2020-2023"
-
-[tool.git_update_faithful]
+author = "Landon Bouma <https://tallybark.com/>"
+copy_years_owner = "2020-2023 Landon Bouma"
 coc_contact_email = "tallybark+doblabs -at- gmail.com"
 
 # ***

@@ -37,6 +37,9 @@ print_tmpl_src_data () {
 
   local project_name=""
   local project_url=""
+  local project_author=""
+  local project_license=""
+  local copy_years_owner=""
   local coc_contact_email=""
 
   local trim_null="select( . != null )"
@@ -49,18 +52,29 @@ print_tmpl_src_data () {
   # but checks *all* the URLs. Or on GHA ($CI = true), just uses 'origin' url.
   project_url="$(print_upstream_remote_url)" || exit 1
 
-  coc_contact_email="$(
-    tomlq -r --exit-status .tool.git_update_faithful.coc_contact_email pyproject.toml
+  project_author="$(
+    tomlq -r ".tool.easy-as-pypi.author | ${trim_null}" pyproject.toml
   )"
 
-  # Fallback canon pyproject.toml for missing values.
+  project_license="$(
+    tomlq -r ".tool.poetry.license | ${trim_null}" pyproject.toml
+  )"
 
+  copy_years_owner="$(
+    tomlq -r ".tool.easy-as-pypi.copy_years_owner | ${trim_null}" pyproject.toml
+  )"
+
+  coc_contact_email="$(
+    tomlq -r ".tool.easy-as-pypi.coc_contact_email | ${trim_null}" pyproject.toml
+  )"
+
+  # Fallback canon pyproject.toml for (some) missing values.
   if [ $? -ne 0 ]; then
     # MAYBE/2023-11-10: If ${CI:-false}, fetch from org var, e.g., ${{ vars.COC_CONTACT }}.
     coc_contact_email="$(
       cd "${canon_base_absolute}"
 
-      tomlq -r .tool.git_update_faithful.coc_contact_email pyproject.toml
+      tomlq -r .tool.easy-as-pypi.coc_contact_email pyproject.toml
     )"
   fi
 
@@ -69,6 +83,9 @@ print_tmpl_src_data () {
     \"project\": {
         \"name\": \"${project_name}\",
         \"url\": \"${project_url}\",
+        \"author\": \"${project_author}\",
+        \"license\": \"${project_license}\",
+        \"copy_years_owner\": \"${copy_years_owner}\",
         \"coc_contact_email\": \"${coc_contact_email}\"
     }
 }"
