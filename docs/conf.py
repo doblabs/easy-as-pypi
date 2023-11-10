@@ -137,7 +137,11 @@ project_ghrepo = project_dist
 # E.g., project_auth = 'Landon Bouma <email>'
 project_auth = ",".join(meta["tool"]["poetry"]["authors"])
 # E.g., project_copy = '2020-2023, Landon Bouma <email>'
-project_copy = f"{meta['tool']['easy-as-pypi']['copyright_years']}, {project_auth}"
+try:
+    copy_years_owner = meta["tool"]["easy_as_pypi"]["copy_years_owner"]
+    project_copy = f"{copy_years_owner.split(' ')[0]}, {project_auth}"
+except KeyError:
+    project_copy = project_auth
 
 # project_orgn = 'Tally Bark LLC'
 project_orgn = meta["tool"]["poetry"]["maintainers"]
