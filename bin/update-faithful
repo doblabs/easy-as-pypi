@@ -12,6 +12,10 @@ source_deps () {
   # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
   #   https://github.com/thegittinsgood/git-update-faithful#⛲
   . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
+
+  # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/update-poetry
+  # - For: print_upstream_remote_url
+  . "$(dirname "$(realpath "$0")")/../.github/bin/update-poetry"
 }
 
 insist_cmd () {
@@ -22,6 +26,52 @@ insist_cmd () {
   >&2 echo "ERROR: Missing system command ‘${cmdname}’."
 
   exit 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+print_tmpl_src_data () {
+  local canon_base_absolute="$1"
+
+  venv_install_yq
+
+  local project_name=""
+  local project_url=""
+  local coc_contact_email=""
+
+  local trim_null="select( . != null )"
+
+  project_name="$(
+    tomlq -r ".tool.poetry.name | ${trim_null}" pyproject.toml
+  )"
+
+  # Basically `project_url="$(tomlq -r .tool.poetry.homepage pyproject.toml)"`
+  # but checks *all* the URLs. Or on GHA ($CI = true), just uses 'origin' url.
+  project_url="$(print_upstream_remote_url)" || exit 1
+
+  coc_contact_email="$(
+    tomlq -r --exit-status .tool.git_update_faithful.coc_contact_email pyproject.toml
+  )"
+
+  # Fallback canon pyproject.toml for missing values.
+
+  if [ $? -ne 0 ]; then
+    # MAYBE/2023-11-10: If ${CI:-false}, fetch from org var, e.g., ${{ vars.COC_CONTACT }}.
+    coc_contact_email="$(
+      cd "${canon_base_absolute}"
+
+      tomlq -r .tool.git_update_faithful.coc_contact_email pyproject.toml
+    )"
+  fi
+
+  echo "\
+{
+    \"project\": {
+        \"name\": \"${project_name}\",
+        \"url\": \"${project_url}\",
+        \"coc_contact_email\": \"${coc_contact_email}\"
+    }
+}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -38,6 +88,17 @@ update_deps_easy_as_pypi () {
   # seconds, happens sooner rather than later, for better UX messaging.)
   local skip_venv_activate=false
 
+  # ***
+
+  # Generate the source data JSON file.
+
+  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
+  local tmpl_src_format="json"
+
+  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
+
+  # ***
+
   # SAVVY: How you might test a subset of this file operation:
   #
   #   UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute}"
@@ -53,7 +114,8 @@ update_deps_easy_as_pypi () {
   # activates the venv for render-faithful-file, and manages a UX
   # progress message, in the spirit of other OMR messaging (like
   # the `infuse` method).
-  update-faithful-begin "${canon_base_absolute}" "${skip_venv_activate}"
+  update-faithful-begin "${canon_base_absolute}" "${skip_venv_activate}" \
+    "${tmpl_src_data}" "${tmpl_src_format}"
 
   # *** Top-level ./ files
 
@@ -178,6 +240,8 @@ update_deps_easy_as_pypi () {
   local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
 
   update-faithful-finish "${sourcerer}"
+
+  command rm "${tmpl_src_data}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
