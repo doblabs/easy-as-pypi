@@ -198,6 +198,11 @@ update_deps_easy_as_pypi () {
   # BELOW: ".pyproject-doc8/"
   # BUILD: ".pyproject-editable/"
   # SPLIT: "pyproject.toml"
+  # └→ Or generated:
+  if [ -f ".pyproject.project.tmpl" ]; then
+    update-faithful-file ".pyproject.common.tmpl" ".pyproject.tmpl"
+    render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
+  fi
   # BUILD: ".pytest_cache/"
   # SPLIT: "README.rst"
   update-faithful-file ".readthedocs.yml"
