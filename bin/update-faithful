@@ -9,8 +9,8 @@ source_deps () {
   # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
   insist_cmd 'realpath'
 
-  # CXREF: ~/.kit/git/ohmyrepos/lib/update-faithful.sh
-  #   https://github.com/landonb/ohmyrepos#😤
+  # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
+  #   https://github.com/thegittinsgood/git-update-faithful#⛲
   . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
 }
 

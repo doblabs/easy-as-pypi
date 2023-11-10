@@ -61,8 +61,8 @@ source_deps () {
 
   # For `print_canon_scoped_head` (which uses `identify_scope_ends_at` from git-put-wise).
   # - Supports running this script on local Dev repo with PRIVATE commits.
-  # CXREF: ~/.kit/git/ohmyrepos/lib/update-faithful.sh
-  #   https://github.com/landonb/ohmyrepos#😤
+  # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
+  #   https://github.com/thegittinsgood/git-update-faithful#⛲
   # $0 on GHA: ./.github/bin/update-poetry
   # pwd on GHA: /home/runner/work/easy-as-pypi/easy-as-pypi
   . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
