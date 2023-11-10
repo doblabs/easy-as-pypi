@@ -204,7 +204,7 @@ update_deps_easy_as_pypi () {
   # SPLIT: "pyproject.toml"
   # └→ Or generated:
   if [ -f ".pyproject.project.tmpl" ]; then
-    update-faithful-file ".pyproject.common.tmpl" ".pyproject.tmpl"
+    update-faithful-file ".pyproject.tmpl"
     render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
   fi
   # BUILD: ".pytest_cache/"
