@@ -88,6 +88,8 @@ print_tmpl_src_data () {
     )"
   fi
 
+  local eapp_version="$(git latest-version 2> /dev/null)"
+
   echo "\
 {
     \"project\": {
@@ -97,6 +99,9 @@ print_tmpl_src_data () {
         \"license\": \"${project_license}\",
         \"copy_years_owner\": \"${copy_years_owner}\",
         \"coc_contact_email\": \"${coc_contact_email}\"
+    },
+    \"easy_as_pypi\": {
+        \"version\": \"${eapp_version}\"
     }
 }"
 }
