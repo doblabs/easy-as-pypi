@@ -67,7 +67,7 @@ update_deps_easy_as_pypi () {
   #   - Well, not really uncommitted, but committed to private dev repo,
   #     then "infused" into this project using symbolic and hard links.
   # - SPLIT: Files that vary slightly between this project and spin-offs.
-  #   - In many cases, you can templatize these (using render-faithful-file).
+  #   - In some cases, you could templatize these (using render-faithful-file).
 
   # SPLIT: update-faithful-file "AUTHORS.rst"
   # IGNOR: "bin/"
