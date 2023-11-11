@@ -126,15 +126,6 @@ update_deps_easy_as_pypi () {
   # such that the canon path (aka path to this project) is 1 directory up.
   local canon_base_absolute="$(realpath "$(dirname "$0")/..")"
 
-  # *** Generate the source data JSON file
-
-  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
-  local tmpl_src_format="json"
-
-  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
-
-  # *** Update/Render files
-
   # If we didn't use the render-faithful-file feature, we could skip the
   # venv. (We could also skip the update-faithful-begin altogether, which
   # really only exists so that venv create and activate, which takes a few
@@ -152,8 +143,19 @@ update_deps_easy_as_pypi () {
   # activates the venv for render-faithful-file, and manages a UX
   # progress message, in the spirit of other OMR messaging (like
   # the `infuse` method).
-  update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}" \
-    "${tmpl_src_data}" "${tmpl_src_format}"
+  update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}"
+
+  # *** Generate the source data JSON file (requires active venv)
+
+  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
+  local tmpl_src_format="json"
+
+  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
+
+  UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
+  UPDEPS_TMPL_SRC_FORMAT="${tmpl_src_format}"
+
+  # *** 1st update-faithful session (continued)
 
   if [ -f ".pyproject.project.tmpl" ]; then
     update_faithful_files_only_pyproject_toml
