@@ -17,6 +17,9 @@ UPDEPS_CANON_BASE_ABSOLUTE="${UPDEPS_CANON_BASE_ABSOLUTE}"
 UPDEPS_TMPL_SRC_DATA="${UPDEPS_TMPL_SRC_DATA}"
 UPDEPS_TMPL_SRC_FORMAT="${UPDEPS_TMPL_SRC_FORMAT}"
 
+# The Git commit title. The body is not customizable.
+UPDEPS_GENERIC_COMMIT_SUBJECT="${UPDEPS_GENERIC_COMMIT_SUBJECT:-Deps: Update faithfuls}"
+
 # ***
 
 # Trace message switch.
@@ -170,7 +173,7 @@ update_faithful_file () {
   # ***
 
   local canon_head
-  canon_head="$(print_canon_scoped_head "${canon_file_absolute}")"
+  canon_head="$(print_scoped_head "${canon_file_absolute}")"
 
   if ${success} && ! examine_and_update_local_from_canon \
     "${local_file}" "${canon_file_absolute}" "${canon_file_relative}" "${canon_head}" \
@@ -384,7 +387,7 @@ examine_and_update_local_from_canon () {
 
   # See if local file matches canon's HEAD version.
   local canon_head_private
-  canon_head_private="$(print_canon_head "${canon_file_absolute}")"
+  canon_head_private="$(print_head_sha "${canon_file_absolute}")"
 
   if [ "${canon_head}" != "${canon_head_private}" ]; then
     has_no_diff "${local_file}" "${canon_file_absolute}" "${canon_file_relative}" "${canon_head_private}" \
@@ -406,12 +409,12 @@ examine_and_update_local_from_canon () {
 
 # ***
 
-print_canon_head () {
-  local canon_file_absolute="$1"
+print_head_sha () {
+  local any_repo_file_path="$1"
   local use_scoping="${2:-false}"
 
   (
-    cd "$(dirname "${canon_file_absolute}")"
+    cd "$(dirname "${any_repo_file_path}")"
 
     local canon_head="HEAD"
 
@@ -433,12 +436,12 @@ print_canon_head () {
   )
 }
 
-print_canon_scoped_head () {
-  local canon_file_absolute="$1"
+print_scoped_head () {
+  local any_repo_file_path="${1:-.}"
 
   local use_scoping=true
 
-  print_canon_head "${canon_file_absolute}" "${use_scoping}"
+  print_head_sha "${any_repo_file_path}" "${use_scoping}"
 }
 
 # ***
@@ -656,18 +659,15 @@ update_local_from_canon () {
     if git status --porcelain=v1 -- "${local_file}" | grep -q -e "^??"; then
       warn " │   
                                       cd \"$(pwd -L)\"
-                                      command rm -f \"${local_file}\"
+                                      command rm \"${local_file}\"
                                       # Try again!
                                       $0"
 
       UPDEPS_CMD_RM_F_LIST+="${local_file} "
     else
-      # Erm, too provocative:
-      #   git commit -m \"Deps: Cleanse the unfaithful\"
       warn " │   
                                       cd \"$(pwd -L)\"
-                                      git rm -f \"${local_file}\"
-                                      git commit -m \"Deps: Decontaminate divergent files\"
+                                      command rm \"${local_file}\"
                                       # Try again!
                                       $0"
 
@@ -974,13 +974,13 @@ remove_faithful_file () {
     git rm -q "${local_file}"
   fi
 
-  # The calls below (print_canon_scoped_head and stage_follower) will only
+  # The calls below (print_scoped_head and stage_follower) will only
   # use the absolute file path to determine the absolute canon directory. I
   # know.
   local canon_fake_absolute="${canon_base_absolute}/ignored"
 
   local canon_head
-  canon_head="$(print_canon_scoped_head "${canon_fake_absolute}")"
+  canon_head="$(print_scoped_head "${canon_fake_absolute}")"
 
   stage_follower "${local_file}" "${canon_head}" "${canon_fake_absolute}" "${what_happn}"
 }
@@ -1005,7 +1005,7 @@ render_document_from_template () {
   local canon_tmpl_absolute="${canon_base_absolute}/${canon_tmpl_relative}"
 
   local canon_head
-  canon_head="$(print_canon_scoped_head "${canon_tmpl_absolute}")"
+  canon_head="$(print_scoped_head "${canon_tmpl_absolute}")"
 
   insist_canon_head_consistent "${canon_head}" "${canon_tmpl_absolute}"
 
@@ -1097,10 +1097,25 @@ render_template_localize_sources () {
   local canon_head="$5"
   local canon_base_absolute="$6"
 
+  local follower_head
+  follower_head="$(print_scoped_head)"
+
+  # Prefer local template, otherwise use canon's.
+  local chosen_tmpl_path="${canon_tmpl_absolute}"
+  local chosen_canon_head="${canon_head}"
+
+  if [ -f "${canon_tmpl_relative}" ]; then
+    chosen_tmpl_path="${canon_tmpl_relative}"
+    chosen_canon_head="${follower_head}"
+  fi
+
   command mkdir -p "$(dirname "${tmp_tmpl_absolute}")"
 
-  canon_path_show_at_canon_head "${canon_tmpl_absolute}" "${canon_tmpl_relative}" "${canon_head}" \
-    > "${tmp_tmpl_absolute}"
+  canon_path_show_at_canon_head \
+    "${chosen_tmpl_path}" \
+    "${canon_tmpl_relative}" \
+    "${chosen_canon_head}" \
+      > "${tmp_tmpl_absolute}"
 
   print_progress_info_prepared_template "${canon_tmpl_relative}"
 
@@ -1135,10 +1150,22 @@ render_template_localize_sources () {
 
       prev_tmpl_absolute="${tmp_child_absolute}"
 
+      # Prefer local template, otherwise use canon's.
+      local chosen_tmpl_path="${canon_child_absolute}"
+      local chosen_canon_head="${canon_head}"
+
+      if [ -f "${child_tmpl_relative}" ]; then
+        chosen_tmpl_path="${child_tmpl_relative}"
+        chosen_canon_head="${follower_head}"
+      fi
+
       command mkdir -p "$(dirname "${tmp_child_absolute}")"
 
-      canon_path_show_at_canon_head "${canon_child_absolute}" "${child_tmpl_relative}" "${canon_head}" \
-        > "${tmp_child_absolute}"
+      canon_path_show_at_canon_head \
+        "${chosen_tmpl_path}" \
+        "${child_tmpl_relative}" \
+        "${chosen_canon_head}" \
+          > "${tmp_child_absolute}"
 
       print_progress_info_prepared_template "${child_tmpl_relative}"
     fi
@@ -1254,7 +1281,7 @@ venv_install_yq () {
 # call sets up the venv.
 update-faithful-begin () {
   local canon_base_absolute="${1:-UPDEPS_CANON_BASE_ABSOLUTE}"
-  local skip_venv_activate="${2:-false}"
+  local skip_venv_manage="${2:-false}"
   local tmpl_src_data="$3"
   local tmpl_src_format="${4}"
 
@@ -1264,7 +1291,7 @@ update-faithful-begin () {
 
   must_pass_checks_and_ensure_cache "${UPDEPS_CANON_BASE_ABSOLUTE}" "" ""
 
-  if ! ${skip_venv_activate}; then
+  if ! ${skip_venv_manage}; then
     venv_activate_and_prepare
   fi
 
@@ -1280,6 +1307,8 @@ update-faithful-finish () {
 
 update_faithful_finish () {
   local sourcerer="$1"
+  local skip_venv_manage="${2:-false}"
+  local commit_subject="$3"
 
   if ! cache_file_nonempty; then
     cache_file_cleanup
@@ -1298,7 +1327,8 @@ update_faithful_finish () {
       update_faithfuls_commit_changes \
         "${cached_head}" \
         "${canon_base_absolute}" \
-        "${sourcerer}"
+        "${sourcerer}" \
+        "${commit_subject}"
 
       info
       info "└── Finished update-faithful operation ─── Changes committed!"
@@ -1318,16 +1348,11 @@ update_faithful_finish () {
       local cleanup_git_cpyst""
       if test -n "${UPDEPS_CMD_RM_F_LIST}"; then
         cleanup_cmd_cpyst="
-                                      command rm -f ${UPDEPS_CMD_RM_F_LIST}"
+                                      command rm ${UPDEPS_CMD_RM_F_LIST}"
       fi
       if test -n "${UPDEPS_GIT_RM_F_LIST}"; then
         cleanup_git_cpyst="
-                                      git rm -f ${UPDEPS_GIT_RM_F_LIST}
-                                      # Optional: git-commit. Or just run update-faithful next.
-                                      printf \"%s\\\n\\\n%s\" \\
-                                        \"Deps: Temporarily expunge divergent faithfuls\" \\
-                                        \"- These files will be restored in the next commit.\" \\
-                                        | git commit -F -"
+                                      command rm ${UPDEPS_GIT_RM_F_LIST}"
       fi
       info
       info "    - If you wanna just replace all the conflicts, eh:
@@ -1338,7 +1363,9 @@ update_faithful_finish () {
     fi
   fi
 
-  venv_deactivate
+  if ! ${skip_venv_manage}; then
+    venv_deactivate
+  fi
 
   cache_file_cleanup
 }
@@ -1349,6 +1376,13 @@ update_faithfuls_commit_changes () {
   local cached_head="$1"
   local canon_base_absolute="$2"
   local sourcerer="$3"
+  local commit_subject="$4"
+
+  local canon_project="$(basename "${canon_base_absolute}")"
+
+  if [ -z "${commit_subject}" ]; then
+    commit_subject="${UPDEPS_GENERIC_COMMIT_SUBJECT} <${canon_project}>"
+  fi
 
   local sourcery=""
   if [ -n "${sourcerer}" ]; then
@@ -1360,9 +1394,9 @@ update_faithfuls_commit_changes () {
   fi
 
   echo "\
-Deps: Update faithfuls
+${commit_subject}
 
-- Source: $(basename "${canon_base_absolute}") @ ${cached_head}
+- Source: ${canon_project} @ $(git_sha_shorten "${cached_head}")
 
 - Commit generated by:
 
