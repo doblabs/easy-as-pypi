@@ -11,9 +11,20 @@
 
 {#- CXREF: How Jinja inheritence works:
  # https://jinja.palletsprojects.com/en/3.1.x/templates/#template-inheritance
- #}
+-#}
 
-{% block project_meta %}
+{#- SAVVY: The {%- whitespace trimmers -%} work this way:
+ #  - In this document, the outer trimmers work, e.g.,:
+ #      {%- block foo %}
+ #      Main template.
+ #      {% endblock -%}
+ #  - In the child templates, the inner trimmers work, e.g.,:
+ #      {% block foo -%}
+ #      Child template.
+ #      {%- endblock %}
+#}
+
+{% block project_meta -%}
 
 [tool.poetry]
 # etc.
@@ -810,7 +821,7 @@ sphinx-rtd-theme = { version = "^2.0.0rc4", optional = true }
 
 # *** App deps
 
-{% block project_dependencies %}
+{% block project_dependencies -%}
 
 # E.g.,
 acme = "^1.2.3"

@@ -7,7 +7,7 @@
 
 # Copyright (c) © 2020-2023 Landon Bouma. All Rights Reserved.
 
-{%- block project_meta -%}
+{% block project_meta -%}
 
 [tool.poetry]
 # REFER: https://peps.python.org/pep-0621/
@@ -120,17 +120,24 @@ issues = "https://github.com/doblabs/easy-as-pypi/issues"
 
 download = "https://pypi.org/project/easy-as-pypi/#files"
 
-{% endblock %}
+{% endblock -%}
 
 {# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #}
 
-{%- block isort_known_third_party -%}
+{% block isort_known_third_party -%}
     "click",
-{% endblock %}
+{%- endblock %}
 
 {# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #}
 
-{%- block project_dependencies -%}
+{# {% block deps_test_fakers_and_factories -%}
+ # ...
+ # {% endblock -%}
+ #}
+
+{# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #}
+
+{% block project_dependencies -%}
 
 click = "^8.0.0"
-{% endblock -%}
+{% endblock %}
