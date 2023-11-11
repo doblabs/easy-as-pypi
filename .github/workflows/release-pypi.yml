@@ -74,9 +74,32 @@ jobs:
     #   permissions? (Also weird that the 'permissions: write-all'
     #   trick doesn't work in the 'needs' job.)
 
+    env:
+      # CXREF: thegittinsgood/git-smart: GITSMART_RE_VERSPARTS.
+      VERSPARTS: "(v)?([0-9]+)\\.([0-9]+)(\\.([0-9]+)([^0-9].*?)?([0-9]+)?)?"
+
     steps:
+      # REFER: GITHUB_REF is the branch ref or tag that triggered the workflow run.
+      # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
       - name: Probe version tag (not workflow_dispatch)
-        run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
+        run: |
+          VERSION_TAG="${GITHUB_REF#refs/tags/}"
+
+          echo "VERSION_TAG=${VERSION_TAG} [${GITHUB_REF}]"
+
+          if [ "${VERSION_TAG}" = "${GITHUB_REF}" ]; then
+            >&2 echo "ERROR: Not a tag ref: ${GITHUB_REF}"
+
+            exit 1
+          fi
+
+          if ! echo "${VERSION_TAG}" | grep -q -E -e "${VERSPARTS}"; then
+            >&2 echo "ERROR: Not a version tag: ${GITHUB_REF}"
+
+            exit 1
+          fi
+
+          echo "VERSION_TAG=${VERSION_TAG}" >> "$GITHUB_ENV"
         shell: bash
         if: github.event_name != 'workflow_dispatch'
 
@@ -93,7 +116,23 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
 
       - name: Probe version tag (is workflow_dispatch)
-        run: echo "VERSION_TAG=$(git tag --points-at HEAD)" >> "$GITHUB_ENV"
+        run: |
+          version_tags="$(
+            git tag --list --points-at HEAD \
+              | grep -E -e "${VERSPARTS}" \
+          )"
+
+          if $(echo "${version_tags}" | wc -l) -gt 1; then
+            >&2 echo "ERROR: Multiple version tags already"
+
+            exit 1
+          fi
+
+          VERSION_TAG="${version_tags}"
+
+          echo "VERSION_TAG=${VERSION_TAG} [${version_tags}]"
+
+          echo "VERSION_TAG=${VERSION_TAG}" >> "$GITHUB_ENV"
         if: github.event_name == 'workflow_dispatch'
 
       # MEH: We could support HEAD not being tagged (e.g., user wants to
@@ -108,7 +147,7 @@ jobs:
 
       # Double-check tag is version-formatted, esp. if 'workflow_dispatch'
       # (which got whatever was tagged on HEAD).
-      - name: Verify version
+      - name: Verify version — ${{ env.VERSION_TAG }}
         run: |
           echo "${VERSION_TAG}" | grep -q -E -v "^v?[0-9]+\.[0-9]+\.[0-9]+.*$" \
             && echo "ERROR: Not a version tag: ${VERSION_TAG}" \
@@ -120,7 +159,7 @@ jobs:
           (echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
            && echo "PRERELEASE=false" || echo "PRERELEASE=true") >> "$GITHUB_ENV"
 
-      - name: Probe version
+      - name: Strip v-prefix
         run: |
           echo "VERSION=${VERSION_TAG#v}" >> "$GITHUB_ENV"
         shell: bash
@@ -154,7 +193,9 @@ jobs:
           echo INDEX_PIPX=$index_url_pipx >> "$GITHUB_ENV"
         shell: bash
 
-      - name: Announcement
+      # MAYBE/2023-11-11: Prefer `fromJSON(shell-bool)` vs. `== 'true|false'`?
+      - name: Announcement — ${{
+          fromJSON(env.PRERELEASE) && 'Pre-release' || 'Normal release' }}
         run: |
           ! $PRERELEASE \
             && prerelease_msg="" \
