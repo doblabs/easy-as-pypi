@@ -122,7 +122,7 @@ update_deps_easy_as_pypi () {
   # venv. (We could also skip the update-faithful-begin altogether, which
   # really only exists so that venv create and activate, which takes a few
   # seconds, happens sooner rather than later, for better UX messaging.)
-  local skip_venv_activate=false
+  local skip_venv_manage=false
 
   # ***
 
@@ -150,7 +150,7 @@ update_deps_easy_as_pypi () {
   # activates the venv for render-faithful-file, and manages a UX
   # progress message, in the spirit of other OMR messaging (like
   # the `infuse` method).
-  update-faithful-begin "${canon_base_absolute}" "${skip_venv_activate}" \
+  update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}" \
     "${tmpl_src_data}" "${tmpl_src_format}"
 
   # *** Top-level ./ files
