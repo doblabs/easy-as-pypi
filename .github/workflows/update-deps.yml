@@ -78,14 +78,16 @@ jobs:
         # DEVXX: Set UPDEPS_FAKE_UPDATE=true to fake poetry.lock update,
         #          e.g., if you're testing inter-workflow flow.
         run: |
-          new_pr_num="$( \
-            UPDEPS_FAKE_UPDATE=false \
-            UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" \
-            UPDEPS_LABEL_INHIBIT_VERSION="${{ ! inputs.increment-version }}" \
-            UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}" \
-            UPDEPS_LABEL_PRERELEASE="${PRERELEASE}" \
-            ./.github/bin/update-poetry
-          )"
+          export UPDEPS_FAKE_UPDATE=false
+          export UPDEPS_REPO_ORG_PROJ="${{ github.repository }}"
+          export UPDEPS_LABEL_INHIBIT_VERSION="${{ ! inputs.increment-version }}"
+          export UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}"
+          export UPDEPS_LABEL_PRERELEASE="${PRERELEASE}"
+
+          env | grep -e "^UPDEPS_"
+
+          new_pr_num="$(./.github/bin/update-poetry)"
+
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
           # USER_TOKEN used to call gh-label (manage 'poetry.lock' label).
