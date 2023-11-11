@@ -126,25 +126,20 @@ update_deps_easy_as_pypi () {
   # such that the canon path (aka path to this project) is 1 directory up.
   local canon_base_absolute="$(realpath "$(dirname "$0")/..")"
 
-  # If we didn't use the render-faithful-file feature, we could skip the
-  # venv. (We could also skip the update-faithful-begin altogether, which
-  # really only exists so that venv create and activate, which takes a few
-  # seconds, happens sooner rather than later, for better UX messaging.)
-  local skip_venv_manage=false
-
-  # ***
-
-  # Generate the source data JSON file.
+  # *** Generate the source data JSON file
 
   local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
   local tmpl_src_format="json"
 
   print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
 
-  # ***
+  # *** Update/Render files
 
-
-  # ***
+  # If we didn't use the render-faithful-file feature, we could skip the
+  # venv. (We could also skip the update-faithful-begin altogether, which
+  # really only exists so that venv create and activate, which takes a few
+  # seconds, happens sooner rather than later, for better UX messaging.)
+  local skip_venv_manage=false
 
   # Sets UPDEPS_CANON_BASE_ABSOLUTE environ so it's available to each
   # update-faithful-file and render-faithful-file. Also creates and
