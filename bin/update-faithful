@@ -143,6 +143,10 @@ update_deps_easy_as_pypi () {
 
   local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
 
+  local commit_subject=""
+
+  # *** 1st update-faithful session
+
   # Sets UPDEPS_CANON_BASE_ABSOLUTE environ so it's available to each
   # update-faithful-file and render-faithful-file. Also creates and
   # activates the venv for render-faithful-file, and manages a UX
@@ -151,16 +155,42 @@ update_deps_easy_as_pypi () {
   update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}" \
     "${tmpl_src_data}" "${tmpl_src_format}"
 
-  update_faithful_files
+  if [ -f ".pyproject.project.tmpl" ]; then
+    update_faithful_files_only_pyproject_toml
 
-  # *** Done...
+    skip_venv_manage=true
 
-  update-faithful-finish "${sourcerer}"
+    commit_subject="Build: CI: Generate pyproject.toml"
+
+    update-faithful-finish "${sourcerer}" "${skip_venv_manage}" "${commit_subject}"
+
+    # *** 2nd update-faithful session
+
+    update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}" \
+      "${tmpl_src_data}" "${tmpl_src_format}"
+  fi
+
+  update_faithful_files_excluding_pyproject_toml
+
+  skip_venv_manage=false
+
+  # The commit title defaults: "Deps: Update faithfuls <proj>".
+  commit_subject=""
+
+  update-faithful-finish "${sourcerer}" "${skip_venv_manage}" "${commit_subject}"
+
+  # *** Completed undate-faithsul session
 
   command rm "${tmpl_src_data}"
 }
 
-update_faithful_files () {
+update_faithful_files_only_pyproject_toml () {
+  if [ -f ".pyproject.project.tmpl" ]; then
+    render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
+  fi
+}
+
+update_faithful_files_excluding_pyproject_toml () {
 
   # *** Top-level ./ files
 
@@ -211,11 +241,7 @@ update_faithful_files () {
   # BELOW: ".pyproject-doc8/"
   # BUILD: ".pyproject-editable/"
   # SPLIT: "pyproject.toml"
-  # └→ Or generated:
-  if [ -f ".pyproject.project.tmpl" ]; then
-    update-faithful-file ".pyproject.tmpl"
-    render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
-  fi
+  # └→ Or generated: See above: update_faithful_files_only_pyproject_toml
   # BUILD: ".pytest_cache/"
   # SPLIT: "README.rst"
   update-faithful-file ".readthedocs.yml"
