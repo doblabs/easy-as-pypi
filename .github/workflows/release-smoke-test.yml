@@ -107,7 +107,7 @@ jobs:
   #
   # So do a crude toml grep to see if the Poetry entry point is defined.
 
-  verify-installs-app:
+  check-is-app:
     runs-on: ubuntu-latest
 
     steps:
@@ -135,8 +135,8 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: verify-installs-app
-    if: needs.verify-installs-app.outputs.is_app == 'true'
+    needs: check-is-app
+    if: needs.check-is-app.outputs.is_app == 'true'
 
     env:
       INDEX_PIPX: ${{ inputs.INDEX_PIPX }}
