@@ -30,10 +30,10 @@ on:
         # It is encouraged that users push tags using `git-bump-version-tag`
         # from their terminal rather than using this workflow_dispatch.
         options:
-          - patch
           - alpha
+          - patch
           - least
-        default: 'least'
+        default: 'alpha'
       cascade-dispatch:
         description: 'Start the cascade!'
         type: boolean
