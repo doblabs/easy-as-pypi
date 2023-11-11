@@ -141,6 +141,8 @@ update_deps_easy_as_pypi () {
   # seconds, happens sooner rather than later, for better UX messaging.)
   local skip_venv_manage=false
 
+  local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
+
   # Sets UPDEPS_CANON_BASE_ABSOLUTE environ so it's available to each
   # update-faithful-file and render-faithful-file. Also creates and
   # activates the venv for render-faithful-file, and manages a UX
@@ -152,8 +154,6 @@ update_deps_easy_as_pypi () {
   update_faithful_files
 
   # *** Done...
-
-  local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
 
   update-faithful-finish "${sourcerer}"
 
