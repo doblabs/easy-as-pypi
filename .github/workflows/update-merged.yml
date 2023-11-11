@@ -150,6 +150,8 @@ jobs:
 
     # USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
     if: ${{ ! cancelled()
+      && (needs.wrangle-ci-tags.result == 'success'
+          || needs.wrangle-ci-tags.result == 'skipped')
       && (github.event_name == 'workflow_dispatch'
           || needs.verify-merged-pr.result == 'success'
          )
