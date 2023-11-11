@@ -30,6 +30,14 @@ insist_cmd () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Note the causality dilemma (chicken-and-egg) here: We read from
+# pyproject.toml to generate pyproject.toml...
+# - You can either add/update [tool.easy_as_pypi] before the render,
+#   or you can render twice (assuming the correct [tool.easy_as_pypi]
+#   exists in .pyproject.project.tmpl, in which case the first render
+#   populates the correct [tool.easy_as_pypi], and then the second
+#   render uses it).
+
 print_tmpl_src_data () {
   local canon_base_absolute="$1"
 
