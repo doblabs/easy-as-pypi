@@ -627,6 +627,7 @@ codecov = ">=2.1.13"
 
 # ***** Fakers and Factories.
 
+{% block deps_test_fakers_and_factories -%}
 # - "package that generates fake data for you"
 #
 #   https://pypi.org/project/Faker
@@ -656,6 +657,8 @@ codecov = ">=2.1.13"
 #   https://pypi.org/project/pytest-factoryboy
 #   https://github.com/pytest-dev/pytest-factoryboy
 #  pytest-factoryboy = ">=2.5.1"
+
+{% endblock -%}
 
 # ***
 
