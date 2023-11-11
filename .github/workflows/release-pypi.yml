@@ -99,7 +99,7 @@ jobs:
             exit 1
           fi
 
-          echo "VERSION_TAG=${VERSION_TAG}" >> "$GITHUB_ENV"
+          echo "VERSION_TAG=${VERSION_TAG}" >> "${GITHUB_ENV}"
         shell: bash
         if: github.event_name != 'workflow_dispatch'
 
@@ -132,7 +132,7 @@ jobs:
 
           echo "VERSION_TAG=${VERSION_TAG} [${version_tags}]"
 
-          echo "VERSION_TAG=${VERSION_TAG}" >> "$GITHUB_ENV"
+          echo "VERSION_TAG=${VERSION_TAG}" >> "${GITHUB_ENV}"
         if: github.event_name == 'workflow_dispatch'
 
       # MEH: We could support HEAD not being tagged (e.g., user wants to
@@ -156,12 +156,12 @@ jobs:
 
       - name: Check if prerelease
         run: |
-          (echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
-           && echo "PRERELEASE=false" || echo "PRERELEASE=true") >> "$GITHUB_ENV"
+          (echo "${VERSION_TAG}" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
+           && echo "PRERELEASE=false" || echo "PRERELEASE=true") >> "${GITHUB_ENV}"
 
       - name: Strip v-prefix
         run: |
-          echo "VERSION=${VERSION_TAG#v}" >> "$GITHUB_ENV"
+          echo "VERSION=${VERSION_TAG#v}" >> "${GITHUB_ENV}"
         shell: bash
 
       - name: Set pipx index URL
@@ -181,32 +181,32 @@ jobs:
             && pipx_pip_args="" \
             || pipx_pip_args="--pip-args=${extra_index_arg}"
           #
-          ! $PRERELEASE \
+          ! ${PRERELEASE} \
             && index_url_pip="" \
             || index_url_pip="--index-url ${test_pypi_url} ${extra_index_arg}"
-          echo "INDEX_PIP=$index_url_pip" >> "$GITHUB_ENV"
+          echo "INDEX_PIP=${index_url_pip}" >> "${GITHUB_ENV}"
           #
           # yamllint disable-line rule:line-length
-          ! $PRERELEASE \
+          ! ${PRERELEASE} \
             && index_url_pipx="" \
             || index_url_pipx="--index-url ${test_pypi_url} ${pipx_pip_args}"
-          echo INDEX_PIPX=$index_url_pipx >> "$GITHUB_ENV"
+          echo INDEX_PIPX=${index_url_pipx} >> "${GITHUB_ENV}"
         shell: bash
 
       # MAYBE/2023-11-11: Prefer `fromJSON(shell-bool)` vs. `== 'true|false'`?
       - name: Announcement — ${{
           fromJSON(env.PRERELEASE) && 'Pre-release' || 'Normal release' }}
         run: |
-          ! $PRERELEASE \
+          ! ${PRERELEASE} \
             && prerelease_msg="" \
             || prerelease_msg=" (prerelease)"
-          echo "Pushing $VERSION_TAG to PyPI${prerelease_msg}"
+          echo "Pushing ${VERSION_TAG} to PyPI${prerelease_msg}"
 
       # ***
 
       # github.repository is, e.g.,"doblabs/easy-as-pypi".
       - name: Probe package name
-        run: echo "PACKAGE_NAME=$(basename ${{ github.repository }})" >> "$GITHUB_ENV"
+        run: echo "PACKAGE_NAME=$(basename ${{ github.repository }})" >> "${GITHUB_ENV}"
         shell: bash
 
       # # Local, and GHA: 1.2.0.
@@ -217,16 +217,16 @@ jobs:
       # On GHA: pipx: error: unrecognized arguments: easy-as-pypi==1.1.1a20
       - name: Check if previously released
         run: |
-          echo "pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION"
-          ! pipx install $INDEX_PIPX $PACKAGE_NAME==$VERSION \
-            || echo "IS_RELEASED=true" >> "$GITHUB_ENV"
+          echo "pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION}"
+          ! pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION} \
+            || echo "IS_RELEASED=true" >> "${GITHUB_ENV}"
         shell: bash
 
       # Determine if previously released (and skip re-releasing if so).
       - name: View release
         run: |
-          echo "gh release view $VERSION_TAG"
-          gh release view $VERSION_TAG
+          echo "gh release view ${VERSION_TAG}"
+          gh release view ${VERSION_TAG}
         env:
           GH_TOKEN: ${{ github.token }}
         if: env.IS_RELEASED == 'true'
@@ -244,7 +244,7 @@ jobs:
       #
       #     - name: Download release
       #       run: |
-      #         gh release download $VERSION_TAG -D dist/
+      #         gh release download ${VERSION_TAG} -D dist/
       #       env:
       #         GH_TOKEN: ${{ github.token }}
       #       if: env.IS_RELEASED == ''
@@ -265,9 +265,9 @@ jobs:
       #         # Or use their environ:
       #         POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
       #       run: |
-      #         # poetry config pypi-token.pypi $PYPI_TOKEN
+      #         # poetry config pypi-token.pypi ${PYPI_TOKEN}
       #         repository=""
-      #         if $PRERELEASE; then
+      #         if ${PRERELEASE}; then
       #           poetry config repositories.testpypi https://test.pypi.org/legacy/
       #           repository="--repository testpypi"
       #         fi
@@ -275,20 +275,20 @@ jobs:
       #         echo "poetry config --list"
       #         poetry config --list
       #         echo
-      #         echo "poetry publish $repository"
-      #         poetry publish $repository
+      #         echo "poetry publish ${repository}"
+      #         poetry publish ${repository}
       #       if: env.IS_RELEASED == ''
 
       - name: Store variables for next job
         id: set_outputs
         run: |
-          echo "INDEX_PIP=$INDEX_PIP" >> "$GITHUB_OUTPUT"
-          echo "INDEX_PIPX=$INDEX_PIPX" >> "$GITHUB_OUTPUT"
-          echo "IS_RELEASED=$IS_RELEASED" >> "$GITHUB_OUTPUT"
-          echo "PACKAGE_NAME=$PACKAGE_NAME" >> "$GITHUB_OUTPUT"
-          echo "PRERELEASE=$PRERELEASE" >> "$GITHUB_OUTPUT"
-          echo "VERSION=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "VERSION_TAG=$VERSION_TAG" >> "$GITHUB_OUTPUT"
+          echo "INDEX_PIP=${INDEX_PIP}" >> "${GITHUB_OUTPUT}"
+          echo "INDEX_PIPX=${INDEX_PIPX}" >> "${GITHUB_OUTPUT}"
+          echo "IS_RELEASED=${IS_RELEASED}" >> "${GITHUB_OUTPUT}"
+          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> "${GITHUB_OUTPUT}"
+          echo "PRERELEASE=${PRERELEASE}" >> "${GITHUB_OUTPUT}"
+          echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
+          echo "VERSION_TAG=${VERSION_TAG}" >> "${GITHUB_OUTPUT}"
 
     outputs:
       INDEX_PIP: ${{ steps.set_outputs.outputs.INDEX_PIP }}
@@ -366,10 +366,10 @@ jobs:
         run: |
           # Won't work:
           #  gh status
-          echo "gh release view $VERSION_TAG"
-          gh release view $VERSION_TAG
-          echo "gh release download $VERSION_TAG -D dist/"
-          gh release download $VERSION_TAG -D dist/
+          echo "gh release view ${VERSION_TAG}"
+          gh release view ${VERSION_TAG}
+          echo "gh release download ${VERSION_TAG} -D dist/"
+          gh release download ${VERSION_TAG} -D dist/
         env:
           GH_TOKEN: ${{ github.token }}
 
@@ -436,7 +436,7 @@ jobs:
   #       workflows run within the same context as the caller.
   #
   #     - Note, too, there might be a way to get around this within the
-  #       same workflow. (I tried `pip cache remove $PACKAGE_NAME`,
+  #       same workflow. (I tried `pip cache remove ${PACKAGE_NAME}`,
   #       which removes nothing, because no wheels files downloaded,
   #       not surprising, but worth a shot.)
 
