@@ -1282,8 +1282,8 @@ venv_install_yq () {
 update-faithful-begin () {
   local canon_base_absolute="${1:-UPDEPS_CANON_BASE_ABSOLUTE}"
   local skip_venv_manage="${2:-false}"
-  local tmpl_src_data="$3"
-  local tmpl_src_format="${4}"
+  local tmpl_src_data="${3:-${UPDEPS_TMPL_SRC_DATA}}"
+  local tmpl_src_format="${4:-${UPDEPS_TMPL_SRC_FORMAT}}"
 
   if [ -n "${canon_base_absolute}" ]; then
     UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute:-/}"
