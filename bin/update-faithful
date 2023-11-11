@@ -292,6 +292,7 @@ update_faithful_files_excluding_pyproject_toml () {
   update-faithful-file ".github/workflows/checks-unspecial.yml"
   update-faithful-file ".github/workflows/checks-versioned.yml"
   update-faithful-file ".github/workflows/checks.yml"
+  update-faithful-file ".github/workflows/ci-tags-wrangle.yml"
   update-faithful-file ".github/workflows/codeql-analysis.yml"
   update-faithful-file ".github/workflows/coverage-comment-external.yml"
   update-faithful-file ".github/workflows/coverage-comment.yml"
