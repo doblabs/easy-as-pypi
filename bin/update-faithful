@@ -112,6 +112,14 @@ print_tmpl_src_data () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# SAVVY: How you might test a subset of this file operation:
+#
+#   UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute}"
+#   render-faithful-file "docs/index.rst"
+#   update-faithful-file ".github/dependabot.yml"
+#   >&2 echo "STOP!"
+#   exit 1
+
 update_deps_easy_as_pypi () {
   # The *-faithful-* workflow expects that this executable lives at
   #   /path/to/easy-as-pypi/bin/update-deps
@@ -135,13 +143,6 @@ update_deps_easy_as_pypi () {
 
   # ***
 
-  # SAVVY: How you might test a subset of this file operation:
-  #
-  #   UPDEPS_CANON_BASE_ABSOLUTE="${canon_base_absolute}"
-  #   render-faithful-file "docs/index.rst"
-  #   update-faithful-file ".github/dependabot.yml"
-  #   >&2 echo "STOP!"
-  #   exit 1
 
   # ***
 
