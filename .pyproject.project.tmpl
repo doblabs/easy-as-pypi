@@ -124,6 +124,12 @@ download = "https://pypi.org/project/easy-as-pypi/#files"
 
 {# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #}
 
+{%- block isort_known_third_party -%}
+    "click",
+{% endblock %}
+
+{# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #}
+
 {%- block project_dependencies -%}
 
 click = "^8.0.0"

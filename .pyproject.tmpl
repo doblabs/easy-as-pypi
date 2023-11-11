@@ -416,7 +416,12 @@ known_third_party = [
     #
     # *** External packages
     #
-    # YOU: List symbol names of packages included in setup.py here.
+    # USAGE: List symbol names from application depenendencies here,
+    #        so the corresponding imports are grouped accordingly.
+    {% block isort_known_third_party -%}
+    # E.g.,
+    #  "acme",
+    {%- endblock %}
     #
     # *** Testing packages
     "factory",
