@@ -268,21 +268,31 @@ update_faithful_files_excluding_pyproject_toml () {
 
   # *** docs/ files
 
-  update-faithful-file "docs/authors.rst"
-  update-faithful-file "docs/code-of-conduct.rst"
-  update-faithful-file "docs/conf.py"
-  update-faithful-file "docs/contributing.rst"
-  # SPLIT: "docs/<package_name>"*".rst"
-  # SPLIT: "docs/history-ci.md"
-  update-faithful-file "docs/history.rst"
-  update-faithful-file "docs/.ignore"
-  render-faithful-file "docs/index.rst"
-  render-faithful-file "docs/installation.rst"
-  # SPLIT: "docs/license.rst"
-  render-faithful-file "docs/make.bat"
-  update-faithful-file "docs/Makefile"
-  render-faithful-file "docs/modules.rst"
-  update-faithful-file "docs/readme.rst"
+  # KLUGE/2023-11-11: Until I think of a better way to do this...
+  # maybe explicitly using an environ to opt-out docs, but we'll
+  # see if this automated check isn't *too* spicy. It looks for
+  # *our* docs/.ignore file and only updates docs/ if it is.
+
+  if head -3 "docs/.ignore" 2> /dev/null \
+    | tail -1 \
+    | grep -q -e "^# Pattern: https://github.com/doblabs/easy-as-pypi#🥧$" \
+  ; then
+    update-faithful-file "docs/authors.rst"
+    update-faithful-file "docs/code-of-conduct.rst"
+    update-faithful-file "docs/conf.py"
+    update-faithful-file "docs/contributing.rst"
+    # SPLIT: "docs/<package_name>"*".rst"
+    # SPLIT: "docs/history-ci.md"
+    update-faithful-file "docs/history.rst"
+    update-faithful-file "docs/.ignore"
+    render-faithful-file "docs/index.rst"
+    render-faithful-file "docs/installation.rst"
+    # SPLIT: "docs/license.rst"
+    render-faithful-file "docs/make.bat"
+    update-faithful-file "docs/Makefile"
+    render-faithful-file "docs/modules.rst"
+    update-faithful-file "docs/readme.rst"
+  fi
 
   # *** .github/ files
 
