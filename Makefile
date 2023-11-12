@@ -181,6 +181,27 @@ MAKEFILE_PROJECT ?= Makefile.project
 
 -include $(MAKEFILE_PROJECT)
 
+# ***
+
+# `make lint` opt-outs
+#
+# - The all-inclusive `lint` task is ideal for most new projects,
+#   but if you're wrapping an existing (fork) project with EAPP
+#   boilerplate, it might be easier to opt-out some of the lint
+#   tasks (by setting these flags 'true' in 'Makefile.project').
+# 
+# - USAGE: Use CLI environ to run a disabled receipt manually, e.g.,:
+#
+#     EAPP_MAKEFILE_PYDOCSTYLE_DISABLE=false make pydocstyle
+
+EAPP_MAKEFILE_DEVELOP_DEFINED ?=
+
+EAPP_MAKEFILE_PYDOCSTYLE_DISABLE ?=
+
+EAPP_MAKEFILE_LINKCHECK_DISABLE ?=
+
+EAPP_MAKEFILE_DOCS_DISABLE ?=
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 help: _help_main _help_local
@@ -528,12 +549,18 @@ _depends_active_venv:
 #
 #             EDITABLES_ROOT=~/.kit/py make develop
 
+ifndef EAPP_MAKEFILE_DEVELOP_DEFINED
+
 develop: editables editable
 	@. "$(MAKETASKS_SH)" && \
 		make_develop "$(VENV_NAME)" "$(VENV_PYVER)" "$(VENV_ARGS)" "$(EDITABLE_DIR)"
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop
+
+EAPP_MAKEFILE_DEVELOP_DEFINED = true
+
+endif
 
 # - MEH: Missing `deactivate` if deleting active virtualenv...
 clean-develop:
@@ -861,17 +888,15 @@ isort_check_only:
 # - CXREF: *PEP 257 - Docstring Conventions*:
 #     https://www.python.org/dev/peps/pep-0257/
 
-MAKE_LINT_SKIP_PYDOCSTYLE ?= false
-
-# If a project sets this flag, you can ignore it on the command line:
-#
-#   MAKE_LINT_SKIP_PYDOCSTYLE=false make pydocstyle
-
+ifndef EAPP_MAKEFILE_PYDOCSTYLE_DISABLE
 pydocstyle: _depends_active_venv
-	@if ! $(MAKE_LINT_SKIP_PYDOCSTYLE); then \
-		pydocstyle $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY); \
-	fi;
+	pydocstyle $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY);
 .PHONY: pydocstyle
+else
+pydocstyle:
+	@printf ""
+.PHONY: pydocstyle
+endif
 
 # ***
 
@@ -940,9 +965,15 @@ twine_check: twine-check
 
 # ***
 
+ifndef EAPP_MAKEFILE_LINKCHECK_DISABLE
 linkcheck: _depends_active_venv
 	@make --directory=docs linkcheck
 .PHONY: linkcheck
+else
+linkcheck:
+	@printf ""
+.PHONY: linkcheck
+endif
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
@@ -1082,8 +1113,14 @@ clean-apidocs:
 	/bin/rm -f docs/modules.rst
 .PHONY: clean-apidocs
 
+ifndef EAPP_MAKEFILE_DOCS_DISABLE
 docs: _docs_html _docs_browse
 .PHONY: docs
+else
+docs:
+	@printf ""
+.PHONY: docs
+endif
 
 _docs_browse:
 	$(PYBROWSER) docs/$(DOCS_BUILDDIR)/html/index.html

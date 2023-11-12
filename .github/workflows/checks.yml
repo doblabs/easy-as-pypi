@@ -36,6 +36,43 @@ env:
 
 jobs:
 
+  # *** Project Task Disablement
+
+  disablement-detector:
+    name: Inspect Makefile.project for opt-outs
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Use an intermediate Makefile to probe project Makefile.
+      # - As mentioned above, skipping:  EAPP_MAKEFILE_LINKCHECK_DISABLE
+      - name: Check if project disabled this task
+        id: read-environs
+        run: |
+
+          for var_name in \
+            "EAPP_MAKEFILE_DOCS_DISABLE" \
+            "EAPP_MAKEFILE_PYDOCSTYLE_DISABLE" \
+          ; do
+            var_value="$(make -f <(
+              echo -e \
+                "-include Makefile.project\nprint_value:\n\t@echo \$(${var_name})"
+            ) print_value)"
+
+            environ_value=$([ -z "${var_value}" ] && echo "false" || echo "true")
+
+            echo "${var_name}=${environ_value}"
+
+            echo "${var_name}=${environ_value}" >> "${GITHUB_OUTPUT}"
+          done
+
+    outputs:
+      EAPP_MAKEFILE_DOCS_DISABLE: ${{ steps.read-environs.outputs.EAPP_MAKEFILE_DOCS_DISABLE }}
+      EAPP_MAKEFILE_PYDOCSTYLE_DISABLE: ${{ steps.read-environs.outputs.EAPP_MAKEFILE_PYDOCSTYLE_DISABLE }}
+
   # *** TEST
 
   test:
@@ -432,6 +469,10 @@ jobs:
   docs:
     runs-on: ubuntu-latest
 
+    needs: disablement-detector
+
+    if: needs.disablement-detector.outputs.EAPP_MAKEFILE_DOCS_DISABLE != 'true'
+
     steps:
       - name: Fail if RUN_ONLYing another job
         run: exit 1
@@ -607,6 +648,10 @@ jobs:
 
   pydocstyle:
     runs-on: ubuntu-latest
+
+    needs: disablement-detector
+
+    if: needs.disablement-detector.outputs.EAPP_MAKEFILE_PYDOCSTYLE_DISABLE != 'true'
 
     steps:
       - name: Fail if RUN_ONLYing another job
