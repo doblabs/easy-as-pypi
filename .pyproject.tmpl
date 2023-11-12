@@ -112,7 +112,11 @@ vcs = "git"
 #  style = "pep440"
 
 # USYNC: The main/default GH branch: 'release'.
-tag-branch = "release"
+# SAVVY: If you see 'fatal: malformed object name release' after:
+#          poetry self add "poetry-dynamic-versioning[plugin]"
+#        Check that the 'release' branch exists.
+# ISOFF: Don't need this, just run against current branch.
+#  tag-branch = "release"
 
 [tool.poetry-dynamic-versioning.substitution]
 
