@@ -44,6 +44,10 @@ make_develop () {
     install_with="$(add_with_group_if_defined "${install_with}" "project_extras")"
   fi
 
+  >&2 echo
+  >&2 echo "poetry -C ${EDITABLE_DIR} install ${install_with}"
+  >&2 echo
+
   poetry -C ${EDITABLE_DIR} install ${install_with}
 }
 
@@ -131,6 +135,10 @@ make_docs_html () {
 
     # Add project-specific optional 'project_docs' group.
     install_with="$(add_with_group_if_defined "${install_with}" "project_docs")"
+
+    >&2 echo
+    >&2 echo "poetry -C ${EDITABLE_DIR} install ${install_with} --extras readthedocs"
+    >&2 echo
 
     poetry -C ${EDITABLE_DIR} install ${install_with} --extras readthedocs
   fi
