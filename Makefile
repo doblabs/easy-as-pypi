@@ -63,6 +63,8 @@ PYPROJECT_DOC8_DIR = .pyproject-doc8
 #   ./docs/_build/html/index.html
 DOCS_BUILDDIR ?= _build
 
+DOCS_CONF_PY = $(shell [ -e docs/conf.py ] && echo docs/conf.py)
+
 # ***
 
 # Task oursourcer.
@@ -777,7 +779,7 @@ linty: _depends_active_venv black flake8 isort
 # ***
 
 black: _depends_active_venv
-	@black $(SOURCE_DIR) tests/ docs/conf.py
+	@black $(SOURCE_DIR) tests/ $(DOCS_CONF_PY)
 .PHONY: black
 
 # ***
@@ -805,7 +807,7 @@ flake8: _depends_active_venv _run_flake8 _gvim_load_quickfix_flake8
 
 _run_flake8: SHELL:=/bin/bash
 _run_flake8: _depends_active_venv
-	@flake8 $(SOURCE_DIR)/ tests/ docs/conf.py | tee >(sed -E "s@^(\./)?@$$(pwd)/@" > $(VIM_QUICKFIX_FLAKE8)); \
+	@flake8 $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY) | tee >(sed -E "s@^(\./)?@$$(pwd)/@" > $(VIM_QUICKFIX_FLAKE8)); \
 	exit $${PIPESTATUS[0]}
 .PHONY: _run_flake8
 
@@ -816,20 +818,20 @@ _gvim_load_quickfix_flake8:
 # ***
 
 # If you want additional blather, try --verbose:
-#   @isort --verbose $(SOURCE_DIR)/ tests/ docs/conf.py
+#   @isort --verbose $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY)
 
 isort: _depends_active_venv
-	@isort $(SOURCE_DIR)/ tests/ docs/conf.py
+	@isort $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY)
 .PHONY: isort
 
 isort-check-only: _depends_active_venv
-	@isort --check-only --verbose $(SOURCE_DIR)/ tests/ docs/conf.py
+	@isort --check-only --verbose $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY)
 .PHONY: isort-check-only
 
 # For parity with `tox -e isort_check_only`.
 # - Also not verbose from tox.
 isort_check_only:
-	@isort --check-only $(SOURCE_DIR)/ tests/ docs/conf.py
+	@isort --check-only $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY)
 .PHONY: isort_check_only
 
 # ISOFF/2023-05-18: In a previous life (because in my current life I
@@ -841,7 +843,7 @@ isort_check_only:
 #   posterity:
 #
 # end-files-with-blank-line:
-#   @git ls-files -- :/$(SOURCE_DIR)/ :/tests/ :/docs/conf.py | while read file; do \
+#   @git ls-files -- :/$(SOURCE_DIR)/ :/tests/ :$(DOCS_CONF_PY) | while read file; do \
 #     if [ -n "$$(tail -n1 $$file)" ]; then \
 #       echo "Blanking: $$file"; \
 #       echo >> $$file; \
@@ -865,7 +867,7 @@ MAKE_LINT_SKIP_PYDOCSTYLE ?= false
 
 pydocstyle: _depends_active_venv
 	@if ! $(MAKE_LINT_SKIP_PYDOCSTYLE); then \
-		pydocstyle $(SOURCE_DIR)/ tests/ docs/conf.py; \
+		pydocstyle $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY); \
 	fi;
 .PHONY: pydocstyle
 
