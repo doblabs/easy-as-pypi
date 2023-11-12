@@ -22,6 +22,8 @@
  #      {% block foo -%}
  #      Child template.
  #      {%- endblock %}
+ #    - Unless there is no child template, in which case this
+ #      file's template's inners work.
 #}
 
 {% block project_meta -%}
@@ -791,6 +793,53 @@ pdbr = ">=0.8.5"
 #   https://mg.pov.lt/restview/
 restview = ">=3.0.1"
 
+# ***
+
+# **** Known project-specific dep groups wired to some CI tasks
+
+[tool.poetry.group.project_dist]
+optional = true
+
+[tool.poetry.group.project_dist.dependencies]
+{% block project_dist_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_i18n]
+optional = true
+
+[tool.poetry.group.project_i18n.dependencies]
+{% block project_i18n_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_lint]
+optional = true
+
+[tool.poetry.group.project_lint.dependencies]
+{% block project_lint_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_test]
+optional = true
+
+[tool.poetry.group.project_test.dependencies]
+{% block project_test_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_docstyle]
+optional = true
+
+[tool.poetry.group.project_docstyle.dependencies]
+{% block project_docstyle_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_docs]
+optional = true
+
+[tool.poetry.group.project_docs.dependencies]
+{% block project_docs_dependencies -%}
+{%- endblock %}
+[tool.poetry.group.project_extras]
+optional = true
+
+[tool.poetry.group.project_extras.dependencies]
+{% block project_extras_dependencies -%}
+{%- endblock %}{% block project_custom_dependencies -%}
+{%- endblock %}
 # ***
 
 # **** What RTD installs when it builds docs

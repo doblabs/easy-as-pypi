@@ -49,7 +49,7 @@ jobs:
           cache: 'poetry'
 
       - name: Install dependencies
-        run: poetry install --no-interaction --with test
+        run: poetry install --no-interaction --with test,project_test
 
       - name: Coverage compute
         run: poetry run make _coverage_sqlite

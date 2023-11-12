@@ -172,7 +172,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with test
+        run: poetry install --no-interaction --with test,project_test
 
       - name: Test
         run: |
@@ -225,7 +225,7 @@ jobs:
           cache: 'poetry'
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
+        run: poetry install --no-interaction --no-root --with lint,project_lint
 
       - name: Run black
         run: poetry run black $SOURCE_DIR --check
@@ -297,7 +297,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --with lint
+        run: poetry install --no-interaction --no-root --with lint,project_lint
 
       - name: Run flake8
         run: poetry run make flake8
@@ -333,7 +333,7 @@ jobs:
           cache: 'poetry'
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
+        run: poetry install --no-interaction --no-root --with lint,project_lint
 
       - name: Run isort
         run: poetry run make isort_check_only
@@ -483,7 +483,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with docs --extras readthedocs
+        run: poetry install --no-interaction --with docs,project_docs --extras readthedocs
 
       - name: Docs build
         run: poetry run make _docs_html_skip_venv
@@ -544,7 +544,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --with dist
+        run: poetry install --no-interaction --no-root --with dist,project_dist
 
       # Verifies bdist and sdist archives.
       - name: Dist check
@@ -659,7 +659,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root --with docstyle
+        run: poetry install --no-interaction --no-root --with docstyle,project_docstyle
 
       - name: Docstring check
         run: poetry run make pydocstyle
@@ -728,7 +728,7 @@ jobs:
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --with test
+        run: poetry install --no-interaction --with test,project_test
 
       - name: Coverage compute
         run: poetry run make _coverage_xml
@@ -776,7 +776,7 @@ jobs:
           cache: 'poetry'
 
       - name: Install dependencies
-        run: poetry install --no-interaction --no-root --with lint
+        run: poetry install --no-interaction --no-root --with lint,project_lint
 
       - name: Run yamllint
         run: poetry run yamllint .
