@@ -20,6 +20,8 @@ insert_final_newline = true
 trim_trailing_whitespace = false
 charset = utf-8
 end_of_line = lf
+# USYNC: pyproject.toml black, flake8, isort, docs, yamllint.
+max_line_length = 88
 
 [*.bat]
 indent_style = tab
@@ -31,6 +33,10 @@ indent_size = 3
 insert_final_newline = true
 trim_trailing_whitespace = true
 charset = utf-8
+max_line_length = off
+
+[*.sh]
+max_line_length = off
 
 [*.yaml]
 indent_style = space
