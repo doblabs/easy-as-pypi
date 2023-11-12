@@ -859,6 +859,10 @@ isort_check_only:
 
 MAKE_LINT_SKIP_PYDOCSTYLE ?= false
 
+# If a project sets this flag, you can ignore it on the command line:
+#
+#   MAKE_LINT_SKIP_PYDOCSTYLE=false make pydocstyle
+
 pydocstyle: _depends_active_venv
 	@if ! $(MAKE_LINT_SKIP_PYDOCSTYLE); then \
 		pydocstyle $(SOURCE_DIR)/ tests/ docs/conf.py; \
