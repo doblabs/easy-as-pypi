@@ -114,6 +114,7 @@ make_docs_html () {
   local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_DOCS}" "" "${VENV_NAME}"
 
+  # E.g., `VENV_FORCE=true make docs`.
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
     _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
