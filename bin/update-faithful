@@ -196,6 +196,10 @@ update_deps_easy_as_pypi () {
   command rm "${tmpl_src_data}"
 }
 
+# Render saves scoped copies of ".pyproject.tmpl" and
+# ".pyproject.project.tmpl" to a temp. directory, generates
+# source data (using pyproject.toml's [tool.easy_as_pypi] table)
+# and creates "pyproject.toml".
 update_faithful_files_only_pyproject_toml () {
   if [ -f ".pyproject.project.tmpl" ]; then
     render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
@@ -252,6 +256,8 @@ update_faithful_files_excluding_pyproject_toml () {
   # BUILD: "poetry.lock"
   # BELOW: ".pyproject-doc8/"
   # BUILD: ".pyproject-editable/"
+  # SPLIT: ".pyproject.project.tmpl"
+  # CANON: ".pyproject.tmpl"
   # SPLIT: "pyproject.toml"
   # └→ Or generated: See above: update_faithful_files_only_pyproject_toml
   # BUILD: ".pytest_cache/"
