@@ -807,7 +807,9 @@ flake8: _depends_active_venv _run_flake8 _gvim_load_quickfix_flake8
 
 _run_flake8: SHELL:=/bin/bash
 _run_flake8: _depends_active_venv
-	@flake8 $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY) | tee >(sed -E "s@^(\./)?@$$(pwd)/@" > $(VIM_QUICKFIX_FLAKE8)); \
+	@flake8 $(SOURCE_DIR)/ tests/ $(DOCS_CONF_PY) \
+		| tee >(sed -E "s@^(\./)?@$$(pwd)/@" \
+			> $(VIM_QUICKFIX_FLAKE8)); \
 	exit $${PIPESTATUS[0]}
 .PHONY: _run_flake8
 
