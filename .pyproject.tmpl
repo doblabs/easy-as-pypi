@@ -332,6 +332,11 @@ per_file_ignores = [
     # file diffable against `sphinx-quickstart`, so rather than
     # make the file lint, tell flake8 to skip just that check.
     "docs/conf.py:E265",
+    {% block flake8_per_file_ignores -%}
+    # E.g.,
+    # # noqa: F401: imported but unused
+    # "src/acme/__init__.py:F401",
+    {%- endblock %}
 ]
 
 # USYNC: (max) line length shared among: black, flake8, isort, doc8, yamllint.
