@@ -40,6 +40,11 @@ __pycache__/
 /.pyproject-editable/
 .venv*/
 
+# USYNC: UPFUL_PYPROJECT_TMPL_CACHE=".pyproject-cache.data"
+# - CXREF: ~/.kit/py/easy-as-pypi/bin/update-faithful
+# - This is jinja2 template source data compiled from pyproject.toml.
+/.pyproject-cache.data
+
 # DX artifacts.
 # - USYNC: Matches VIM_QUICKFIX_FLAKE8 from `make flake8`.
 #   - If you use a different path, add yours to .git/info/exclude

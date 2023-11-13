@@ -5,6 +5,14 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+UPFUL_PYPROJECT_PROJECT_TMPL=".pyproject.project.tmpl"
+
+UPFUL_PYPROJECT_TMPL_CACHE="${UPFUL_PYPROJECT_TMPL_CACHE:-.pyproject-cache.data}"
+
+UPFUL_PYPROJECT_TMPL_CACHE_DISABLE=${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE:-false}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 source_deps () {
   # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
   insist_cmd 'realpath'
@@ -46,23 +54,55 @@ insist_cmd () {
 prepare_tmpl_src_data () {
   local canon_base_absolute="$1"
 
-  # *** Generate the source data JSON file (requires active venv)
+  local tmpl_src_data=""
 
-  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
-  local tmpl_src_format="json"
+  if ! ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE} \
+    && [ -e "${UPFUL_PYPROJECT_TMPL_CACHE}" ] \
+    && [ -e "${UPFUL_PYPROJECT_PROJECT_TMPL}" ] \
+    && ! [ "${UPFUL_PYPROJECT_TMPL_CACHE}" -nt "${UPFUL_PYPROJECT_PROJECT_TMPL}" ] \
+    && ! [ "${UPFUL_PYPROJECT_TMPL_CACHE}" -ot "${UPFUL_PYPROJECT_PROJECT_TMPL}" ] \
+  ; then
+    # The cache file and '.pyproject.project.tmpl' have the same last mod. date.
+    # - This tells ourselves the cache is valid.
+    tmpl_src_data="${UPFUL_PYPROJECT_TMPL_CACHE}"
 
-  # Note this follows update-faithful-begin, so we can be sure we're
-  # in the appropriate venv.
+    info "Using cached template source values"
+    info "  └→ HINT: To rebuild source values cache, invalidate it:"
+    info "             touch .pyproject.project.tmpl"
+    info "           Or delete it:"
+    info "             command rm ${UPFUL_PYPROJECT_TMPL_CACHE}"
+    info "           Or skip it:"
+    info "             UPFUL_PYPROJECT_TMPL_CACHE_DISABLE=true $0"
+  fi
 
-  printf "%s" "Preparing template source values..."
+  if [ -z "${tmpl_src_data}" ]; then
+    # Generate the source data JSON file (requires active venv).
 
-  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
+    if ! ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE}; then
+      tmpl_src_data="${UPFUL_PYPROJECT_TMPL_CACHE}"
+    else
+      tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
+    fi
+
+    printf "%s" "Preparing template source values..."
+
+    # Note this follows update-faithful-begin, so we can be sure we're
+    # in the appropriate venv (and can install `yq` if necessary).
+
+    print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
+
+    if ! ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE}; then
+      # Copy access and mod. times from template and apply to cache file.
+      # - Such that when user edits the template, the cache invalidates.
+      touch -r "${UPFUL_PYPROJECT_PROJECT_TMPL}" "${tmpl_src_data}"
+    fi
+
+    printf "\r"
+    info "Prepared template source values"
+  fi
 
   UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
-  UPDEPS_TMPL_SRC_FORMAT="${tmpl_src_format}"
-
-  printf "\r"
-  info "Prepared template source values"
+  UPDEPS_TMPL_SRC_FORMAT="json"
 }
 
 print_tmpl_src_data () {
@@ -234,7 +274,7 @@ update_deps_easy_as_pypi () {
 
   # *** 1st update-faithful session (continued)
 
-  if [ -f ".pyproject.project.tmpl" ]; then
+  if [ -f "${UPFUL_PYPROJECT_PROJECT_TMPL}" ]; then
     update_faithful_files_only_pyproject_toml
 
     skip_venv_manage=true
@@ -259,7 +299,9 @@ update_deps_easy_as_pypi () {
 
   # *** Completed undate-faithsul session
 
-  command rm "${UPDEPS_TMPL_SRC_DATA}"
+  if ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE}; then
+    command rm "${UPDEPS_TMPL_SRC_DATA}"
+  fi
 }
 
 # Render saves scoped copies of ".pyproject.tmpl" and
@@ -267,8 +309,8 @@ update_deps_easy_as_pypi () {
 # source data (using pyproject.toml's [tool.easy_as_pypi] table)
 # and creates "pyproject.toml".
 update_faithful_files_only_pyproject_toml () {
-  if [ -f ".pyproject.project.tmpl" ]; then
-    render-faithful-file "pyproject.toml" ".pyproject.project.tmpl"
+  if [ -f "${UPFUL_PYPROJECT_PROJECT_TMPL}" ]; then
+    render-faithful-file "pyproject.toml" "${UPFUL_PYPROJECT_PROJECT_TMPL}"
   fi
 }
 
