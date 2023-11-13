@@ -235,8 +235,7 @@ update_deps_easy_as_pypi () {
 
     # *** 2nd update-faithful session
 
-    update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}" \
-      "${tmpl_src_data}" "${tmpl_src_format}"
+    update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}"
   fi
 
   update_faithful_files_excluding_pyproject_toml
