@@ -40,8 +40,8 @@ insist_cmd () {
 
 print_tmpl_src_data () {
   local canon_base_absolute="$1"
-
-  venv_install_yq
+  
+  venv_install_yq_maybe
 
   local project_name=""
   local project_url=""
@@ -118,6 +118,50 @@ print_tmpl_src_data () {
         \"version\": \"${eapp_version}\"
     }
 }"
+}
+
+venv_install_yq_maybe () {
+  local cmd_name="tomlq"
+  local pkg_name="yq"
+
+  local is_cmd_present=false
+  is_cmd_present=$(
+    (_upful_insist_cmd "${cmd_name}" 2> /dev/null) \
+    && echo true || echo false
+  )
+
+  if python -c "import sys; sys.stdout.write(sys.prefix)" \
+    | grep -q -e "${UPDEPS_VENV_PREFIX}" \
+  ; then
+    # Our Python venv.
+    if ! ${is_cmd_present}; then
+      venv_install_yq
+    fi
+
+    return 0
+  fi
+
+  if ! ${is_cmd_present}; then
+    if [ -n "${VIRTUAL_ENV}" ]; then
+      >&2 echo "ERROR: Please \`pip install ${pkg_name}\` to your venv"
+      >&2 echo "- OR: Deactivate your venv, and run this script again"
+    else
+      >&2 echo "ERROR: No \`${cmd_name}\` command, but not running in a venv"
+      >&2 echo "- TRY: Run again with venv force enabled:"
+      >&2 echo "         UPDEPS_VENV_FORCE=true $0"
+    fi
+
+    exit 1
+  fi
+
+  return 0
+}
+
+# CXREF: `tomlq` from `yq`, a YAML/XML/TOML jq wrapper.
+#   https://github.com/kislyuk/yq
+#   https://kislyuk.github.io/yq/
+venv_install_yq () {
+  pip install -q yq
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
