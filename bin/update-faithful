@@ -38,6 +38,11 @@ insist_cmd () {
 #   populates the correct [tool.easy_as_pypi], and then the second
 #   render uses it).
 
+# PROFILING: Note that many of the operations below taking noticeable time:
+# - Each `tomlq` takes 100s of millis (~300 ms? if you trust `date '+%s%N'`).
+# - The print_upstream_remote_url is especially costly, ~1.2 secs.
+# - The version check is surprisingly fast, ~100 msec.
+
 print_tmpl_src_data () {
   local canon_base_absolute="$1"
   
@@ -204,10 +209,18 @@ update_deps_easy_as_pypi () {
   local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
   local tmpl_src_format="json"
 
+  # Note this follows update-faithful-begin, so we can be sure we're
+  # in the appropriate venv.
+
+  printf "%s" "Preparing template source values..."
+
   print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
 
   UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
   UPDEPS_TMPL_SRC_FORMAT="${tmpl_src_format}"
+
+  printf "\r"
+  info "Prepared template source values"
 
   # *** 1st update-faithful session (continued)
 
