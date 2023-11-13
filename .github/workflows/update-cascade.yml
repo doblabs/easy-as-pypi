@@ -65,7 +65,7 @@ jobs:
         # - github.repository is org/repo, e.g., 'doblabs/easy-as-pypi'.
         with:
           cmd: |
-            yq --tojson --indent "0" '."${{ github.repository }}"' \
+            yq -o=json --indent "0" '."${{ github.repository }}"' \
               ".github/doblabs-dependencies.yml"
 
     outputs:
