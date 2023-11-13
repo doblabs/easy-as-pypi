@@ -31,7 +31,7 @@ DTRACE=false
 
 source_deps () {
   # Ensure coreutils installed (from Linux pkg mgr, or from macOS Homebrew).
-  insist_cmd 'realpath'
+  _upful_insist_cmd 'realpath'
 
   # Load the logger library, from github.com/landonb/sh-logger.
   # - Includes print commands: info, warn, error, debug.
@@ -75,12 +75,12 @@ source_dep_git_put_wise () {
 
 # ***
 
-insist_cmd () {
-  local cmdname="$1"
+_upful_insist_cmd () {
+  local cmd_name="$1"
 
-  command -v "${cmdname}" > /dev/null && return 0
+  command -v "${cmd_name}" > /dev/null && return 0
 
-  >&2 echo "ERROR: Missing system command ‘${cmdname}’."
+  >&2 echo "ERROR: Missing system command ‘${cmd_name}’."
 
   exit 1
 }
@@ -648,8 +648,12 @@ update_local_from_canon () {
   }
 
   warn_usage_hint_add_meld_compare_cpyst () {
+    # UPDEPS_MELD_CMP_LIST+="
+    #                                   meld \"${local_file}\" \"${canon_file_absolute}\" &"
     UPDEPS_MELD_CMP_LIST+="
-                                      meld \"${local_file}\" \"${canon_file_absolute}\" &"
+                                      ( cd \"$(dirname "${canon_file_absolute}")\" \\
+                                        && meld \"$(pwd)/${local_file}\" \\
+                                           <(git show ${canon_head}:\"${canon_file_relative}\") ) &"
   }
 
   warn_usage_hint_delete_local_profit () {
@@ -1186,12 +1190,38 @@ print_progress_info_prepared_template () {
 
 UPDEPS_VENV_PREFIX="update-faithful-venv-"
 
+UPDEPS_VENV_FORCE=${UPDEPS_VENV_FORCE:-false}
+
 venv_activate_and_prepare () {
+  local is_beginning=${1:-false}
+
+  local cmd_name="jinja2"
+
   # If Python environment looks like one we created, we're good.
   if python -c "import sys; sys.stdout.write(sys.prefix)" \
     | grep -q -e "${UPDEPS_VENV_PREFIX}" \
   ; then
+    if ${is_beginning}; then
+      info "Our Python venv verified"
+    fi
+
+    if ! (_upful_insist_cmd "${cmd_name}" 2> /dev/null); then
+      >&2 echo "ERROR: Unexpected path: Our venv, but no ‘${cmd_name}’?"
+
+      exit 1
+    fi
+
     return 0
+  fi
+
+  if ! ${UPDEPS_VENV_FORCE}; then
+    if (_upful_insist_cmd "${cmd_name}" 2> /dev/null); then
+      if ${is_beginning}; then
+        info "Using local $(font_emphasize "${cmd_name}") 💨"
+      fi
+
+      return 0
+    fi
   fi
 
   printf "%s" "Creating Python venv..."
@@ -1202,6 +1232,8 @@ venv_activate_and_prepare () {
 
   printf "\r"
   info "Activated Python venv"
+  debug "  └→ HINT: Avoid this wait with your own venv, and:"
+  debug "           pip install jinja2-cli"
 }
 
 # REFER: https://gist.github.com/cupdike/6a9caaf18f30250364c8fcf6d64ff22e
@@ -1265,13 +1297,6 @@ venv_install_jinja2_cli () {
   #   python -m pip install jinja2-cli
 }
 
-# CXREF: `tomlq` from `yq`, a YAML/XML/TOML jq wrapper.
-#   https://github.com/kislyuk/yq
-#   https://kislyuk.github.io/yq/
-venv_install_yq () {
-  pip install -q yq
-}
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # It's not necessary to call this function, unless you
@@ -1292,7 +1317,9 @@ update-faithful-begin () {
   must_pass_checks_and_ensure_cache "${UPDEPS_CANON_BASE_ABSOLUTE}" "" ""
 
   if ! ${skip_venv_manage}; then
-    venv_activate_and_prepare
+    local is_beginning=true
+
+    venv_activate_and_prepare ${is_beginning}
   fi
 
   UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
@@ -1453,5 +1480,4 @@ main () {
 main "$@"
 unset -f main
 unset -f source_deps
-unset -f insist_cmd
 
