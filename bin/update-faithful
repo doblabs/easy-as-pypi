@@ -43,6 +43,28 @@ insist_cmd () {
 # - The print_upstream_remote_url is especially costly, ~1.2 secs.
 # - The version check is surprisingly fast, ~100 msec.
 
+prepare_tmpl_src_data () {
+  local canon_base_absolute="$1"
+
+  # *** Generate the source data JSON file (requires active venv)
+
+  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
+  local tmpl_src_format="json"
+
+  # Note this follows update-faithful-begin, so we can be sure we're
+  # in the appropriate venv.
+
+  printf "%s" "Preparing template source values..."
+
+  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
+
+  UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
+  UPDEPS_TMPL_SRC_FORMAT="${tmpl_src_format}"
+
+  printf "\r"
+  info "Prepared template source values"
+}
+
 print_tmpl_src_data () {
   local canon_base_absolute="$1"
   
@@ -204,23 +226,11 @@ update_deps_easy_as_pypi () {
   # the `infuse` method).
   update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}"
 
-  # *** Generate the source data JSON file (requires active venv)
+  # *** Generate or Uncache the source data JSON file
 
-  local tmpl_src_data="$(mktemp -t ${UPDEPS_VENV_PREFIX}XXXX)"
-  local tmpl_src_format="json"
+  UPDEPS_TMPL_SRC_DATA=""
 
-  # Note this follows update-faithful-begin, so we can be sure we're
-  # in the appropriate venv.
-
-  printf "%s" "Preparing template source values..."
-
-  print_tmpl_src_data "${canon_base_absolute}" > "${tmpl_src_data}"
-
-  UPDEPS_TMPL_SRC_DATA="${tmpl_src_data}"
-  UPDEPS_TMPL_SRC_FORMAT="${tmpl_src_format}"
-
-  printf "\r"
-  info "Prepared template source values"
+  prepare_tmpl_src_data "${canon_base_absolute}"
 
   # *** 1st update-faithful session (continued)
 
@@ -249,7 +259,7 @@ update_deps_easy_as_pypi () {
 
   # *** Completed undate-faithsul session
 
-  command rm "${tmpl_src_data}"
+  command rm "${UPDEPS_TMPL_SRC_DATA}"
 }
 
 # Render saves scoped copies of ".pyproject.tmpl" and
