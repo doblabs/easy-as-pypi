@@ -64,7 +64,7 @@ make_doc8_pip () {
   _venv_manage_and_activate "${VENV_DOC8}" "" "${VENV_NAME}"
 
   python -c "import doc8" 2> /dev/null \
-    || pip install -U pip doc8>="1.1.1"
+    || pip install -U pip "doc8>=1.1.1"
 
   python -m doc8 *.rst docs/
 }
