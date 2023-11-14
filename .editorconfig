@@ -11,6 +11,10 @@
 #
 #        Step 3: Profit.
 
+# REFER:
+#
+#   https://github.com/editorconfig/editorconfig/wiki/EditorConfig-Properties
+
 root = true
 
 [*]
