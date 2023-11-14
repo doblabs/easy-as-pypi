@@ -21,8 +21,8 @@ on:
 # ***
 
 env:
-  # USYNC: https://github.com/actions/python-versions/releases
-  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  # TRACK: https://github.com/actions/python-versions/releases
+  # USYNC: workflows/ (PYTHON_VERSION), tox.ini (basepython), Makefile (VENV_PYVER).
   PYTHON_VERSION: 3.11
 
 jobs:

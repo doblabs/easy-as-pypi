@@ -31,8 +31,8 @@ EDITABLE_DIR ?= .pyproject-editable
 # Local "editable" virtualenv directory (`make develop`).
 VENV_NAME ?= .venv-$(PACKAGE_NAME)
 
-# The "editable" virtualenv Python version (`make develop`).
-# - USYNC: Keep current with tox.ini's `basepython`.
+# USYNC: workflows/ (PYTHON_VERSION), tox.ini (basepython), Makefile (VENV_PYVER).
+# - The "editable" virtualenv Python version (`make develop`).
 VENV_PYVER ?= 3.11
 
 # Additional `python -m venv` options.
@@ -517,7 +517,7 @@ _warn_unless_virtualenvwrapper:
 #	    but that's some spectacular magic:
 #	      sed 's/^ \+\([0-9]\+\.[0-9]\+\.\([0-9]\+\)\)/\2 \1/'
 
-# USYNC: Keep synced with tox.ini [testenv:py*] jobs.
+# USYNC: checks.yml (python-version), tox.ini (envlist), Makefile (pyenv-install-pys).
 # - -s: --skip-existing
 pyenv-install-pys:
 	@pyenv install -s 3.8

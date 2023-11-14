@@ -37,8 +37,8 @@ env:
   #        of Python currently in `PATH` will be used." and
   #       "Cache paths are empty. Please check the previous
   #        logs and make sure that the python version is specified"
-  # USYNC: https://github.com/actions/python-versions/releases
-  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  # TRACK: https://github.com/actions/python-versions/releases
+  # USYNC: workflows/ (PYTHON_VERSION), tox.ini (basepython), Makefile (VENV_PYVER).
   # BWARE: Trailing zeroes disappear unless quoted.
   PYTHON_VERSION: "3.11"
 

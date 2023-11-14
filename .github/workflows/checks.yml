@@ -19,8 +19,8 @@ on:
 # ***
 
 env:
-  # USYNC: https://github.com/actions/python-versions/releases
-  # - USYNC: PYTHON_VERSION usage in .github/workflows/*.
+  # TRACK: https://github.com/actions/python-versions/releases
+  # USYNC: workflows/ (PYTHON_VERSION), tox.ini (basepython), Makefile (VENV_PYVER).
   PYTHON_VERSION: 3.11
 
   # USAGE: Set RUN_ONLY to restrict to specific job, e.g.,
@@ -83,7 +83,7 @@ jobs:
       fail-fast: true
       matrix:
         platform: ['ubuntu-latest']
-        # USYNC: https://github.com/actions/python-versions/releases
+        # TRACK: https://github.com/actions/python-versions/releases
         # LATER/2023-11-04: Latest 3.13.0-alpha.1 not working yet:
         #   Poetry installation failed.
         #   See /home/runner/work/easy-as-pypi/easy-as-pypi/poetry-installer-error-6onruz7x.log
@@ -93,6 +93,7 @@ jobs:
         #  python-version: ['3.8', '3.9', '3.10', '3.11', '3.12', '3.13.0-alpha.1']
         # USYNC: Update GitHub Branch protection rules when you modify this list! E.g.,
         #   https://github.com/doblabs/easy-as-pypi/settings/branch_protection_rules/37797347
+        # USYNC: checks.yml (here), tox.ini (envlist), Makefile (pyenv-install-pys).
         python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
 
         # DUNNO/2022-10-04: GitHub doesn't always spin up macOS and Windows
