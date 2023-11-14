@@ -524,9 +524,10 @@ pyenv-install-pys:
 	@pyenv install -s 3.9
 	@pyenv install -s 3.10
 	@pyenv install -s 3.11
+	@pyenv install -s 3.12
 	@# Pre-release Python only installable by full version.
-	@# This installs the non-dev version, e.g., '3.12.0a5', not '3.12-dev'.
-	@pyenv install -s $$(pyenv install -l | grep '^ \+3\.12\.' | tail -1)
+	@# This installs the non-dev version, e.g., '3.13.0a1', not '3.13-dev'.
+	@pyenv install -s $$(pyenv install -l | grep '^ \+3\.13\.' | tail -1)
 .PHONY: pyenv-install-pys
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
