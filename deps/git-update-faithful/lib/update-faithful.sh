@@ -616,6 +616,27 @@ canon_path_show_at_canon_head () {
     >&2 error "  git show ${canon_head}:\"${canon_file_relative}\""
     >&2 error
     >&2 error "- HINT: Perhaps you need to commit the file?"
+    # TRACK/2023-11-14: git-show failed on me, but worked on next run.
+    # - But there was not enough error output to diagnose.
+    #   - So we'll run git-show again and dump output to stderr.
+    #   - But note, based on what happened today, the git-show
+    #     here might actually *work*.
+    #     - If you need to diagnose further, you might need to rework the
+    #       callers that call this fcn. via `<(process substitution)`.
+    #       Instead, you'll want to use a temp file: Then all fcn callers
+    #       would call it like `canon_path_show_at_canon_head > tmp_file`
+    #       and then we could dump tmp_file if git-show fails (because
+    #       we would have saved the error > to the file). (We'd also
+    #       have to move the `exit 1` here to each of the callers.)
+    >&2 warn
+    >&2 warn "- Following is the raw git-show output"
+    >&2 warn
+    >&2 warn "  - BWARE: Sometimes git-show works again,"
+    >&2 warn "           so we'll cap the output:"
+    >&2 warn
+    git show ${canon_head}:"${canon_file_relative}" | >&2 head -13
+    >&2 warn
+    >&2 warn "‰c."
 
     # This kills caller, including from within process substition.
     exit 1
