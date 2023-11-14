@@ -59,11 +59,11 @@ source_deps () {
   # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
   _updeps_insist_cmd 'realpath'
 
-  # For `print_canon_scoped_head` (which uses `identify_scope_ends_at` from git-put-wise).
+  # For `print_scoped_head` (which uses `identify_scope_ends_at` from git-put-wise).
   # - Supports running this script on local Dev repo with PRIVATE commits.
   # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
   #   https://github.com/thegittinsgood/git-update-faithful#⛲
-  # $0 on GHA: ./.github/bin/update-poetry
+  # $0  on GHA: ./.github/bin/update-poetry
   # pwd on GHA: /home/runner/work/easy-as-pypi/easy-as-pypi
   . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
 
@@ -172,7 +172,7 @@ prepare_branch () {
   local remote_name="$2"
 
   local scoped_head="HEAD"
-  scoped_head="$(print_canon_scoped_head ".")"
+  scoped_head="$(print_scoped_head ".")"
 
   print_prog "git checkout -b ${branch_name} ${scoped_head}\n"
 
