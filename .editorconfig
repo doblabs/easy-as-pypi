@@ -28,11 +28,8 @@ indent_style = tab
 end_of_line = crlf
 
 [*.rst]
-indent_style = space
 indent_size = 3
-insert_final_newline = true
 trim_trailing_whitespace = true
-charset = utf-8
 max_line_length = off
 
 [*.sh]
