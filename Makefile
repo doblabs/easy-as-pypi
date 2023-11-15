@@ -584,6 +584,7 @@ EDITABLE_PJS = \
 	click-hotoffthehamster \
 	click-hotoffthehamster-alias \
 	config-decorator \
+	easy-as-pypi \
 	easy-as-pypi-appdirs \
 	easy-as-pypi-config \
 	easy-as-pypi-getver \
