@@ -684,6 +684,23 @@ EDITABLE_PJS = \
 #         - The ../SOURCE_DIR symlink (possibly src -> ../src) will steer
 #           Poetry to the correct location.
 
+# The awk match is checking for a dependency line like one of these:
+#
+#     easy-as-pypi = "^1.2.3"
+#     easy-as-pypi = "==1.2.3"
+#     easy-as-pypi = "> 1.2.3"
+#     easy-as-pypi = "<= 1.2.3"
+#                     ||||
+#                     |||└→ [0-9]+
+#                     ||└─→ \s*
+#                     ||
+#                     └┴──→ [<>=^]{1,2}
+#
+# and not like this:
+#
+#     [tool.poetry.scripts]
+#     easy-as-pypi = "easy_as_pypi:run"
+
 editable:
 	@mkdir -p $(EDITABLE_DIR)
 	@#
@@ -709,7 +726,7 @@ editable:
 	| awk \
 			-v pyprojs_root="$(EDITABLES_ROOT)" \
 			' \
-				match($$0, /^('$${concat_pjs}')( |$$)/, matches) { \
+				match($$0, /^('$${concat_pjs}')\s*=\s*"[<>=^]{1,2}\s*[0-9]+/, matches) { \
 					print matches[1] " = {path = \"" pyprojs_root "/" matches[1] "/$(EDITABLE_DIR)\", develop = true}"; \
 					next; \
 				} 1 \
