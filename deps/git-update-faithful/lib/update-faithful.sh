@@ -27,6 +27,14 @@ DTRACE=false
 # DEV/YOU: Uncomment to spit trace to stderr.
 #  DTRACE=true
 
+# *** Overrideable but probably never will be
+
+UPDEPS_VENV_PREFIX="update-faithful-venv-"
+
+UPDEPS_VENV_FORCE=${UPDEPS_VENV_FORCE:-false}
+
+UPDEPS_TEMP_PREFIX="update-faithful-sh-"
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 source_deps () {
@@ -591,24 +599,30 @@ has_no_diff () {
   fi
 
   local local_fullpath
-
   local_fullpath="$(realpath "${local_file}")"
 
-  diff -q \
-    "${local_fullpath}" \
-    <(canon_path_show_at_canon_head "${canon_file_absolute}" "${canon_file_relative}" "${canon_head}") \
-      > /dev/null
+  local tmp_canon_copy
+  tmp_canon_copy="$(mktemp -t ${UPDEPS_TEMP_PREFIX}XXXX)"
+
+  canon_path_show_at_canon_head \
+    "${canon_file_absolute}" \
+    "${canon_file_relative}" \
+    "${canon_head}" \
+    "${tmp_canon_copy}"
+
+  diff -q "${local_fullpath}" "${tmp_canon_copy}" > /dev/null
 }
 
 canon_path_show_at_canon_head () {
   local canon_file_absolute="$1"
   local canon_file_relative="$2"
   local canon_head="$3"
+  local dest_file="$4"
 
   cd "$(dirname "${canon_file_absolute}")"
 
   # Note that git-show uses the root-relative path, regardless of curr. dir.
-  git show ${canon_head}:"${canon_file_relative}"
+  git show ${canon_head}:"${canon_file_relative}" > "${dest_file}"
 
   if [ $? -ne 0 ]; then
     >&2 error "ERROR: git-show failed:"
@@ -629,16 +643,11 @@ canon_path_show_at_canon_head () {
     #       we would have saved the error > to the file). (We'd also
     #       have to move the `exit 1` here to each of the callers.)
     >&2 warn
-    >&2 warn "- Following is the raw git-show output"
+    >&2 warn "- Following is the git-show stdout:"
     >&2 warn
-    >&2 warn "  - BWARE: Sometimes git-show works again,"
-    >&2 warn "           so we'll cap the output:"
+    >&2 cat "${dest_file}"
     >&2 warn
-    git show ${canon_head}:"${canon_file_relative}" | >&2 head -13
-    >&2 warn
-    >&2 warn "‰c."
 
-    # This kills caller, including from within process substition.
     exit 1
   fi
 
@@ -885,10 +894,17 @@ copy_canon_version () {
   # - It's up to the caller to remake hard-links.
   command rm -f "${local_file}"
 
+  local tmp_canon_copy
+  tmp_canon_copy="$(mktemp -t ${UPDEPS_TEMP_PREFIX}XXXX)"
+
   # Copy scoped version.
-  command cp -f \
-    <(canon_path_show_at_canon_head "${canon_file_absolute}" "${canon_file_relative}" "${canon_head}") \
-    "${local_file}"
+  canon_path_show_at_canon_head \
+    "${canon_file_absolute}" \
+    "${canon_file_relative}" \
+    "${canon_head}" \
+    "${tmp_canon_copy}"
+
+  command mv -f "${tmp_canon_copy}" "${local_file}"
 
   apply_canon_permissions_to_follower "${local_file}" "${canon_file_absolute}"
 }
@@ -1146,7 +1162,7 @@ render_template_localize_sources () {
     "${chosen_tmpl_path}" \
     "${canon_tmpl_relative}" \
     "${chosen_canon_head}" \
-      > "${tmp_tmpl_absolute}"
+    "${tmp_tmpl_absolute}"
 
   print_progress_info_prepared_template "${canon_tmpl_relative}"
 
@@ -1196,7 +1212,7 @@ render_template_localize_sources () {
         "${chosen_tmpl_path}" \
         "${child_tmpl_relative}" \
         "${chosen_canon_head}" \
-          > "${tmp_child_absolute}"
+        "${tmp_child_absolute}"
 
       print_progress_info_prepared_template "${child_tmpl_relative}"
     fi
@@ -1214,10 +1230,6 @@ print_progress_info_prepared_template () {
 }
 
 # ***
-
-UPDEPS_VENV_PREFIX="update-faithful-venv-"
-
-UPDEPS_VENV_FORCE=${UPDEPS_VENV_FORCE:-false}
 
 venv_activate_and_prepare () {
   local is_beginning=${1:-false}
