@@ -43,7 +43,7 @@ VENV_PYVER ?= 3.11
 #
 #     VENV_ARGS = --system-site-packages
 #
-# SAVVY: Rather than edit this file, edit Makefile.project.
+# USAGE: Set this from Makefile.project.
 VENV_ARGS =
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
