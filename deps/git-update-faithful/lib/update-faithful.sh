@@ -915,6 +915,7 @@ apply_canon_permissions_to_follower () {
   local local_file="$1"
   local canon_file_absolute="$2"
 
+  # Copy file modes.
   command chmod --reference="${canon_file_absolute}" "${local_file}"
 }
 
