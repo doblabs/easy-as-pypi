@@ -457,6 +457,17 @@ known_third_party = [
 # So that isort doesn't mangle your comments.
 treat_all_comments_as_code = true
 
+# Configure isort to continue lines like black.
+# - The default isort uses a backslash (which doesn't feel
+#   very Pythonic), e.g.,
+#     from ..controllers.config.logging_output import \
+#         extend_config as extend_config_logging_output
+#   Whereas black default to using parentheses, e.g.,
+#     from ..controllers.config.logging_output import (
+#         extend_config as extend_config_logging_output,
+#     )
+use_parentheses = true
+
 # ***
 
 # doc8 options
