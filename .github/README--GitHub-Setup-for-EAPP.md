@@ -150,3 +150,47 @@
 
   - Copy the badge URL to `README.rst`, which includes a token
 
+## Organization settings
+
+### Organization secrets and variables
+
+- Create a Personal access token *classic* so pushing version tag from
+  ``workflows/update-merged.yml`` triggers release workflow, and so
+  pushing code from ``workflows/update-deps.yml`` triggers checks.
+
+  https://github.com/settings/tokens
+
+  <!-- Note that I tried a *new* fine-grained personal access token
+       (in *beta*) but did not get it to work. -->
+
+  - Click *Generate new token* and pick *Generate new token (classic)*
+
+    - Note: ``EAPP-workflows``
+
+    - Expiration: Up to a year, or none, you choose
+
+    - Select scopes: Enable one setting: ``public_repo`` (under ``repo``).
+
+  - Add org secret for personal access token (PAT)
+
+    E.g., https://github.com/organizations/doblabs/settings/secrets/actions
+
+    - Click *New organization secret*
+
+      - Name: ``USER_PAT``
+
+      - Value: *Copied from previous step*
+
+ <!-- - Value: ``ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`` -->
+
+- Add org var for Git commit user (for ``bin/update-poetry``, called by
+  ``workflows/update-deps.yml``)
+
+  E.g., https://github.com/organizations/doblabs/settings/variables/actions
+
+  - Click *New organization variable*
+
+    - Name: ``UPDEPS_USER_EMAIL``
+
+      Value: ``<user>@users.noreply.github.com``
+
