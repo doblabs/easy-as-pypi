@@ -60,8 +60,8 @@
       - ✓ Require status checks to pass before merging
         - ✓ Require branches to be up to date before merging
           - CHORE: Use search box to tediously add all checks!
-            - ENTER: Type ``b`` into the box,
-              and all **18** ``branch-checks-runner/`` jobs should appear
+            - ENTER: Type `b` into the box,
+              and all **18** `branch-checks-runner/` jobs should appear
               - Click first one in list and repeat process for all of them
             - SAVVY: I think checks have to pass for the search box to work...
 
@@ -155,8 +155,8 @@
 ### Organization secrets and variables
 
 - Create a Personal access token *classic* so pushing version tag from
-  ``workflows/update-merged.yml`` triggers release workflow, and so
-  pushing code from ``workflows/update-deps.yml`` triggers checks.
+  `workflows/update-merged.yml` triggers release workflow, and so
+  pushing code from `workflows/update-deps.yml` triggers checks.
 
   https://github.com/settings/tokens
 
@@ -165,11 +165,11 @@
 
   - Click *Generate new token* and pick *Generate new token (classic)*
 
-    - Note: ``EAPP-workflows``
+    - Note: `EAPP-workflows`
 
     - Expiration: Up to a year, or none, you choose
 
-    - Select scopes: Enable one setting: ``public_repo`` (under ``repo``).
+    - Select scopes: Enable one setting: `public_repo` (under `repo`).
 
   - Add org secret for personal access token (PAT)
 
@@ -177,20 +177,20 @@
 
     - Click *New organization secret*
 
-      - Name: ``USER_PAT``
+      - Name: `USER_PAT`
 
       - Value: *Copied from previous step*
 
- <!-- - Value: ``ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`` -->
+ <!-- - Value: `ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX` -->
 
-- Add org var for Git commit user (for ``bin/update-poetry``, called by
-  ``workflows/update-deps.yml``)
+- Add org var for Git commit user (for `bin/update-poetry`, called by
+  `workflows/update-deps.yml`)
 
   E.g., https://github.com/organizations/doblabs/settings/variables/actions
 
   - Click *New organization variable*
 
-    - Name: ``UPDEPS_USER_EMAIL``
+    - Name: `UPDEPS_USER_EMAIL`
 
-      Value: ``<user>@users.noreply.github.com``
+      Value: `<user>@users.noreply.github.com`
 
