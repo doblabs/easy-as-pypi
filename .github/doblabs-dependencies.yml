@@ -22,6 +22,10 @@
 #     project as listed until we eventually update and release
 #     dob.
 
+# TRICK: You can easily extract values from herein using `yq`, e.g.,
+#
+#   yq -r '.["doblabs/ansi-escape-room"][0]' .github/doblabs-dependencies.yml
+
 # ***
 
 # These projects are not based on easy-as-pypi boilerplate, so
