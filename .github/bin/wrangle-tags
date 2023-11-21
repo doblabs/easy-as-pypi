@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+# - Not exactly the same, though, that's a PR label, this is a Git tag.
+EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
+EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS="ci-inhibit-cascade-always"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+wrangle_tags () {
+  declare -a tag_names
+  # CRUDE: Set tag_names array.
+  set_tag_locals ""
+
+  trace_full
+
+  trace_lite "┌─ CI tags wrangler: ─────────┬────────────────┬───────────────────────────────────┐"
+
+  for which_tag in "${tag_names[@]}"; do
+    trace_full "which tag: ${which_tag}"
+
+    local tag_name tag_setting tag_scope output_name skip_if
+    # CRUDE: Set `local` vars for specified tag.
+    set_tag_locals "${which_tag}"
+
+    wrangle_tag "${tag_name}" "${tag_setting}" "${tag_scope}" "${output_name}" "${skip_if}"
+
+    trace_full
+  done
+
+  trace_lite "└─────────────────────────────┴────────────────┴───────────────────────────────────┘"
+}
+
+# ***
+
+wrangle_tag () {
+  local tag_name="$1"
+  local tag_setting="$2"
+  local tag_scope="$3"
+  local output_name="$4"
+  local skip_if="$5"
+
+  trace_full "manage-ci-tag @ $(git rev-parse HEAD)"
+  trace_full "- tag_name: ${tag_name}"
+  trace_full "- tag_setting: ${tag_setting}"
+  trace_full "- tag_scope: ${tag_scope}"
+  trace_full "- output_name: ${output_name}"
+  trace_full "- skip_if?: ${skip_if}"
+
+  if ${skip_if}; then
+    return 0
+  fi
+
+  local was_enabled=false
+
+  if [ "${tag_scope}" = "HEAD" ]; then
+    # E.g., ci-inhibit-cascade, ci-cascade-least, etc.
+    head_tag_match="$(git tag -l --points-at HEAD "${tag_name}")"
+
+    if [ -n "${head_tag_match}" ]; then
+      was_enabled=true
+    fi
+  else
+    # Use not-fully-qualified branch name because refs/heads/<branch> doesn't
+    # work with git-branch (so not `git rev-parse --symbolic-full-name HEAD`).
+    local default_branch="$(git rev-parse --abbrev-ref=loose HEAD)"
+    # Currently just the ci-inhibit-cascade-always tag.
+    # SAVVY: The branch name pattern is ^strict$ w/out wildcards.
+    # SAVVY: If tag doesn't exists, dies:
+    #   error: malformed object name refs/tags/foo
+    if branch_tag_match="$(
+      git branch --list --contains "refs/tags/${tag_name}" "${default_branch}" \
+        2> /dev/null
+    )"; then
+      if [ -n "${branch_tag_match}" ]; then
+        was_enabled=true
+      fi
+    fi
+  fi
+
+  if [ "${tag_setting}" = "true" ]; then
+    if ! ${was_enabled}; then
+      git tag -f "${tag_name}"
+      git push -f "origin" "refs/tags/${tag_name}"
+    fi
+  elif [ "${tag_setting}" = "false" ]; then
+    # Only need to delete branch tag if was_enabled, because
+    # otherwise already doesn't exist.
+    # - Always delete HEAD-only tag, in case stale one persists.
+    if ${was_enabled} || [ "${tag_scope}" = "HEAD" ]; then
+      git tag -d "${tag_name}" 2> /dev/null || true
+      git push "origin" ":refs/tags/${tag_name}"
+    fi
+  fi
+
+  trace_full "${output_name}: ${was_enabled}"
+
+  trace_lite "├── $(printf '%-25s' "${tag_name}")" \
+    "│ new val: $(printf '%-5s' "${tag_setting}")" \
+    "│ $(printf '%-27s' "${output_name}:") ${was_enabled} │"
+
+  if [ -n "${GITHUB_OUTPUT}" ]; then
+    # Aka `if ${CI}; then`.
+    echo "${output_name}=${was_enabled}" >> "${GITHUB_OUTPUT}"
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# (lb): 2023-11-21: This function acts in lieu of Bash (or shell)
+# having any sort of object support, and is used to iterate over
+# a list of object values, setting the same local variables with
+# different values each time it's called.
+# - This feels like an abuse of variable scoping (most languages
+#   don't expose a called function's variables or values to the
+#   caller, but the shell does), but I couldn't think of anything
+#   DRYer, or simple to implement. Sorry not sorry?
+
+set_tag_locals () {
+  local which_tag="$1"
+
+  is_this_tag_object_specified () {
+    local tag_name="$1"
+
+    trace_full "which_tag: ${which_tag}"
+    trace_full "tag_name: ${tag_name}"
+
+    [ -n "${which_tag}" ] || tag_names+=("${tag_name}")
+
+    [ -n "${which_tag}" ] && [ "${which_tag}" = "${tag_name}" ]
+  }
+
+  # ***
+
+  # USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+  # - Not exactly the same, though, that's a PR label, this is a Git tag.
+  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE}"  # "ci-inhibit-cascade"
+  if is_this_tag_object_specified "${tag_name}"; then
+    # Note that EAPP_INHIBIT_CASCADE is a string:
+    #   "true"/"false" creates/deletes the tag,
+    #     any other string leaves it be.
+    # - COUPL: Workflow sets EAPP_INHIBIT_CASCADE (inputs.inhibit-cascade).
+    tag_setting="${EAPP_INHIBIT_CASCADE}"
+    # A "HEAD" tag is only valid if on HEAD commit.
+    tag_scope="HEAD"
+    # COUPL: Workflow that called us sets this value for its caller.
+    output_name="old_inhibit_cascade"
+    skip_if=false
+  fi
+
+  # ***
+
+  # USYNC: MAYBE/2023-11-08 21:46: Add option to git-bump, or something local.
+  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS}"  # "ci-inhibit-cascade-always"
+  if is_this_tag_object_specified "${tag_name}"; then
+    tag_setting="${EAPP_INHIBIT_CASCADE_ALWAYS}"
+    # A "branch" tag is valid if it's on any commit in the branch.
+    tag_scope="branch"
+    output_name="old_inhibit_cascade_always"
+    skip_if=false
+  fi
+
+  # ***
+
+  tag_name="${which_tag}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+TRACE_LITE_ENABLE=${TRACE_LITE_ENABLE:-true}
+TRACE_FULL_ENABLE=${TRACE_FULL_ENABLE:-false}
+
+trace_lite () {
+  ${TRACE_LITE_ENABLE} || return 0
+
+  >&2 echo "$@"
+}
+
+trace_full () {
+  ${TRACE_FULL_ENABLE} || return 0
+
+  >&2 echo "$@"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+main () {
+  set -e
+
+  wrangle_tags "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  # Being executed, so execute.
+  main "$@"
+fi
+
+unset -f main
+

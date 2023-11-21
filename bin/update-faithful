@@ -415,6 +415,7 @@ update_faithful_files_excluding_pyproject_toml () {
   # IGNOR: ".github/README--github-variable-dump--example.rst"
   #
   update-faithful-file ".github/bin/update-poetry"
+  update-faithful-file ".github/bin/wrangle-tags"
   #
   update-faithful-file ".github/deps/git-update-faithful/lib/update-faithful.sh" \
     "deps/git-update-faithful/lib/update-faithful.sh"
