@@ -44,6 +44,18 @@ make_develop () {
     install_with="$(add_with_group_if_defined "${install_with}" "project_extras")"
   fi
 
+  # ***
+
+  # Ensure poetry.lock up-to-date with any recent pyproject.toml changes.
+
+  >&2 echo
+  >&2 echo "poetry -C ${EDITABLE_DIR} lock"
+  >&2 echo
+
+  poetry -C ${EDITABLE_DIR} lock
+
+  # ***
+
   >&2 echo
   >&2 echo "poetry -C ${EDITABLE_DIR} install ${install_with}"
   >&2 echo
