@@ -16,6 +16,21 @@ on:
       inhibit-cascade-always:
         type: string
         required: false
+      ci-cascade-least:
+        type: string
+        required: false
+      ci-cascade-alpha:
+        type: string
+        required: false
+      ci-cascade-patch:
+        type: string
+        required: false
+      ci-cascade-no-update-deps:
+        type: string
+        required: false
+      ci-cascade-no-version-tag:
+        type: string
+        required: false
 
     # Maps workflow outputs to job outputs.
     outputs:
@@ -25,6 +40,21 @@ on:
       old-inhibit-cascade-always:
         description: "The old ci-inhibit-cascade-always value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade-always }}
+      old-cascade-least:
+        description: "The old ci-cascade-least value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-least }}
+      old-cascade-alpha:
+        description: "The old ci-cascade-alpha value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-alpha }}
+      old-cascade-patch:
+        description: "The old ci-cascade-patch value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-patch }}
+      old-cascade-skip-deps:
+        description: "The old ci-cascade-no-update-deps value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-skip-deps }}
+      old-cascade-skip-vers:
+        description: "The old ci-cascade-no-version-tag value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-skip-vers }}
 
 # ***
 
@@ -42,6 +72,21 @@ jobs:
       }}"
       old-inhibit-cascade-always: "${{
         steps.manage-ci-tag.outputs.old_inhibit_cascade_always
+      }}"
+      old-cascade-least: "${{
+        steps.manage-ci-tag.outputs.old_cascade_least
+      }}"
+      old-cascade-alpha: "${{
+        steps.manage-ci-tag.outputs.old_cascade_alpha
+      }}"
+      old-cascade-patch: "${{
+        steps.manage-ci-tag.outputs.old_cascade_patch
+      }}"
+      old-cascade-skip-deps: "${{
+        steps.manage-ci-tag.outputs.old_cascade_skip_deps
+      }}"
+      old-cascade-skip-vers: "${{
+        steps.manage-ci-tag.outputs.old_cascade_skip_vers
       }}"
 
     steps:
@@ -63,3 +108,8 @@ jobs:
         env:
           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
           EAPP_INHIBIT_CASCADE_ALWAYS: ${{ inputs.inhibit-cascade-always }}
+          EAPP_CASCADE_LEAST: ${{ inputs.ci-cascade-least }}
+          EAPP_CASCADE_ALPHA: ${{ inputs.ci-cascade-alpha }}
+          EAPP_CASCADE_PATCH: ${{ inputs.ci-cascade-patch }}
+          EAPP_CASCADE_SKIP_DEPS: ${{ inputs.ci-cascade-no-update-deps }}
+          EAPP_CASCADE_SKIP_VERS: ${{ inputs.ci-cascade-no-version-tag }}
