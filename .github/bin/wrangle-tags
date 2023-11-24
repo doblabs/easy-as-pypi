@@ -74,24 +74,29 @@ wrangle_tag () {
   local was_enabled=false
 
   if [ "${tag_scope}" = "HEAD" ]; then
-    # E.g., ci-inhibit-cascade, ci-cascade-least, etc.
+    # A "HEAD" tag is only valid if on HEAD commit.
+    # - This branch followed by all tags but 'ci-inhibit-forever'.
     head_tag_match="$(git tag -l --points-at HEAD "${tag_name}")"
 
     if [ -n "${head_tag_match}" ]; then
       was_enabled=true
     fi
   else
+    # A "branch" tag is valid if it's on any commit in the branch.
+    # - This code path followed by only the 'ci-inhibit-forever'
+    #   tag (for now, says 2023-11-22).
+
     # Use not-fully-qualified branch name because refs/heads/<branch> doesn't
     # work with git-branch (so not `git rev-parse --symbolic-full-name HEAD`).
     local default_branch="$(git rev-parse --abbrev-ref=loose HEAD)"
-    # Currently just the ci-inhibit-cascade-always tag.
-    # SAVVY: The branch name pattern is ^strict$ w/out wildcards.
-    # SAVVY: If tag doesn't exists, dies:
-    #   error: malformed object name refs/tags/foo
+
+    # - The name pattern — ${default_branch} — is ^strict$ w/out wildcards.
+    # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
     if branch_tag_match="$(
       git branch --list --contains "refs/tags/${tag_name}" "${default_branch}" \
         2> /dev/null
     )"; then
+
       if [ -n "${branch_tag_match}" ]; then
         was_enabled=true
       fi
@@ -127,14 +132,14 @@ wrangle_tag () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# (lb): 2023-11-21: This function acts in lieu of Bash (or shell)
-# having any sort of object support, and is used to iterate over
-# a list of object values, setting the same local variables with
-# different values each time it's called.
+# (lb): These functions act in lieu of Bash (or shell) having any
+# sort of object support, and are used to iterate over a list of
+# object values, setting the same local variables with different
+# values each time they're called.
 # - This feels like an abuse of variable scoping (most languages
 #   don't expose a called function's variables or values to the
 #   caller, but the shell does), but I couldn't think of anything
-#   DRYer, or simple to implement. Sorry not sorry?
+#   DRYer, or simpler to implement. So like sorry not sorry?
 
 set_tag_locals () {
   local which_tag="$1"
