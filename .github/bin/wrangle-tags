@@ -30,11 +30,20 @@ wrangle_tags () {
   for which_tag in "${tag_names[@]}"; do
     trace_full "which tag: ${which_tag}"
 
-    local tag_name tag_setting tag_scope output_name skip_if
+    local tag_name
+    local tag_setting
+    local tag_scope
+    local output_name
+    local skip_if
     # CRUDE: Set `local` vars for specified tag.
     set_tag_locals "${which_tag}"
 
-    wrangle_tag "${tag_name}" "${tag_setting}" "${tag_scope}" "${output_name}" "${skip_if}"
+    wrangle_tag \
+      "${tag_name}" \
+      "${tag_setting}" \
+      "${tag_scope}" \
+      "${output_name}" \
+      "${skip_if}"
 
     trace_full
   done
