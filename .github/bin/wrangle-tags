@@ -76,7 +76,7 @@ wrangle_tag () {
   if [ "${tag_scope}" = "HEAD" ]; then
     # A "HEAD" tag is only valid if on HEAD commit.
     # - This branch followed by all tags but 'ci-inhibit-forever'.
-    head_tag_match="$(git tag -l --points-at HEAD "${tag_name}")"
+    local head_tag_match="$(git tag --list --points-at HEAD "${tag_name}")"
 
     if [ -n "${head_tag_match}" ]; then
       was_enabled=true
@@ -92,6 +92,7 @@ wrangle_tag () {
 
     # - The name pattern — ${default_branch} — is ^strict$ w/out wildcards.
     # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
+    local branch_tag_match
     if branch_tag_match="$(
       git branch --list --contains "refs/tags/${tag_name}" "${default_branch}" \
         2> /dev/null
