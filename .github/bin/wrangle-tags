@@ -165,23 +165,12 @@ wrangle_tag () {
 set_tag_locals () {
   local which_tag="$1"
 
-  is_this_tag_object_specified () {
-    local tag_name="$1"
-
-    trace_full "which_tag: ${which_tag}"
-    trace_full "tag_name: ${tag_name}"
-
-    [ -n "${which_tag}" ] || tag_names+=("${tag_name}")
-
-    [ -n "${which_tag}" ] && [ "${which_tag}" = "${tag_name}" ]
-  }
-
   # ***
 
   # USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
   # - Not exactly the same, though, that's a PR label, this is a Git tag.
   tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE}"  # "ci-inhibit-cascade"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     # Note that EAPP_INHIBIT_CASCADE is a string:
     #   "true"/"false" creates/deletes the tag,
     #     any other string leaves it be.
@@ -198,7 +187,7 @@ set_tag_locals () {
 
   # USYNC: MAYBE/2023-11-08 21:46: Add option to git-bump, or something local.
   tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS}"  # "ci-inhibit-cascade-always"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_INHIBIT_CASCADE_ALWAYS}"
     # A "branch" tag is valid if it's on any commit in the branch.
     tag_scope="branch"
@@ -209,7 +198,7 @@ set_tag_locals () {
   # ***
 
   tag_name="${EAPP_CI_TAG_CASCADE_LEAST}"  # "ci-cascade-least"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_LEAST}"
     tag_scope="HEAD"
     output_name="old_cascade_least"
@@ -219,7 +208,7 @@ set_tag_locals () {
   # ***
 
   tag_name="${EAPP_CI_TAG_CASCADE_ALPHA}"  # "ci-cascade-alpha"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_ALPHA}"
     tag_scope="HEAD"
     output_name="old_cascade_alpha"
@@ -229,7 +218,7 @@ set_tag_locals () {
   # ***
 
   tag_name="${EAPP_CI_TAG_CASCADE_PATCH}"  # "ci-cascade-patch"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_PATCH}"
     tag_scope="HEAD"
     output_name="old_cascade_patch"
@@ -239,7 +228,7 @@ set_tag_locals () {
   # ***
 
   tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"  # "ci-cascade-no-update-deps"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_SKIP_DEPS}"
     tag_scope="HEAD"
     output_name="old_cascade_skip_deps"
@@ -249,7 +238,7 @@ set_tag_locals () {
   # ***
 
   tag_name="${EAPP_CI_TAG_CASCADE_SKIP_VERS}"  # "ci-cascade-no-version-tag"
-  if is_this_tag_object_specified "${tag_name}"; then
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_SKIP_VERS}"
     tag_scope="HEAD"
     output_name="old_cascade_skip_vers"
@@ -259,6 +248,19 @@ set_tag_locals () {
   # ***
 
   tag_name="${which_tag}"
+}
+
+is_this_tag_object_specified () {
+  local which_tag="$1"
+  local tag_name="$2"
+  # Caller local: tag_names
+
+  trace_full "which_tag: ${which_tag}"
+  trace_full "tag_name: ${tag_name}"
+
+  [ -n "${which_tag}" ] || tag_names+=("${tag_name}")
+
+  [ -n "${which_tag}" ] && [ "${which_tag}" = "${tag_name}" ]
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
