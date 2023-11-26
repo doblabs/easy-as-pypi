@@ -16,6 +16,9 @@ UPDEPS_USER_NAME="${UPDEPS_USER_NAME_UPDEPS:-${UPDEPS_USER_NAME:-update-poetry}}
 #     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
 UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
+# Optional: Set faker true to skip poetry-update (useful for developing).
+UPDEPS_FAKE_UPDATE="${UPDEPS_FAKE_UPDATE:-false}"
+
 # ***
 
 # DEVXX: Use this (or similar) to test locally (but note PR self-approve fails
