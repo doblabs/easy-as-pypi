@@ -195,37 +195,34 @@ is_this_tag_object_specified () {
   trace_full "which_tag: ${which_tag}"
   trace_full "tag_name: ${tag_name}"
 
+  # At first, caller leaves which_tag unset,
+  # and we procure a list of all tag names.
   [ -n "${which_tag}" ] || tag_names+=("${tag_name}")
 
+  # Then, caller iterates over the list of
+  # tag names, and we set the `local` vars
+  # for that tag.
   [ -n "${which_tag}" ] && [ "${which_tag}" = "${tag_name}" ]
 }
 
 # ***
 
 set_tag_locals_inhibit_cascade () {
-  # USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
-  # - Not exactly the same, though, that's a PR label, this is a Git tag.
-  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE}"  # "ci-inhibit-cascade"
+  # E.g., "ci-inhibit-cascade"
+  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    # Note that EAPP_INHIBIT_CASCADE is a string:
-    #   "true"/"false" creates/deletes the tag,
-    #     any other string leaves it be.
-    # - COUPL: Workflow sets EAPP_INHIBIT_CASCADE (inputs.inhibit-cascade).
     tag_setting="${EAPP_INHIBIT_CASCADE}"
-    # A "HEAD" tag is only valid if on HEAD commit.
     tag_scope="HEAD"
-    # COUPL: Workflow that called us sets this value for its caller.
     output_name="old_inhibit_cascade"
     skip_if=false
   fi
 }
 
 set_tag_locals_inhibit_cascade_always () {
-  # USYNC: MAYBE/2023-11-08 21:46: Add option to git-bump, or something local.
-  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS}"  # "ci-inhibit-cascade-always"
+  # E.g., "ci-inhibit-cascade-always"
+  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_INHIBIT_CASCADE_ALWAYS}"
-    # A "branch" tag is valid if it's on any commit in the branch.
     tag_scope="branch"
     output_name="old_inhibit_cascade_always"
     skip_if=false
@@ -233,7 +230,8 @@ set_tag_locals_inhibit_cascade_always () {
 }
 
 set_tag_locals_cascade_least () {
-  tag_name="${EAPP_CI_TAG_CASCADE_LEAST}"  # "ci-cascade-least"
+  # E.g., "ci-cascade-least"
+  tag_name="${EAPP_CI_TAG_CASCADE_LEAST}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_LEAST}"
     tag_scope="HEAD"
@@ -243,7 +241,8 @@ set_tag_locals_cascade_least () {
 }
 
 set_tag_locals_cascade_alpha () {
-  tag_name="${EAPP_CI_TAG_CASCADE_ALPHA}"  # "ci-cascade-alpha"
+  # E.g., "ci-cascade-alpha"
+  tag_name="${EAPP_CI_TAG_CASCADE_ALPHA}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_ALPHA}"
     tag_scope="HEAD"
@@ -253,7 +252,8 @@ set_tag_locals_cascade_alpha () {
 }
 
 set_tag_locals_cascade_patch () {
-  tag_name="${EAPP_CI_TAG_CASCADE_PATCH}"  # "ci-cascade-patch"
+  # E.g., "ci-cascade-patch"
+  tag_name="${EAPP_CI_TAG_CASCADE_PATCH}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_PATCH}"
     tag_scope="HEAD"
@@ -263,7 +263,8 @@ set_tag_locals_cascade_patch () {
 }
 
 set_tag_locals_cascade_no_update_deps () {
-  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"  # "ci-cascade-no-update-deps"
+  # E.g., "ci-cascade-no-update-deps"
+  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_SKIP_DEPS}"
     tag_scope="HEAD"
@@ -273,7 +274,8 @@ set_tag_locals_cascade_no_update_deps () {
 }
 
 set_tag_locals_cascade_no_version_tag () {
-  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_VERS}"  # "ci-cascade-no-version-tag"
+  # E.g., "ci-cascade-no-version-tag"
+  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_VERS}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     tag_setting="${EAPP_CASCADE_SKIP_VERS}"
     tag_scope="HEAD"
