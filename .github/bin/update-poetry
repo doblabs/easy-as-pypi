@@ -134,7 +134,7 @@ update_poetry_update () {
   assert_git_status_only_poetry_lock_changed_if_any
 
   if test -n "$(git status --porcelain=v1)"; then
-    prepare_branch "${branch_name}" "${remote_name}"
+    prepare_branch "${branch_name}"
 
     poetry_update_commit_changes "${branch_name}"
 
@@ -194,7 +194,6 @@ print_branch_name () {
 
 prepare_branch () {
   local branch_name="$1"
-  local remote_name="$2"
 
   local scoped_head="HEAD"
   scoped_head="$(print_scoped_head ".")"
