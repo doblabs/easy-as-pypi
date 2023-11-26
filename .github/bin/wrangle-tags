@@ -91,9 +91,13 @@ wrangle_tag () {
   trace_full "- new_tag_value: ${new_tag_value}"
   trace_full "- skip_if?: ${skip_if}"
 
+  # ***
+
   if ${skip_if}; then
     return 0
   fi
+
+  # ***
 
   local was_enabled=false
 
@@ -146,14 +150,17 @@ wrangle_tag () {
       git push -f "origin" "refs/tags/${tag_name}"
     fi
   elif [ "${new_tag_value}" = "false" ]; then
-    # Only need to delete branch tag if was_enabled, because
-    # otherwise already doesn't exist.
-    # - Always delete HEAD-only tag, in case stale one persists.
+    # Only need to delete branch tag if tag_exists,
+    # because otherwise already doesn't exist.
+    # - But always delete HEAD-only tag, in
+    #   case stale one persists elsewhere.
     if ${was_enabled} || [ "${tag_scope}" = "HEAD" ]; then
       git tag -d "${tag_name}" 2> /dev/null || true
       git push "origin" ":refs/tags/${tag_name}"
     fi
   fi
+
+  # ***
 
   trace_full "${out_name}: ${old_tag_value}"
 
@@ -162,7 +169,7 @@ wrangle_tag () {
     "│ $(printf '%-27s' "${out_name}:") $(printf '%-5s' "${old_tag_value}") │"
 
   if [ -n "${GITHUB_OUTPUT}" ]; then
-    # Aka `if ${CI}; then`.
+    # Aka `if ${CI:-false}; then`.
     echo "${out_name}=${old_tag_value}" >> "${GITHUB_OUTPUT}"
   fi
 }
