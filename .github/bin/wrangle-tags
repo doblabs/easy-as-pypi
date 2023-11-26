@@ -29,11 +29,11 @@
 
 EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
 EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
+EAPP_CI_TAG_CASCADE_SKIP_DEPS="ci-cascade-no-update-deps"
 
 EAPP_CI_TAG_CASCADE_LEAST="ci-cascade-least"
 EAPP_CI_TAG_CASCADE_ALPHA="ci-cascade-alpha"
 EAPP_CI_TAG_CASCADE_PATCH="ci-cascade-patch"
-EAPP_CI_TAG_CASCADE_SKIP_DEPS="ci-cascade-no-update-deps"
 EAPP_CI_TAG_CASCADE_SKIP_VERS="ci-cascade-no-version-tag"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -205,13 +205,13 @@ set_tag_locals () {
 
   set_tag_locals_inhibit_forever
 
+  set_tag_locals_cascade_no_update_deps
+
   set_tag_locals_cascade_least
 
   set_tag_locals_cascade_alpha
 
   set_tag_locals_cascade_patch
-
-  set_tag_locals_cascade_no_update_deps
 
   set_tag_locals_cascade_no_version_tag
 
@@ -262,6 +262,17 @@ set_tag_locals_inhibit_forever () {
   fi
 }
 
+set_tag_locals_cascade_no_update_deps () {
+  # E.g., "ci-cascade-no-update-deps"
+  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
+    out_name="old_cascade_skip_deps"
+    tag_scope="HEAD"
+    default_value="false"
+    new_tag_value="${EAPP_CASCADE_SKIP_DEPS}"
+  fi
+}
+
 set_tag_locals_cascade_least () {
   # E.g., "ci-cascade-least"
   tag_name="${EAPP_CI_TAG_CASCADE_LEAST}"
@@ -292,17 +303,6 @@ set_tag_locals_cascade_patch () {
     tag_scope="HEAD"
     default_value="false"
     new_tag_value="${EAPP_CASCADE_PATCH}"
-  fi
-}
-
-set_tag_locals_cascade_no_update_deps () {
-  # E.g., "ci-cascade-no-update-deps"
-  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"
-  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_skip_deps"
-    tag_scope="HEAD"
-    default_value="false"
-    new_tag_value="${EAPP_CASCADE_SKIP_DEPS}"
   fi
 }
 
