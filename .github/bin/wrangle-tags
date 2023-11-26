@@ -99,7 +99,7 @@ wrangle_tag () {
 
   # ***
 
-  local was_enabled=false
+  local tag_exists=false
 
   if [ "${tag_scope}" = "HEAD" ]; then
     # A "HEAD" tag is only valid if on HEAD commit.
@@ -107,7 +107,7 @@ wrangle_tag () {
     local head_tag_match="$(git tag --list --points-at HEAD "${tag_name}")"
 
     if [ -n "${head_tag_match}" ]; then
-      was_enabled=true
+      tag_exists=true
     fi
   else
     # A "branch" tag is valid if it's on any commit in the branch.
@@ -127,7 +127,7 @@ wrangle_tag () {
     )"; then
 
       if [ -n "${branch_tag_match}" ]; then
-        was_enabled=true
+        tag_exists=true
       fi
     fi
   fi
@@ -136,7 +136,7 @@ wrangle_tag () {
 
   local old_tag_value=""
 
-  if ${was_enabled}; then
+  if ${tag_exists}; then
     old_tag_value="true"
   else
     old_tag_value="${default_value}"
@@ -145,7 +145,7 @@ wrangle_tag () {
   # ***
 
   if [ "${new_tag_value}" = "true" ]; then
-    if ! ${was_enabled}; then
+    if ! ${tag_exists}; then
       git tag -f "${tag_name}"
       git push -f "origin" "refs/tags/${tag_name}"
     fi
@@ -154,7 +154,7 @@ wrangle_tag () {
     # because otherwise already doesn't exist.
     # - But always delete HEAD-only tag, in
     #   case stale one persists elsewhere.
-    if ${was_enabled} || [ "${tag_scope}" = "HEAD" ]; then
+    if ${tag_exists} || [ "${tag_scope}" = "HEAD" ]; then
       git tag -d "${tag_name}" 2> /dev/null || true
       git push "origin" ":refs/tags/${tag_name}"
     fi
