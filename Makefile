@@ -1002,9 +1002,10 @@ endif
 #
 #     pytest --pdb -vv -k test_function tests/
 #
-#                      ^^^^^^^^^^^^^^^^  Test specific function or class
-#                  ^^^                   Increase verbosity
-#            ^^^^^                       Start pdb on error or KeyboardInterrupt
+#                                       ^^^^^^ Test specific path or file
+#                      ^^ ^^^^^^^^^^^^^ Test specific function or class
+#                  ^^^ Increase verbosity
+#            ^^^^^ Start pdb on error or KeyboardInterrupt
 
 # SAVVY: By default, pipeline returns exit value from final command, e.g.,
 #
