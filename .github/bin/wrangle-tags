@@ -29,7 +29,7 @@
 
 EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
 EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
-EAPP_CI_TAG_CASCADE_SKIP_DEPS="ci-cascade-no-update-deps"
+EAPP_CI_TAG_CASCADE_UPDATEDEPS="ci-cascade-updatedeps"
 
 EAPP_CI_TAG_CASCADE_LEAST="ci-cascade-least"
 EAPP_CI_TAG_CASCADE_ALPHA="ci-cascade-alpha"
@@ -205,7 +205,7 @@ set_tag_locals () {
 
   set_tag_locals_inhibit_forever
 
-  set_tag_locals_cascade_no_update_deps
+  set_tag_locals_cascade_updatedeps
 
   set_tag_locals_cascade_least
 
@@ -262,14 +262,14 @@ set_tag_locals_inhibit_forever () {
   fi
 }
 
-set_tag_locals_cascade_no_update_deps () {
-  # E.g., "ci-cascade-no-update-deps"
-  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_DEPS}"
+set_tag_locals_cascade_updatedeps () {
+  # E.g., "ci-cascade-updatedeps"
+  tag_name="${EAPP_CI_TAG_CASCADE_UPDATEDEPS}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_skip_deps"
+    out_name="old_cascade_updatedeps"
     tag_scope="HEAD"
-    default_value="false"
-    new_tag_value="${EAPP_CASCADE_SKIP_DEPS}"
+    default_value="true"
+    new_tag_value="${EAPP_CASCADE_UPDATEDEPS}"
   fi
 }
 
