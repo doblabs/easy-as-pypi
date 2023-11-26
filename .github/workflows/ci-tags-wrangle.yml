@@ -9,13 +9,26 @@ name: CI tag specialist
 
 on:
   workflow_call:
+    # SAVVY: Callers call us to set values, or to fetch values, or both.
+    # - So if inputs left unsaid, means caller just wants current state.
+
     inputs:
+      # If tagged on HEAD, don't do current cascade.
       inhibit-cascade:
         type: string
         required: false
+
+      # If tagged on any commit in current branch, don't do cascade.
       inhibit-cascade-always:
         type: string
         required: false
+
+      # *** Cascade-time tags
+      #
+      # These tags are set per-project when they start (update-deps.yml), and
+      # cleared when they pass along the cascading stick (by release-smoke-test.yml,
+      # after calling update-cascade.yml).
+
       ci-cascade-least:
         type: string
         required: false
@@ -33,6 +46,9 @@ on:
         required: false
 
     # Maps workflow outputs to job outputs.
+    # - SAVVY: Returns old/current values, before applying new values.
+    #   - If caller is not setting new values, returns current values.
+    #     - Just FYI, in case the "old-" prefix *confuses you*.
     outputs:
       old-inhibit-cascade:
         description: "The old ci-inhibit-cascade value"
@@ -94,9 +110,12 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.repository.default_branch }}
-          # For 'branch' tags, fetch all history, for `git branch --list`.
+          # We can `fetch-depth: 0` or `fetch-tags: 'true'` for all tags.
+          # - We don't need history, just tags.
+          # - The docs don't say why it matters. It's left to the reader
+          #   to assume that fetching history and/or tags is more resource
+          #   intensive and/or degrades job performance. *Just saying.*
           fetch-depth: 1
-          # To fetch tags, either fetch-depth=0, and/or fetch-tags=true.
           fetch-tags: true
 
       # ***

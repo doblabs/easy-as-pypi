@@ -5,8 +5,28 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
-# - Not exactly the same, though, that's a PR label, this is a Git tag.
+# USYNC: See ./.github/bin/update-poetry, which uses similarly-
+#        named GitHub PR labels for the same Git tags named here.
+#
+#        - We use Git tags to message across the release process,
+#          between the PyPI release workflow, and the smoke test.
+#
+#        - We use GitHub PR labels to message across the poetry-
+#          update process.
+#
+#        In both instances, the workflow effectively ends before resuming
+#        again after some event happens. And we cannot use GHA workflow
+#        artifacts, which only persist throughout a single workflow, to
+#        communicate between workflows.
+#
+#        So these mechanisms (PR labels, and Git tags), seem like the
+#        (only) obvious choice to handle end-to-end workflow settings.
+#
+#        - And there's no reason the Git tags and the GH labels have
+#          to be named the same, except they represent the same value
+#          we want to carry through the cascade workflows.
+#
+
 EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
 EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS="ci-inhibit-cascade-always"
 

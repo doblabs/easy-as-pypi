@@ -11,11 +11,16 @@ run-name: 👣 — Cascade — 2.) Update deps ${{
   github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
-  # Via update-cascade.yml
+  # Via update-cascade.yml from upstream project
   repository_dispatch:
     types: [update-deps]
+    # Inputs are not defined, but are part of github.event.client_payload.
+    # This workflow looks for the following inputs:
+    #
+    #   inputs:
+    #     - cascade-versioning
 
-  # Via GitHub Actions website button
+  # Via GitHub Actions website button, from user
   workflow_dispatch:
     inputs:
       increment-version:

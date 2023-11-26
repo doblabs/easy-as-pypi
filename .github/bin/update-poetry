@@ -24,7 +24,8 @@ UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
 # ***
 
-# DEVXX: How you might test locally (but note PR self-approve fails):
+# DEVXX: Use this (or similar) to test locally (but note PR self-approve fails
+#        unless you set USER_TOKEN and GBOT_TOKEN to different users' tokens):
 __UPDEPS__CPYST__="
   UPDEPS_FAKE_UPDATE=true \
   UPDEPS_LABEL_INHIBIT_VERSION=true \
@@ -35,6 +36,12 @@ __UPDEPS__CPYST__="
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Optional: Customizable PR label names and descriptions.
+
+# The update-merged.yml workflow use the 'poetry.lock' label to "verify"
+# the PR was created by this script. (Though, as with any PR label or Gi
+# t tag the CI uses, any user could apply the same tag/label to trick us,
+# but we assume no such chicanery.)
 UPDEPS_LABEL_NAME_POETRY_LOCK="${UPDEPS_LABEL_NAME_POETRY_LOCK:-\
 poetry.lock}"
 UPDEPS_LABEL_DESC_POETRY_LOCK="${UPDEPS_LABEL_DESC_POETRY_LOCK:-\
@@ -45,6 +52,8 @@ ci-inhibit-version}"
 UPDEPS_LABEL_DESC_INHIBIT_VERSION="${UPDEPS_LABEL_DESC_INHIBIT_VERSION:-\
 Tells CI not to version after auto-merge}"
 
+# The 'ci-inhibit-cascade' label, if set, tells update-cascade.yml
+# to not send the repo-dispatch downstream.
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
@@ -54,6 +63,10 @@ UPDEPS_LABEL_NAME_PRERELEASE="${UPDEPS_LABEL_NAME_PRERELEASE:-\
 ci-prerelease}"
 UPDEPS_LABEL_DESC_PRERELEASE="${UPDEPS_LABEL_DESC_PRERELEASE:-\
 Tells CI to use prerelease versions}"
+
+# ***
+
+# Optional: Customizable PR label color (same color used for all).
 UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

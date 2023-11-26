@@ -23,12 +23,12 @@ on:
   # Via GitHub Actions website button
   workflow_dispatch:
     inputs:
+      # If user wants to make a more "serious" release, they can bump major
+      # or minor part from terminal, e.g., using `git-bump-version-tag`:
+      #   https://github.com/thegittinsgood/git-bump-version-tag#🐫
       bump-part:
         description: 'Bump part'
         type: choice
-        # It is intentional that this only lets users bump patch or alpha.
-        # It is encouraged that users push tags using `git-bump-version-tag`
-        # from their terminal rather than using this workflow_dispatch.
         options:
           - alpha
           - patch
@@ -128,7 +128,7 @@ jobs:
 
     # Note that inhibit-cascade only applies if version/release not inhibited.
     # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
-    #   USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+    # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
     if: (github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch)
       || (contains(github.event.pull_request.labels.*.name, 'poetry.lock')
         && ! contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
@@ -138,6 +138,7 @@ jobs:
     uses: ./.github/workflows/ci-tags-wrangle.yml
 
     with:
+      # Create "ci-inhibit-cascade" tag.
       inhibit-cascade: true
 
   # ***
