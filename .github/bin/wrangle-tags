@@ -36,6 +36,9 @@ EAPP_CI_TAG_CASCADE_ALPHA="ci-cascade-alpha"
 EAPP_CI_TAG_CASCADE_PATCH="ci-cascade-patch"
 EAPP_CI_TAG_CASCADE_SKIP_VERS="ci-cascade-no-version-tag"
 
+# The git-push remote, only used if $CI, so should always be 'origin'.
+EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 wrangle_tags () {
@@ -153,7 +156,7 @@ wrangle_tag () {
       git tag -d "${tag_name}" 2> /dev/null || true
 
       if ${CI:-false}; then
-        git push "origin" ":refs/tags/${tag_name}"
+        git push "${EAPP_CI_REMOTE_NAME}" ":refs/tags/${tag_name}"
       fi
     fi
   elif [ "${new_tag_value}" = "true" ]; then
@@ -161,7 +164,7 @@ wrangle_tag () {
       git tag -f "${tag_name}"
 
       if ${CI:-false}; then
-        git push -f "origin" "refs/tags/${tag_name}"
+        git push -f "${EAPP_CI_REMOTE_NAME}" "refs/tags/${tag_name}"
       fi
     fi
   fi
