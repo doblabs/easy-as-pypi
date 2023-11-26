@@ -29,7 +29,8 @@ on:
       # cleared when they pass along the cascading stick (by release-smoke-test.yml,
       # after calling update-cascade.yml).
 
-      ci-cascade-no-update-deps:
+      # If tagged on HEAD and not "true", skip bin/update-poetry this cascade.
+      cascade-updatedeps:
         type: string
         required: false
 
@@ -57,9 +58,9 @@ on:
       old-inhibit-forever:
         description: "The old ci-inhibit-forever value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-forever }}
-      old-cascade-skip-deps:
-        description: "The old ci-cascade-no-update-deps value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-skip-deps }}
+      old-cascade-updatedeps:
+        description: "The old ci-cascade-updatedeps value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-updatedeps }}
       old-cascade-least:
         description: "The old ci-cascade-least value"
         value: ${{ jobs.manage-ci-tags.outputs.old-cascade-least }}
@@ -90,8 +91,8 @@ jobs:
       old-inhibit-forever: "${{
         steps.manage-ci-tag.outputs.old_inhibit_forever
       }}"
-      old-cascade-skip-deps: "${{
-        steps.manage-ci-tag.outputs.old_cascade_skip_deps
+      old-cascade-updatedeps: "${{
+        steps.manage-ci-tag.outputs.old_cascade_updatedeps
       }}"
       old-cascade-least: "${{
         steps.manage-ci-tag.outputs.old_cascade_least
@@ -128,7 +129,7 @@ jobs:
         env:
           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
-          EAPP_CASCADE_SKIP_DEPS: ${{ inputs.ci-cascade-no-update-deps }}
+          EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
           EAPP_CASCADE_LEAST: ${{ inputs.ci-cascade-least }}
           EAPP_CASCADE_ALPHA: ${{ inputs.ci-cascade-alpha }}
           EAPP_CASCADE_PATCH: ${{ inputs.ci-cascade-patch }}
