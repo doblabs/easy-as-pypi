@@ -168,6 +168,10 @@ set_tag_locals () {
   # These fcns rely on `local` scoping to set these vars for the caller:
   #   tag_name, tag_setting, tag_scope, out_name, skip_if
 
+  # SAVVY: Nothing sets skip_if=true
+  # - But it's available for future generations.
+  skip_if=false
+
   set_tag_locals_inhibit_cascade
 
   set_tag_locals_inhibit_cascade_always
@@ -214,7 +218,6 @@ set_tag_locals_inhibit_cascade () {
     tag_setting="${EAPP_INHIBIT_CASCADE}"
     tag_scope="HEAD"
     out_name="old_inhibit_cascade"
-    skip_if=false
   fi
 }
 
@@ -225,7 +228,6 @@ set_tag_locals_inhibit_cascade_always () {
     tag_setting="${EAPP_INHIBIT_CASCADE_ALWAYS}"
     tag_scope="branch"
     out_name="old_inhibit_cascade_always"
-    skip_if=false
   fi
 }
 
@@ -236,7 +238,6 @@ set_tag_locals_cascade_least () {
     tag_setting="${EAPP_CASCADE_LEAST}"
     tag_scope="HEAD"
     out_name="old_cascade_least"
-    skip_if=false
   fi
 }
 
@@ -247,7 +248,6 @@ set_tag_locals_cascade_alpha () {
     tag_setting="${EAPP_CASCADE_ALPHA}"
     tag_scope="HEAD"
     out_name="old_cascade_alpha"
-    skip_if=false
   fi
 }
 
@@ -258,7 +258,6 @@ set_tag_locals_cascade_patch () {
     tag_setting="${EAPP_CASCADE_PATCH}"
     tag_scope="HEAD"
     out_name="old_cascade_patch"
-    skip_if=false
   fi
 }
 
@@ -269,7 +268,6 @@ set_tag_locals_cascade_no_update_deps () {
     tag_setting="${EAPP_CASCADE_SKIP_DEPS}"
     tag_scope="HEAD"
     out_name="old_cascade_skip_deps"
-    skip_if=false
   fi
 }
 
@@ -280,7 +278,6 @@ set_tag_locals_cascade_no_version_tag () {
     tag_setting="${EAPP_CASCADE_SKIP_VERS}"
     tag_scope="HEAD"
     out_name="old_cascade_skip_vers"
-    skip_if=false
   fi
 }
 
