@@ -122,7 +122,7 @@ update_poetry_update () {
   assert_git_email_known
 
   local branch_name
-  branch_name="$(print_branch_name)"
+  branch_name="$(generate_branch_name)"
 
   local remote_name
   remote_name="$(git_upstream_remote)"
@@ -186,7 +186,7 @@ git_HEAD_commit_sha () {
   git rev-parse HEAD
 }
 
-print_branch_name () {
+generate_branch_name () {
   branch_name="update-deps/$(TTTtt0)/$(shorten_string "$(git_HEAD_commit_sha)")"
 
   printf "%s" "${branch_name}"
