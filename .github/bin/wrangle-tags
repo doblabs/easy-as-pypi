@@ -151,12 +151,18 @@ wrangle_tag () {
     #   case stale one persists elsewhere.
     if ${tag_exists} || [ "${tag_scope}" = "HEAD" ]; then
       git tag -d "${tag_name}" 2> /dev/null || true
-      git push "origin" ":refs/tags/${tag_name}"
+
+      if ${CI:-false}; then
+        git push "origin" ":refs/tags/${tag_name}"
+      fi
     fi
   elif [ "${new_tag_value}" = "true" ]; then
     if ! ${tag_exists}; then
       git tag -f "${tag_name}"
-      git push -f "origin" "refs/tags/${tag_name}"
+
+      if ${CI:-false}; then
+        git push -f "origin" "refs/tags/${tag_name}"
+      fi
     fi
   fi
 
