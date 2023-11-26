@@ -53,7 +53,7 @@ wrangle_tags () {
     local tag_name
     local out_name
     local tag_scope
-    local tag_setting
+    local new_tag_value
     local skip_if
     # CRUDE: Set `local` vars for specified tag.
     set_tag_locals "${which_tag}"
@@ -62,7 +62,7 @@ wrangle_tags () {
       "${tag_name}" \
       "${out_name}" \
       "${tag_scope}" \
-      "${tag_setting}" \
+      "${new_tag_value}" \
       "${skip_if}"
 
     trace_full
@@ -77,14 +77,14 @@ wrangle_tag () {
   local tag_name="$1"
   local out_name="$2"
   local tag_scope="$3"
-  local tag_setting="$4"
+  local new_tag_value="$4"
   local skip_if="$5"
 
   trace_full "manage-ci-tag @ $(git rev-parse HEAD)"
   trace_full "- tag_name: ${tag_name}"
   trace_full "- out_name: ${out_name}"
   trace_full "- tag_scope: ${tag_scope}"
-  trace_full "- tag_setting: ${tag_setting}"
+  trace_full "- new_tag_value: ${new_tag_value}"
   trace_full "- skip_if?: ${skip_if}"
 
   if ${skip_if}; then
@@ -124,12 +124,12 @@ wrangle_tag () {
     fi
   fi
 
-  if [ "${tag_setting}" = "true" ]; then
+  if [ "${new_tag_value}" = "true" ]; then
     if ! ${was_enabled}; then
       git tag -f "${tag_name}"
       git push -f "origin" "refs/tags/${tag_name}"
     fi
-  elif [ "${tag_setting}" = "false" ]; then
+  elif [ "${new_tag_value}" = "false" ]; then
     # Only need to delete branch tag if was_enabled, because
     # otherwise already doesn't exist.
     # - Always delete HEAD-only tag, in case stale one persists.
@@ -142,7 +142,7 @@ wrangle_tag () {
   trace_full "${out_name}: ${was_enabled}"
 
   trace_lite "├── $(printf '%-25s' "${tag_name}")" \
-    "│ new val: $(printf '%-5s' "${tag_setting}")" \
+    "│ new val: $(printf '%-5s' "${new_tag_value}")" \
     "│ $(printf '%-27s' "${out_name}:") ${was_enabled} │"
 
   if [ -n "${GITHUB_OUTPUT}" ]; then
@@ -166,7 +166,7 @@ set_tag_locals () {
   local which_tag="$1"
 
   # These fcns rely on `local` scoping to set these vars for the caller:
-  #   tag_name, out_name, tag_scope, tag_setting, skip_if
+  #   tag_name, out_name, tag_scope, new_tag_value, skip_if
 
   # SAVVY: Nothing sets skip_if=true
   # - But it's available for future generations.
@@ -217,7 +217,7 @@ set_tag_locals_inhibit_cascade () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_inhibit_cascade"
     tag_scope="HEAD"
-    tag_setting="${EAPP_INHIBIT_CASCADE}"
+    new_tag_value="${EAPP_INHIBIT_CASCADE}"
   fi
 }
 
@@ -227,7 +227,7 @@ set_tag_locals_inhibit_cascade_always () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_inhibit_cascade_always"
     tag_scope="branch"
-    tag_setting="${EAPP_INHIBIT_CASCADE_ALWAYS}"
+    new_tag_value="${EAPP_INHIBIT_CASCADE_ALWAYS}"
   fi
 }
 
@@ -237,7 +237,7 @@ set_tag_locals_cascade_least () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_least"
     tag_scope="HEAD"
-    tag_setting="${EAPP_CASCADE_LEAST}"
+    new_tag_value="${EAPP_CASCADE_LEAST}"
   fi
 }
 
@@ -247,7 +247,7 @@ set_tag_locals_cascade_alpha () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_alpha"
     tag_scope="HEAD"
-    tag_setting="${EAPP_CASCADE_ALPHA}"
+    new_tag_value="${EAPP_CASCADE_ALPHA}"
   fi
 }
 
@@ -257,7 +257,7 @@ set_tag_locals_cascade_patch () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_patch"
     tag_scope="HEAD"
-    tag_setting="${EAPP_CASCADE_PATCH}"
+    new_tag_value="${EAPP_CASCADE_PATCH}"
   fi
 }
 
@@ -267,7 +267,7 @@ set_tag_locals_cascade_no_update_deps () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_skip_deps"
     tag_scope="HEAD"
-    tag_setting="${EAPP_CASCADE_SKIP_DEPS}"
+    new_tag_value="${EAPP_CASCADE_SKIP_DEPS}"
   fi
 }
 
@@ -277,7 +277,7 @@ set_tag_locals_cascade_no_version_tag () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_skip_vers"
     tag_scope="HEAD"
-    tag_setting="${EAPP_CASCADE_SKIP_VERS}"
+    new_tag_value="${EAPP_CASCADE_SKIP_VERS}"
   fi
 }
 
