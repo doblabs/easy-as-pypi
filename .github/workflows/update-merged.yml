@@ -198,20 +198,9 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    needs: [verify-merged-pr, wrangle-ci-tags]
+    needs: wrangle-ci-tags
 
-    # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
-    if: ${{ ! cancelled()
-      && (false
-          || needs.wrangle-ci-tags.result == 'success'
-          || needs.wrangle-ci-tags.result == 'skipped')
-      && (false
-          || (github.event_name == 'pull_request'
-              && needs.verify-merged-pr.result == 'success'
-              && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
-          || (github.event_name == 'workflow_dispatch'
-              && inputs.bump-part != 'skip')
-    }}
+    if: ${{ ! cancelled() && needs.wrangle-ci-tags.result == 'success' }}
 
     steps:
       - name: Checkout this repo
