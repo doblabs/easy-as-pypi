@@ -296,6 +296,7 @@ jobs:
 
     needs: [verify-merged-pr, env-outputs]
 
+    # SAVVY: Note this won't casade is git-bump ran but didn't change the version.
     if: ${{ ! cancelled()
       && ((github.event_name == 'repository_dispatch')
           || (github.event_name == 'workflow_dispatch'
