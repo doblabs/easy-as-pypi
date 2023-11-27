@@ -101,12 +101,13 @@ jobs:
 
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
-          # USER_TOKEN used to call gh-label (manage 'poetry.lock' label).
+          # USER_TOKEN used with gh-label (manage 'poetry.lock' label),
+          # and GBOT_TOKEN used to approve PR using different user:
           # - USER_TOKEN used on gh-pr-create and gh-pr-merge, and
           #   GBOT_TOKEN used on gh-pr-review.
           USER_TOKEN: ${{ secrets.USER_PAT }}
           GBOT_TOKEN: ${{ github.token }}
-          # Organization variables.
+          # Organization variables (user email/name used on git-commit).
           UPDEPS_USER_EMAIL: ${{ vars.UPDEPS_USER_EMAIL }}
           UPDEPS_USER_NAME: ${{ vars.UPDEPS_USER_NAME }}
           UPDEPS_USER_NAME_UPDEPS: ${{ vars.UPDEPS_USER_NAME_UPDEPS }}
