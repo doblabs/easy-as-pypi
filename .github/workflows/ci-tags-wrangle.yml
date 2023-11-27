@@ -53,13 +53,13 @@ on:
     #     - Just FYI, in case the "old-" prefix *confuses you*.
     outputs:
       old-inhibit-cascade:
-        description: "The old ci-inhibit-cascade value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
+        description: "The previous/maybe current ci-inhibit-cascade value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-cascade }}
       old-inhibit-forever:
-        description: "The old ci-inhibit-forever value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-forever }}
+        description: "The previous/maybe current ci-inhibit-forever value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-forever }}
       old-cascade-updatedeps:
-        description: "The old ci-cascade-updatedeps value"
+        description: "The previous/maybe current ci-cascade-updatedeps value"
         value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-updatedeps }}
       old-cascade-least:
         description: "The old ci-cascade-least value"
