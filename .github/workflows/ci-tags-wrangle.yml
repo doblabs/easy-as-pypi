@@ -78,33 +78,33 @@ on:
 
 jobs:
 
-  manage-ci-tags:
-    name: CI tags
+  wrangle-ci-tags:
+    name: Wrangle CI tags
 
     runs-on: ubuntu-latest
 
     # Maps job outputs to step outputs.
     outputs:
       old-inhibit-cascade: "${{
-        steps.manage-ci-tag.outputs.old_inhibit_cascade
+        steps.wrangle-ci-tags.outputs.old_inhibit_cascade
       }}"
       old-inhibit-forever: "${{
-        steps.manage-ci-tag.outputs.old_inhibit_forever
+        steps.wrangle-ci-tags.outputs.old_inhibit_forever
       }}"
       old-cascade-updatedeps: "${{
-        steps.manage-ci-tag.outputs.old_cascade_updatedeps
+        steps.wrangle-ci-tags.outputs.old_cascade_updatedeps
       }}"
       old-cascade-least: "${{
-        steps.manage-ci-tag.outputs.old_cascade_least
+        steps.wrangle-ci-tags.outputs.old_cascade_least
       }}"
       old-cascade-alpha: "${{
-        steps.manage-ci-tag.outputs.old_cascade_alpha
+        steps.wrangle-ci-tags.outputs.old_cascade_alpha
       }}"
       old-cascade-patch: "${{
-        steps.manage-ci-tag.outputs.old_cascade_patch
+        steps.wrangle-ci-tags.outputs.old_cascade_patch
       }}"
       old-cascade-skip-vers: "${{
-        steps.manage-ci-tag.outputs.old_cascade_skip_vers
+        steps.wrangle-ci-tags.outputs.old_cascade_skip_vers
       }}"
 
     steps:
