@@ -249,18 +249,18 @@ make_editable () {
   local concat_pjs=""
 
   local pyprojs_full
-  pyprojs_full="$$(echo "${EDITABLES_ROOT}" | sed "s@~@$${HOME}@")"
+  pyprojs_full="$(echo "${EDITABLES_ROOT}" | sed "s@~@${HOME}@")"
 
   local project
   for project in ${EDITABLE_PJS}; do
-    if [ -d "$${pyprojs_full}/$${project}" ]; then
-      concat_pjs="$${concat_pjs}$${project}|"
+    if [ -d "${pyprojs_full}/${project}" ]; then
+      concat_pjs="${concat_pjs}${project}|"
     else
-      echo "ALERT: Missing project: $${pyprojs_full}/$${project}"
+      echo "ALERT: Missing project: ${pyprojs_full}/${project}"
     fi
   done
 
-  concat_pjs="$$(echo "$${concat_pjs}" | sed 's@|$$@@')"
+  concat_pjs="$(echo "${concat_pjs}" | sed 's@|$@@')"
 
   sed -E \
     -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
@@ -270,7 +270,7 @@ make_editable () {
   | awk \
       -v pyprojs_root="${EDITABLES_ROOT}" \
       ' \
-        match($$0, /^('$${concat_pjs}')\s*=\s*"[<>=^]{1,2}\s*[0-9]+/, matches) { \
+        match($0, /^('${concat_pjs}')\s*=\s*"[<>=^]{1,2}\s*[0-9]+/, matches) { \
           print matches[1] " = {path = \"" pyprojs_root "/" matches[1] "/${EDITABLE_DIR}\", develop = true}"; \
           next; \
         } 1 \
@@ -278,8 +278,8 @@ make_editable () {
     >> ${EDITABLE_DIR}/pyproject.toml
 
   local editable_link="${EDITABLE_DIR}/${SOURCE_DIR}"
-  [ -h "$${editable_link}" ] && command rm "$${editable_link}"
-  command ln -s "../${SOURCE_DIR}" "$${editable_link}"
+  [ -h "${editable_link}" ] && command rm "${editable_link}"
+  command ln -s "../${SOURCE_DIR}" "${editable_link}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
