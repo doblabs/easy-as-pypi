@@ -176,7 +176,8 @@ jobs:
     # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
     if: ${{ ! cancelled()
       && ((github.event_name == 'workflow_dispatch'
-           && inputs.cascade-dispatch)
+           && inputs.cascade-dispatch
+           && inputs.bump-part != 'skip')
           || (github.event_name == 'pull_request'
               && needs.verify-merged-pr.result == 'success'
               && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
@@ -290,6 +291,7 @@ jobs:
 
     needs: verify-merged-pr
 
+    # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     if: ${{ ! cancelled()
       && ((github.event_name == 'workflow_dispatch'
            && inputs.cascade-dispatch
