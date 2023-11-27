@@ -102,7 +102,7 @@ make_doc8_poetry () {
 
   _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin
 
-  poetry install --no-interaction --no-root
+  poetry install --no-interaction --no-root --with dev
 
   cd "${before_cd}"
 
