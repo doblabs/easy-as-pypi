@@ -37,7 +37,7 @@ on:
         default: 'alpha'
 
       cascade-dispatch:
-        description: 'Start the cascade!'
+        description: 'Start the cascade'
         type: boolean
         default: false
         required: false
@@ -126,7 +126,7 @@ jobs:
   # ***
 
   wrangle-ci-tags:
-    name: Wrangle CI tags
+    name: Wrangle (write) CI tag(s)
 
     # Note that inhibit-cascade only applies if version/release not inhibited.
     # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
