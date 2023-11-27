@@ -40,7 +40,6 @@ on:
         description: 'Start the cascade'
         type: boolean
         default: false
-        required: false
 
 # ***
 
