@@ -150,7 +150,6 @@ env:
   # Uses bump-part input if workflow_dispatch;
   # or looks for special CI label if pull_request;
   # finally falls-back 'alpha' (which is bump's default).
-  BUMP_PART: ${{ inputs.bump-part || env.CASCADE_VERSIONG }}
 
 # ***
 
@@ -207,9 +206,9 @@ jobs:
         || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
       # LEAVE: "ci-inhibit-forever"
       # Manage "ci-cascade-updatedeps"
-      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
+      cascade-updatedeps: env.CASCADE_UPDATEDEPS
       # Manage "ci-cascade-versioning"
-      cascade-versioning: ${{ env.BUMP_PART }}
+      cascade-versioning: inputs.bump-part || env.CASCADE_VERSIONG
 
   # ***
 
@@ -287,6 +286,19 @@ jobs:
           echo "git bump-version-tag \"${BUMP_PART}\""
           git bump-version-tag "${BUMP_PART}"
 
+    env:
+      BUMP_PART: inputs.bump-part || env.CASCADE_VERSIONG
+
+  # ***
+
+  expose-envs-as-job-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo
+    outputs:
+      cascade-updatedeps: env.CASCADE_UPDATEDEPS
+      cascade-versioning: env.CASCADE_VERSIONING
+
   # ***
 
   # If no new version/release, continue cascade; otherwise checks-versioned.yml
@@ -297,7 +309,7 @@ jobs:
     uses: ./.github/workflows/update-cascade.yml
     secrets: inherit
 
-    needs: verify-merged-pr
+    needs: [verify-merged-pr, expose-envs-as-job-outputs]
 
     # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     if: ${{ ! cancelled()
@@ -310,5 +322,5 @@ jobs:
          ) }}
 
     with:
-      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
-      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
+      cascade-updatedeps: ${{ needs.expose-envs-as-job-outputs.outputs.CASCADE_UPDATEDEPS }}
+      cascade-versioning: ${{ needs.expose-envs-as-job-outputs.outputs.CASCADE_VERSIONING }}
