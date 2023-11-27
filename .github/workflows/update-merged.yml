@@ -19,6 +19,14 @@ on:
     types:
       - closed
 
+  # Via .github/workflows/update-deps.yml.
+  workflow_call:
+    inputs:
+      cascade-versioning:
+        type: string
+        # Use empty string to fallback Git tag value if input not set.
+        default: ''
+
   # Via GitHub Actions website button
   workflow_dispatch:
     inputs:
@@ -39,6 +47,16 @@ on:
         description: 'Start the cascade'
         type: boolean
         default: false
+
+      cascade-versioning:
+        description: 'Cascade version bump'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'alpha'
 
 # ***
 
@@ -105,7 +123,7 @@ env:
   #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
   #     "ci-version-(alpha|patch|least|skip)"
   CASCADE_VERSIONING: ${{
-    false
+    inputs.cascade-versioning
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
         && 'alpha')
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
@@ -252,3 +270,27 @@ jobs:
           #  git bump-version-tag least
           echo "git bump-version-tag \"${BUMP_PART}\""
           git bump-version-tag "${BUMP_PART}"
+
+  # ***
+
+  # If no new version/release, continue cascade; otherwise checks-versioned.yml
+  # et al run, and cascade eventually continues from release-smoke-test.yml.
+  update-cascade:
+    name: "Cascade maybe"
+
+    uses: ./.github/workflows/update-cascade.yml
+    secrets: inherit
+
+    needs: verify-merged-pr
+
+    if: ${{ ! cancelled()
+      && ((github.event_name == 'workflow_dispatch'
+           && inputs.cascade-dispatch
+           && inputs.bump-part == 'skip')
+          || (github.event_name == 'pull_request'
+              && needs.verify-merged-pr.result == 'success'
+              && contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
+         ) }}
+
+    with:
+      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
