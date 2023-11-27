@@ -19,10 +19,10 @@ on:
 
     # Maps workflow outputs to job outputs.
     outputs:
-      old_inhibit_cascade:
+      old-inhibit-cascade:
         description: "The old ci-inhibit-cascade value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
-      old_inhibit_cascade_always:
+      old-inhibit-cascade-always:
         description: "The old ci-inhibit-cascade-always value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade-always }}
 

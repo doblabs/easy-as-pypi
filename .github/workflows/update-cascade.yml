@@ -78,8 +78,8 @@ jobs:
 
     needs: [wrangle-ci-tags, identify-downstream-repos]
 
-    if: needs.wrangle-ci-tags.outputs.old_inhibit_cascade == 'false'
-      && needs.wrangle-ci-tags.outputs.old_inhibit_cascade_always == 'false'
+    if: needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
+      && needs.wrangle-ci-tags.outputs.old-inhibit-cascade-always == 'false'
 
     runs-on: ubuntu-latest
 
