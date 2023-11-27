@@ -97,6 +97,27 @@ on:
 #
 #       $ jq .event.pull_request.body pull_request.json
 #       "Cascading release"
+
+# ***
+
+env:
+  # USYNC: .github/bin/update-poetry defines these strings:
+  #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
+  #     "ci-version-(alpha|patch|least|skip)"
+  CASCADE_VERSIONING: ${{
+    false
+    || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
+        && 'alpha')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
+        && 'patch')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-version-least')
+        && 'least')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
+        && 'skip')
+    || 'alpha' }}
+
+# ***
+
 jobs:
 
   verify-merged-pr:
@@ -227,21 +248,9 @@ jobs:
           #  git bump-version-tag least
           echo "git bump-version-tag \"${BUMP_PART}\""
           git bump-version-tag "${BUMP_PART}"
-        env:
-          # Uses bump-part input if workflow_dispatch;
-          # or looks for special CI label if pull_request;
-          # finally falls-back 'alpha' (which is bump's default).
-          #
-          # USYNC: UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
-          #         "ci-version-(alpha|patch|least|skip)"
-          BUMP_PART: ${{
-            inputs.bump-part
-            || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
-                && 'alpha')
-            || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
-                && 'patch')
-            || (contains(github.event.pull_request.labels.*.name, 'ci-version-least')
-                && 'least')
-            || (contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
-                && 'skip')
-            || 'alpha' }}
+
+    env:
+      # Uses bump-part input if workflow_dispatch;
+      # or looks for special CI label if pull_request;
+      # finally falls-back 'alpha' (which is bump's default).
+      BUMP_PART: ${{ inputs.bump-part || env.CASCADE_VERSIONG }}
