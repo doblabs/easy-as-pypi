@@ -487,8 +487,7 @@ jobs:
             -f "INDEX_PIP=${INDEX_PIP}" \
             -f "INDEX_PIPX=${INDEX_PIPX}" \
             -f "PACKAGE_NAME=${PACKAGE_NAME}" \
-            -f "VERSION=${VERSION}" \
-            -f "PRERELEASE=${PRERELEASE}"
+            -f "VERSION=${VERSION}"
           #
           # echo "... | gh workflow run release-smoke-test.yml --json"
           # # Doesn't like double-quotes outside, singles inside:
@@ -513,6 +512,5 @@ jobs:
           INDEX_PIPX: ${{ needs.prepare-publish.outputs.INDEX_PIPX }}
           PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
           VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
-          PRERELEASE: ${{ needs.prepare-publish.outputs.PRERELEASE }}
 
 # ***

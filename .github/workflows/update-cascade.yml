@@ -11,23 +11,27 @@ run-name: 👣 — Cascade — 1.) Dispatch ${{
   github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
-  # Via release-smoke-test.yml
+  # Via release-smoke-test.yml after PyPI release, which doesn't
+  # set inputs, b/c we'll read CI tags herein.
   workflow_call:
     inputs:
-      prerelease:
-        description: 'Pre-release cascade'
-        type: boolean
-        default: false
-        required: false
+      cascade-versioning:
+        type: string
+        # Use empty string to fallback Git tag value if input not set.
+        default: ''
 
   # Via GitHub Actions website button
   workflow_dispatch:
     inputs:
-      prerelease:
-        description: 'Pre-release cascade'
-        type: boolean
-        default: false
-        required: false
+      cascade-versioning:
+        description: 'Cascade version bump'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'alpha'
 
 # ***
 
@@ -100,6 +104,10 @@ jobs:
           token: ${{ secrets.PAT__PUBLIC_REPO }}
           repository: ${{ matrix.repo }}
           event-type: update-deps
-          # REFER: Use JSON blob to pass args using repo-dispatch, e.g.,:
-          #  client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}"}'
-          client-payload: '{"prerelease": "${{ inputs.prerelease }}"}'
+          client-payload: '
+            {
+              "cascade-versioning": "${{
+                inputs.cascade-versioning
+                || needs.wrangle-ci-tags.outputs.old-cascade-versioning
+              }}"
+            }'

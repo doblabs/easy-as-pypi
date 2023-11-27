@@ -27,13 +27,15 @@ on:
       # or minor part from terminal, e.g., using `git-bump-version-tag`:
       #   https://github.com/thegittinsgood/git-bump-version-tag#🐫
       bump-part:
-        description: 'Bump part'
+        description: 'Increment version'
         type: choice
         options:
-          - alpha
-          - patch
-          - least
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
         default: 'alpha'
+
       cascade-dispatch:
         description: 'Start the cascade!'
         type: boolean
@@ -127,12 +129,12 @@ jobs:
     name: Wrangle CI tags
 
     # Note that inhibit-cascade only applies if version/release not inhibited.
-    # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
     # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
+    # - USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
     if: (github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch)
       || (contains(github.event.pull_request.labels.*.name, 'poetry.lock')
-        && ! contains(github.event.pull_request.labels.*.name, 'ci-inhibit-version')
         && contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
+        && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
       )
 
     uses: ./.github/workflows/ci-tags-wrangle.yml
@@ -149,18 +151,18 @@ jobs:
 
     needs: [verify-merged-pr, wrangle-ci-tags]
 
-    # USYNC: UPDEPS_LABEL_NAME_INHIBIT_VERSION="ci-inhibit-version"
+    # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
     if: ${{ ! cancelled()
       && (false
           || needs.wrangle-ci-tags.result == 'success'
           || needs.wrangle-ci-tags.result == 'skipped')
       && (false
-          || github.event_name == 'workflow_dispatch'
-          || needs.verify-merged-pr.result == 'success'
-         )
-      && ! contains(
-        github.event.pull_request.labels.*.name, 'ci-inhibit-version'
-      ) }}
+          || (github.event_name == 'pull_request'
+              && needs.verify-merged-pr.result == 'success'
+              && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
+          || (github.event_name == 'workflow_dispatch'
+              && inputs.bump-part != 'skip')
+    }}
 
     steps:
       - name: Checkout this repo
@@ -230,36 +232,18 @@ jobs:
         env:
           # Uses bump-part input if workflow_dispatch;
           # or looks for special CI label if pull_request;
-          # finally falls-back 'least' (which is bump's default).
-          # - SAVVY: If you start a normal version release cascade but then
-          #   reach a project on pre-release, this bump, because 'least',
-          #   will maintain that pre-release. And then on the next cascade
-          #   dispatch, the prerelease will propagate to the next repo.
-          #   Which seems like a good thing: If one project in the chain
-          #   is on pre-release, then everything downstream should also
-          #   be considered alpha. Alternatively, if the cascade didn't turn
-          #   prerelease on, the prerelease project wouldn't get updated
-          #   in downstream projects, but maybe upstreamer projects would.
-          #   So perhaps it'd be fine to not propagate prerelease when
-          #   encountered along the cascade -- but the CI isn't quite
-          #   plumbed for that case. Rather than update-cascade.yml use
-          #   the PRERELEASE flag passed around (based off the current
-          #   version tag), update-merged.yml would have to add a
-          #   'ci-prerelease' or 'ci-prerelease-cascade' tag to the repo,
-          #   based on the 'ci-prelease' PR label that update-deps.yml
-          #   added (based on the PRERELEASE input from update-cascade.yml).
-          #   Then update-cascade would have to read that tag.
-          #   - TL;DR: If you don't want one prerelease project to make the
-          #     rest of the cascade prerelease versions, you need to add a
-          #     new 'ci-prerelease' tag to ci-tags-wrangle.yml that will be
-          #     set in update-merged.yml (based on same-named PR label),
-          #     and that will be read in update-cascade.yml (and dispatch
-          #     to next repo's update-deps.yml).
-          #     - DEBAR: Do not change from Normal to Prerelease cascade
-          #              when cascade reaches a Prerelease project.
-          # USYNC: UPDEPS_LABEL_NAME_PRERELEASE="ci-prerelease"
+          # finally falls-back 'alpha' (which is bump's default).
+          #
+          # USYNC: UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
+          #         "ci-version-(alpha|patch|least|skip)"
           BUMP_PART: ${{
             inputs.bump-part
-            || (contains(github.event.pull_request.labels.*.name, 'ci-prerelease')
+            || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
                 && 'alpha')
-            || 'least' }}
+            || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
+                && 'patch')
+            || (contains(github.event.pull_request.labels.*.name, 'ci-version-least')
+                && 'least')
+            || (contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
+                && 'skip')
+            || 'alpha' }}

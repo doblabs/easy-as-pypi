@@ -34,16 +34,12 @@ on:
         type: string
         required: false
 
-      ci-cascade-least:
-        type: string
-        required: false
-      ci-cascade-alpha:
-        type: string
-        required: false
-      ci-cascade-patch:
-        type: string
-        required: false
-      ci-cascade-no-version-tag:
+      # If tagged on HEAD, determines versioning increment this cascade.
+      # - Use "skip" to not version, and also to not release any projects.
+      cascade-versioning:
+        # Opts: 'alpha', 'patch', 'least', or 'skip';
+        #       or 'false' to remove the tag,
+        #       or '' to merely read the tag.
         type: string
         required: false
 
@@ -61,18 +57,9 @@ on:
       old-cascade-updatedeps:
         description: "The previous/maybe current ci-cascade-updatedeps value"
         value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-updatedeps }}
-      old-cascade-least:
-        description: "The old ci-cascade-least value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-least }}
-      old-cascade-alpha:
-        description: "The old ci-cascade-alpha value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-alpha }}
-      old-cascade-patch:
-        description: "The old ci-cascade-patch value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-patch }}
-      old-cascade-skip-vers:
-        description: "The old ci-cascade-no-version-tag value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-cascade-skip-vers }}
+      old-cascade-versioning:
+        description: "The previous/maybe current ci-cascade-versioning value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-versioning }}
 
 # ***
 
@@ -94,17 +81,8 @@ jobs:
       old-cascade-updatedeps: "${{
         steps.wrangle-ci-tags.outputs.old_cascade_updatedeps
       }}"
-      old-cascade-least: "${{
-        steps.wrangle-ci-tags.outputs.old_cascade_least
-      }}"
-      old-cascade-alpha: "${{
-        steps.wrangle-ci-tags.outputs.old_cascade_alpha
-      }}"
-      old-cascade-patch: "${{
-        steps.wrangle-ci-tags.outputs.old_cascade_patch
-      }}"
-      old-cascade-skip-vers: "${{
-        steps.wrangle-ci-tags.outputs.old_cascade_skip_vers
+      old-cascade-versioning: "${{
+        steps.wrangle-ci-tags.outputs.old_cascade_versioning
       }}"
 
     steps:
@@ -130,7 +108,4 @@ jobs:
           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
           EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
-          EAPP_CASCADE_LEAST: ${{ inputs.ci-cascade-least }}
-          EAPP_CASCADE_ALPHA: ${{ inputs.ci-cascade-alpha }}
-          EAPP_CASCADE_PATCH: ${{ inputs.ci-cascade-patch }}
-          EAPP_CASCADE_SKIP_VERS: ${{ inputs.ci-cascade-no-version-tag }}
+          EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
