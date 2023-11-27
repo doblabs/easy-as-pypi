@@ -56,9 +56,26 @@ env:
   PYTHON_VERSION: 3.11
 
 jobs:
+  # Here we check for branch tags (ci-inhibit-forever) and HEAD tags the
+  # user might've set deliberately on this project. Because this is the
+  # cascade entry point for a project, HEAD tags won't be automatically
+  # set unless user set them deliberately.
+  wrangle-ci-tags:
+    name: Wrangle (read) CI tags
+    uses: ./.github/workflows/ci-tags-wrangle.yml
+
   poetry-update:
     name: Update lock deps
 
+    needs: [wrangle-ci-tags]
+
+    # If called from upstream repo, it tells us to updatedeps or not.
+    # - If triggered via workflow_dispatch, updatedeps this repo unless
+    #   user proactively tagged us not to.
+    #   - And tell downstream repos to do whatever user chose them to do.
+    if: true
+      && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
+      && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
     runs-on: ubuntu-latest
 
     steps:
@@ -133,13 +150,17 @@ jobs:
     uses: ./.github/workflows/update-merged.yml
     secrets: inherit
 
-    needs: poetry-update
+    needs: [wrangle-ci-tags, poetry-update]
 
-    if: |
-      needs.poetry-update.result == 'success'
-        && needs.poetry-update.outputs.new_pr_num == ''
+    if: ${{ !cancelled()
+        && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
+        && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
+        && (needs.poetry-update.result == 'skipped'
+            || (needs.poetry-update.result == 'success'
+                && needs.poetry-update.outputs.new_pr_num == ''))
         && (github.event_name != 'workflow_dispatch'
             || inputs.cascade-dispatch == 'true')
+      }}
 
     with:
       cascade-versioning: ${{
