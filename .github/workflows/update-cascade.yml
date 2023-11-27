@@ -140,3 +140,18 @@ jobs:
                 || needs.wrangle-ci-tags.outputs.old-cascade-versioning
               }}"
             }'
+
+  # ***
+
+  wrangle-ci-tags-cleanup:
+    name: Remove (temporary) CI tags
+    uses: ./.github/workflows/ci-tags-wrangle.yml
+    with:
+      # USYNC: EAPP_CI_DELETE_KEYWORD="FALSE"
+      #   Use "FALSE" values to delete matching tags.
+      #   (A sad hack in lieu of adding more inputs.)
+      #
+      inhibit-cascade: "FALSE"
+      # LEAVE: inhibit-forever
+      cascade-updatedeps: "FALSE"
+      cascade-versioning: "FALSE"
