@@ -91,10 +91,7 @@ jobs:
       - name: Run bin/update-poetry
         id: run-update-poetry
         # Run poetry-update.
-        # DEVXX: Set UPDEPS_FAKE_UPDATE=true to fake poetry.lock update,
-        #          e.g., if you're testing inter-workflow flow.
         run: |
-          export UPDEPS_FAKE_UPDATE=false
           export UPDEPS_REPO_ORG_PROJ="${{ github.repository }}"
           export UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}"
 
@@ -117,6 +114,8 @@ jobs:
           UPDEPS_LABEL_VERSIONING_PART: ${{
             github.event_name == 'workflow_dispatch' && inputs.bump-part
             || github.event.client_payload.cascade-versioning }}
+          # DEVXX: Mock poetry-update w/ UPDEPS_FAKE_UPDATE=true to test/dev faster.
+          UPDEPS_FAKE_UPDATE: false
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
