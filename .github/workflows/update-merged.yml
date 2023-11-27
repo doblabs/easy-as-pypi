@@ -191,6 +191,9 @@ jobs:
       inhibit-cascade: github.event_name == 'workflow_dispatch'
         && ! inputs.cascade-dispatch
         || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
+      # LEAVE: "ci-inhibit-forever"
+      # Manage "ci-cascade-versioning"
+      cascade-versioning: inputs.bump-part || env.CASCADE_VERSIONG
 
   # ***
 
