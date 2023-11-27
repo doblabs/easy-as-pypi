@@ -162,23 +162,34 @@ jobs:
 
   # ***
 
+  # Temporarily set HEAD tags pertinent to the current cascade. We
+  # will clear these tags when we pass the cascade torch along later.
   wrangle-ci-tags:
     name: Wrangle (write) CI tag(s)
 
-    # Note that inhibit-cascade only applies if version/release not inhibited.
-    # - USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
-    # - USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
-    if: (github.event_name == 'workflow_dispatch' && ! inputs.cascade-dispatch)
-      || (contains(github.event.pull_request.labels.*.name, 'poetry.lock')
-        && contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
-        && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
-      )
+    needs: [verify-merged-pr]
+
+    # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
+    # SAVVY: When called via upstream repo-dispatch and update-deps.yml
+    #        calls us via workflow_call, event is still repo-dispatch.
+    if: ${{ ! cancelled()
+      && inputs.cascade-versioning != 'skip'
+      && ((github.event_name == 'repository_dispatch')
+          || (github.event_name == 'workflow_dispatch'
+              && inputs.cascade-dispatch)
+          || (github.event_name == 'pull_request'
+              && needs.verify-merged-pr.result == 'success'
+              && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
+         ) }}
 
     uses: ./.github/workflows/ci-tags-wrangle.yml
 
+    # Note we only set CI tags here, and we don't reference the outputs later.
     with:
-      # Create "ci-inhibit-cascade" tag.
-      inhibit-cascade: true
+      # Manage "ci-inhibit-cascade"
+      inhibit-cascade: github.event_name == 'workflow_dispatch'
+        && ! inputs.cascade-dispatch
+        || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
 
   # ***
 
