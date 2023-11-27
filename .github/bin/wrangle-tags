@@ -58,6 +58,15 @@ EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
 EAPP_CI_TAG_CASCADE_UPDATEDEPS="ci-cascade-updatedeps"
 EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 
+# REFER: See ./.github/workflows/ci-tags-wrangle.yml for the 
+#        environs this script uses as runtime args. They all
+#        default to the empty string:
+#
+#           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
+#           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
+#           EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
+#           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
+
 # The git-push remote, only used if $CI, so should always be 'origin'.
 EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
 
