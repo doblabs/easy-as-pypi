@@ -70,6 +70,8 @@ EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 # The git-push remote, only used if $CI, so should always be 'origin'.
 EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
 
+EAPP_CI_DELETE_KEYWORD="${EAPP_CI_DELETE_KEYWORD:-FALSE}"
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 wrangle_tags () {
@@ -188,7 +190,9 @@ wrangle_tag () {
 
   # ***
 
-  if [ "${new_tag_value}" = "false" ]; then
+  if [ -n "${EAPP_CI_DELETE_KEYWORD}" ] \
+    && [ "${new_tag_value}" = "${EAPP_CI_DELETE_KEYWORD}" ] \
+  ; then
     # Only need to delete branch tag if tag_exists,
     # because otherwise already doesn't exist.
     # - But always delete HEAD-only tag, in
