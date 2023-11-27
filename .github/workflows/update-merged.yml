@@ -19,9 +19,13 @@ on:
     types:
       - closed
 
-  # Via .github/workflows/update-deps.yml.
+  # Via .github/workflows/update-deps.yml, when !cascade-updatedeps.
   workflow_call:
     inputs:
+      cascade-updatedeps:
+        type: boolean
+        default: true
+
       cascade-versioning:
         type: string
         # Use empty string to fallback Git tag value if input not set.
@@ -47,6 +51,11 @@ on:
         description: 'Start the cascade'
         type: boolean
         default: false
+
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: boolean
+        default: true
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -119,6 +128,11 @@ on:
 # ***
 
 env:
+  CASCADE_UPDATEDEPS: ${{
+    github.event_name == 'workflow_dispatch'
+    && inputs.cascade-updatedeps
+    || contains(github.event.pull_request.labels.*.name, 'ci-cascade-updatedeps') }}
+
   # USYNC: .github/bin/update-poetry defines these strings:
   #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
   #     "ci-version-(alpha|patch|least|skip)"
@@ -192,6 +206,8 @@ jobs:
         && ! inputs.cascade-dispatch
         || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
       # LEAVE: "ci-inhibit-forever"
+      # Manage "ci-cascade-updatedeps"
+      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
       # Manage "ci-cascade-versioning"
       cascade-versioning: ${{ env.BUMP_PART }}
 
@@ -294,4 +310,5 @@ jobs:
          ) }}
 
     with:
+      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
       cascade-versioning: ${{ env.CASCADE_VERSIONING }}

@@ -13,8 +13,15 @@ run-name: 👣 — Cascade — 1.) Dispatch ${{
 on:
   # Via release-smoke-test.yml after PyPI release, which doesn't
   # set inputs, b/c we'll read CI tags herein.
+  # - Or via update-merged.yml, if nothing new was released (no PR,
+  #   no new version tag, no GH or PyPI release or smoke test),
+  #   in which case CI tags are not set but these 2 inputs are.
   workflow_call:
     inputs:
+      cascade-updatedeps:
+        type: boolean
+        default: true
+
       cascade-versioning:
         type: string
         # Use empty string to fallback Git tag value if input not set.
@@ -23,6 +30,11 @@ on:
   # Via GitHub Actions website button
   workflow_dispatch:
     inputs:
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: boolean
+        default: true
+
       cascade-versioning:
         description: 'Cascade version bump'
         type: choice
@@ -82,6 +94,15 @@ jobs:
 
     needs: [wrangle-ci-tags, identify-downstream-repos]
 
+    # Note that we honor CI tag regardless if workflow_dispatch or workflow_call.
+    # - Also note that the 4 CI tags valid if called via release-smoke-test.yml.
+    # - Via update-deps.yml, 2 cascade-* args are inputs; and 2 inhibit-* args
+    #   unset, where inhibit-cascade known false (b/c cascade-dispatch is true
+    #   if workflow_dispatch, or implied if repository_dispatch (otherwise
+    #   upstream repo would not have called us)), and inhibit-forever we still
+    #   want to check.
+    #   - We'll still check HEAD-only ci-inhibit-cascade because why not, user
+    #     might have set it themselves.
     if: ${{ true
         && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
         && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
@@ -104,8 +125,16 @@ jobs:
           token: ${{ secrets.PAT__PUBLIC_REPO }}
           repository: ${{ matrix.repo }}
           event-type: update-deps
+          # - The `inputs.cascade-updatedeps && ci-tags.old-cascade-updatedeps`
+          #   is because both default true, so if either is set false, use false.
+          # - The `inputs.cascade-versioning`, on the other hand, defaults to
+          #   the empty string, so fallback CI tag value if not an input
           client-payload: '
             {
+              "cascade-updatedeps": "${{
+                inputs.cascade-updatedeps
+                && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps
+              }}",
               "cascade-versioning": "${{
                 inputs.cascade-versioning
                 || needs.wrangle-ci-tags.outputs.old-cascade-versioning
