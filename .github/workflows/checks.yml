@@ -639,7 +639,7 @@ jobs:
 
       # Verifies pyproject.toml.
       - name: Poetry check
-        run: make poetry-check
+        run: poetry run make poetry-check
 
   # *** PYDOCSTYLE
 
@@ -827,4 +827,4 @@ jobs:
         run: poetry install --no-interaction --no-root --with lint,project_lint
 
       - name: Run yamllint
-        run: poetry run yamllint .
+        run: poetry run make yamllint
