@@ -26,15 +26,16 @@
 #          to be named the same, except they represent the same value
 #          we want to carry through the cascade workflows.
 #
+#        - Also note that annotated tags can be used to store values,
+#          whereas GH PR labels are simple booleans (is it set or not?).
+#          - So some vars (specifically, ci-cascade-versioning), can be
+#            represented by a single Git tag, but must be represented by
+#            multiple PR labels, one for each possible value.
 
 EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
 EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
 EAPP_CI_TAG_CASCADE_UPDATEDEPS="ci-cascade-updatedeps"
-
-EAPP_CI_TAG_CASCADE_LEAST="ci-cascade-least"
-EAPP_CI_TAG_CASCADE_ALPHA="ci-cascade-alpha"
-EAPP_CI_TAG_CASCADE_PATCH="ci-cascade-patch"
-EAPP_CI_TAG_CASCADE_SKIP_VERS="ci-cascade-no-version-tag"
+EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 
 # The git-push remote, only used if $CI, so should always be 'origin'.
 EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
@@ -140,7 +141,7 @@ wrangle_tag () {
   local old_tag_value=""
 
   if ${tag_exists}; then
-    old_tag_value="true"
+    old_tag_value="$(git tag --list --format='%(contents:subject)' "${tag_name}")"
   else
     old_tag_value="${default_value}"
   fi
@@ -159,9 +160,10 @@ wrangle_tag () {
         git push "${EAPP_CI_REMOTE_NAME}" ":refs/tags/${tag_name}"
       fi
     fi
-  elif [ "${new_tag_value}" = "true" ]; then
+  elif [ -n "${new_tag_value}" ]; then
+    # Create tag if new value not non-empty and not "false".
     if ! ${tag_exists}; then
-      git tag -f "${tag_name}"
+      git tag -f -a "${tag_name}" -m "${new_tag_value}"
 
       if ${CI:-false}; then
         git push -f "${EAPP_CI_REMOTE_NAME}" "refs/tags/${tag_name}"
@@ -210,13 +212,7 @@ set_tag_locals () {
 
   set_tag_locals_cascade_updatedeps
 
-  set_tag_locals_cascade_least
-
-  set_tag_locals_cascade_alpha
-
-  set_tag_locals_cascade_patch
-
-  set_tag_locals_cascade_no_version_tag
+  set_tag_locals_cascade_versioning
 
   # ***
 
@@ -276,47 +272,23 @@ set_tag_locals_cascade_updatedeps () {
   fi
 }
 
-set_tag_locals_cascade_least () {
-  # E.g., "ci-cascade-least"
-  tag_name="${EAPP_CI_TAG_CASCADE_LEAST}"
+# EAPP_CASCADE_VERSIONING is:
+# - 'least', 'alpha', 'patch', or 'skip'; or,
+#   as applies to all tags: '' to just read
+#   the tag (and not create or delete it),
+#   or 'false' to remove the tag.
+set_tag_locals_cascade_versioning () {
+  # E.g., "ci-cascade-versioning"
+  tag_name="${EAPP_CI_TAG_CASCADE_VERSIONING}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_least"
+    out_name="old_cascade_versioning"
     tag_scope="HEAD"
-    default_value="true"
-    new_tag_value="${EAPP_CASCADE_LEAST}"
-  fi
-}
-
-set_tag_locals_cascade_alpha () {
-  # E.g., "ci-cascade-alpha"
-  tag_name="${EAPP_CI_TAG_CASCADE_ALPHA}"
-  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_alpha"
-    tag_scope="HEAD"
-    default_value="false"
-    new_tag_value="${EAPP_CASCADE_ALPHA}"
-  fi
-}
-
-set_tag_locals_cascade_patch () {
-  # E.g., "ci-cascade-patch"
-  tag_name="${EAPP_CI_TAG_CASCADE_PATCH}"
-  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_patch"
-    tag_scope="HEAD"
-    default_value="false"
-    new_tag_value="${EAPP_CASCADE_PATCH}"
-  fi
-}
-
-set_tag_locals_cascade_no_version_tag () {
-  # E.g., "ci-cascade-no-version-tag"
-  tag_name="${EAPP_CI_TAG_CASCADE_SKIP_VERS}"
-  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_cascade_skip_vers"
-    tag_scope="HEAD"
-    default_value="false"
-    new_tag_value="${EAPP_CASCADE_SKIP_VERS}"
+    # This particular default is not really important, because user has to
+    # choose from a dropdown to send workflow_event to initiate the cascade.
+    # - So this tag value should always be set.
+    # But we'll use 'alpha' to match update-merged.yml.
+    default_value="alpha"
+    new_tag_value="${EAPP_CASCADE_VERSIONING}"
   fi
 }
 

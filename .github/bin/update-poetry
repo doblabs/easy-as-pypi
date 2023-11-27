@@ -16,6 +16,9 @@ UPDEPS_USER_NAME="${UPDEPS_USER_NAME_UPDEPS:-${UPDEPS_USER_NAME:-update-poetry}}
 #     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
 UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
+# Cascade options.
+UPDEPS_LABEL_VERSIONING_PART="${UPDEPS_LABEL_VERSIONING_PART:-alpha}"
+
 # Optional: Set faker true to skip poetry-update (useful for developing).
 UPDEPS_FAKE_UPDATE="${UPDEPS_FAKE_UPDATE:-false}"
 
@@ -25,9 +28,8 @@ UPDEPS_FAKE_UPDATE="${UPDEPS_FAKE_UPDATE:-false}"
 #        unless you set USER_TOKEN and GBOT_TOKEN to different users' tokens):
 __UPDEPS__CPYST__="
   UPDEPS_FAKE_UPDATE=true \
-  UPDEPS_LABEL_INHIBIT_VERSION=true \
   UPDEPS_LABEL_INHIBIT_CASCADE=true \
-  UPDEPS_LABEL_PRERELEASE=true \
+  UPDEPS_LABEL_VERSIONING_PART=skip \
     ./.github/bin/update-poetry
 "
 
@@ -44,11 +46,6 @@ poetry.lock}"
 UPDEPS_LABEL_DESC_POETRY_LOCK="${UPDEPS_LABEL_DESC_POETRY_LOCK:-\
 Pull requests that update poetry.lock}"
 
-UPDEPS_LABEL_NAME_INHIBIT_VERSION="${UPDEPS_LABEL_NAME_INHIBIT_VERSION:-\
-ci-inhibit-version}"
-UPDEPS_LABEL_DESC_INHIBIT_VERSION="${UPDEPS_LABEL_DESC_INHIBIT_VERSION:-\
-Tells CI not to version after auto-merge}"
-
 # The 'ci-inhibit-cascade' label, if set, tells update-cascade.yml
 # to not send the repo-dispatch downstream.
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
@@ -56,10 +53,33 @@ ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
 Tells CI not to cascade after release}"
 
-UPDEPS_LABEL_NAME_PRERELEASE="${UPDEPS_LABEL_NAME_PRERELEASE:-\
-ci-prerelease}"
-UPDEPS_LABEL_DESC_PRERELEASE="${UPDEPS_LABEL_DESC_PRERELEASE:-\
-Tells CI to use prerelease versions}"
+# The next 4 labels represent the 'cascade-versioning' Git tag.
+# - An annotated Git tag contains a message we kluge to hold our
+#   variable value.
+#   - So we can use the same Git tag for different values.
+# - But a GitHub PR label is just a label, essentially a boolean.
+#   So we use 4 labels here to represent the 4 'cascade-versioning'
+#   values: 'alpha', 'patch', 'least', and 'skip'.
+#
+UPDEPS_LABEL_NAME_VERSION_ALPHA="${UPDEPS_LABEL_NAME_VERSION_ALPHA:-\
+ci-version-alpha}"
+UPDEPS_LABEL_DESC_VERSION_ALPHA="${UPDEPS_LABEL_DESC_VERSION_ALPHA:-\
+Tells CI to bump alpha version}"
+#
+UPDEPS_LABEL_NAME_VERSION_PATCH="${UPDEPS_LABEL_NAME_VERSION_PATCH:-\
+ci-version-patch}"
+UPDEPS_LABEL_DESC_VERSION_PATCH="${UPDEPS_LABEL_DESC_VERSION_PATCH:-\
+Tells CI to bump patch version}"
+#
+UPDEPS_LABEL_NAME_VERSION_LEAST="${UPDEPS_LABEL_NAME_VERSION_LEAST:-\
+ci-version-least}"
+UPDEPS_LABEL_DESC_VERSION_LEAST="${UPDEPS_LABEL_DESC_VERSION_LEAST:-\
+Tells CI to bump least version}"
+#
+UPDEPS_LABEL_NAME_VERSION_SKIP="${UPDEPS_LABEL_NAME_VERSION_SKIP:-\
+ci-version-skip}"
+UPDEPS_LABEL_DESC_VERSION_SKIP="${UPDEPS_LABEL_DESC_VERSION_SKIP:-\
+Tells CI to skip version bump}"
 
 # ***
 
@@ -435,14 +455,6 @@ gh_label_create () {
 
 # Meh: This feels like TMBL — Too Much Business Logic — than maybe belongs here.
 print_pr_ci_labels () {
-  if ${UPDEPS_LABEL_INHIBIT_VERSION:-false}; then
-    gh_label_create \
-      "${UPDEPS_LABEL_NAME_INHIBIT_VERSION}" \
-      "${UPDEPS_LABEL_DESC_INHIBIT_VERSION}"
-
-    printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_VERSION} "
-  fi
-
   if ${UPDEPS_LABEL_INHIBIT_CASCADE:-false}; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_INHIBIT_CASCADE}" \
@@ -451,12 +463,30 @@ print_pr_ci_labels () {
     printf "%s" "--label ${UPDEPS_LABEL_NAME_INHIBIT_CASCADE} "
   fi
 
-  if ${UPDEPS_LABEL_PRERELEASE:-false}; then
+  if [ "${UPDEPS_LABEL_VERSIONING_PART}" = "least" ]; then
     gh_label_create \
-      "${UPDEPS_LABEL_NAME_PRERELEASE}" \
-      "${UPDEPS_LABEL_DESC_PRERELEASE}"
+      "${UPDEPS_LABEL_NAME_VERSION_LEAST}" \
+      "${UPDEPS_LABEL_DESC_VERSION_LEAST}"
 
-    printf "%s" "--label ${UPDEPS_LABEL_NAME_PRERELEASE} "
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_LEAST} "
+  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "alpha" ]; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_VERSION_ALPHA}" \
+      "${UPDEPS_LABEL_DESC_VERSION_ALPHA}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_ALPHA} "
+  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "patch" ]; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_VERSION_PATCH}" \
+      "${UPDEPS_LABEL_DESC_VERSION_PATCH}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_PATCH} "
+  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "skip" ]; then
+    gh_label_create \
+      "${UPDEPS_LABEL_NAME_VERSION_SKIP}" \
+      "${UPDEPS_LABEL_DESC_VERSION_SKIP}"
+
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_SKIP} "
   fi
 }
 

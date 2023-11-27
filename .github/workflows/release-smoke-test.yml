@@ -26,9 +26,6 @@ on:
       VERSION:
         required: true
         type: string
-      PRERELEASE:
-        required: true
-        type: boolean
 
 # ***
 
@@ -218,6 +215,3 @@ jobs:
       && (needs.pipx-smoke-test.result == 'success'
           || needs.pipx-smoke-test.result == 'skipped'
       ) }}
-
-    with:
-      prerelease: ${{ inputs.PRERELEASE }}
