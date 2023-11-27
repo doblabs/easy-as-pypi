@@ -92,9 +92,6 @@ jobs:
         id: run-update-poetry
         # Run poetry-update.
         run: |
-          export UPDEPS_REPO_ORG_PROJ="${{ github.repository }}"
-          export UPDEPS_LABEL_INHIBIT_CASCADE="${{ ! inputs.cascade-dispatch }}"
-
           env | grep -e "^UPDEPS_"
 
           new_pr_num="$(./.github/bin/update-poetry)"
@@ -111,7 +108,10 @@ jobs:
           UPDEPS_USER_EMAIL: ${{ vars.UPDEPS_USER_EMAIL }}
           UPDEPS_USER_NAME: ${{ vars.UPDEPS_USER_NAME }}
           UPDEPS_USER_NAME_UPDEPS: ${{ vars.UPDEPS_USER_NAME_UPDEPS }}
+          # Project identifier (used to deduce remote name for git-push).
+          UPDEPS_REPO_ORG_PROJ: ${{ github.repository }}
           # Script inputs.
+          UPDEPS_LABEL_INHIBIT_CASCADE: ${{ ! inputs.cascade-dispatch }}
           UPDEPS_LABEL_VERSIONING_PART: ${{
             github.event_name == 'workflow_dispatch' && inputs.bump-part
             || github.event.client_payload.cascade-versioning }}
