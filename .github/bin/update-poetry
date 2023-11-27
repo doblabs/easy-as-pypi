@@ -17,6 +17,7 @@ UPDEPS_USER_NAME="${UPDEPS_USER_NAME_UPDEPS:-${UPDEPS_USER_NAME:-update-poetry}}
 UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
 # Cascade options.
+UPDEPS_LABEL_INHIBIT_CASCADE="${UPDEPS_LABEL_INHIBIT_CASCADE:-false}"
 UPDEPS_LABEL_VERSIONING_PART="${UPDEPS_LABEL_VERSIONING_PART:-alpha}"
 
 # Optional: Set faker true to skip poetry-update (useful for developing).
