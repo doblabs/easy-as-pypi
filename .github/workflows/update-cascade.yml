@@ -151,6 +151,21 @@ jobs:
 
   # ***
 
+  celebrate-cascade-complete:
+    name: Celebrate Completed Cascade
+
+    needs: identify-downstream-repos
+
+    if: ${{ needs.identify-downstream-repos.outputs.downstream_repos_exist == 'false' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Congrats!
+        run: echo "Contrats!"
+
+  # ***
+
   wrangle-ci-tags-cleanup:
     name: Remove (temporary) CI tags
     needs: dispatch-downstream-repos
