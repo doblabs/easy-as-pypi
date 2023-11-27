@@ -86,6 +86,14 @@ jobs:
 
     outputs:
       downstream_repos_raw: ${{ steps.probe_yaml.outputs.result }}
+      # mikefarah/yq prints "null" (JSON null object) if there is not a
+      # matching list named github.repository, which makes sense, but
+      # also if the matching list is empty (rather than printing, e.g.,
+      # "[]"). Though I suppose in Yaml, how would interpreter know if
+      # that "named-thing:" is a list or dictionary, or valueless atom?
+      # - fromJson('null') returns null object, which when stringified
+      #   is the empty string (which you might see in error messages).
+      downstream_repos_exist: ${{ steps.probe_yaml.outputs.result != 'null' }}
 
   # ***
 
@@ -103,7 +111,7 @@ jobs:
     #   want to check.
     #   - We'll still check HEAD-only ci-inhibit-cascade because why not, user
     #     might have set it themselves.
-    if: ${{ true
+    if: ${{ needs.identify-downstream-repos.outputs.downstream_repos_exist == 'true'
         && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
         && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
       }}
