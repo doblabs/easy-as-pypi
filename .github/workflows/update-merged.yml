@@ -176,7 +176,8 @@ jobs:
       && inputs.cascade-versioning != 'skip'
       && ((github.event_name == 'repository_dispatch')
           || (github.event_name == 'workflow_dispatch'
-              && inputs.cascade-dispatch)
+              && inputs.cascade-dispatch
+              && inputs.bump-part != 'skip')
           || (github.event_name == 'pull_request'
               && needs.verify-merged-pr.result == 'success'
               && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
@@ -307,6 +308,7 @@ jobs:
 
     needs: [verify-merged-pr, env-outputs]
 
+    # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     # SAVVY: Note this won't casade if git-bump ran but didn't change the version.
     if: ${{ ! cancelled()
       && ((github.event_name == 'repository_dispatch')
