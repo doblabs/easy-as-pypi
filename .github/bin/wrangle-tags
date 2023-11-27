@@ -5,6 +5,27 @@
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# CPYST: Wired into GHA CI, but callable from developer term, too:
+__USAGE__="
+  GITHUB_OUTPUT="$(mktemp -t wrangle-tags-XXXXX)" ./.github/bin/wrangle-tags
+
+  EAPP_INHIBIT_CASCADE=true \
+  EAPP_INHIBIT_FOREVER='' \
+  EAPP_CASCADE_UPDATEDEPS='' \
+  EAPP_CASCADE_VERSIONING='' \
+  GITHUB_OUTPUT="$(mktemp -t wrangle-tags-XXXXX)" \
+    ./.github/bin/wrangle-tags
+
+  EAPP_INHIBIT_CASCADE=true \
+  EAPP_INHIBIT_FOREVER='' \
+  EAPP_CASCADE_UPDATEDEPS='' \
+  EAPP_CASCADE_VERSIONING='' \
+  GITHUB_OUTPUT="$(mktemp -t wrangle-tags-XXXXX)" \
+    ~/.kit/py/easy-as-pypi/.github/bin/wrangle-tags
+"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # USYNC: See ./.github/bin/update-poetry, which uses similarly-
 #        named GitHub PR labels for the same Git tags named here.
 #
