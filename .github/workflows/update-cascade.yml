@@ -85,7 +85,7 @@ jobs:
               ".github/doblabs-dependencies.yml"
 
     outputs:
-      probe_yaml_outputs_result: ${{ steps.probe_yaml.outputs.result }}
+      downstream_repos_raw: ${{ steps.probe_yaml.outputs.result }}
 
   # ***
 
@@ -113,7 +113,7 @@ jobs:
     strategy:
       matrix:
         repo: "${{
-          fromJSON(needs.identify-downstream-repos.outputs.probe_yaml_outputs_result)
+          fromJSON(needs.identify-downstream-repos.outputs.downstream_repos_raw)
         }}"
 
     steps:
