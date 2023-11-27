@@ -127,7 +127,7 @@ jobs:
   verify-merged-pr:
 
     # USYNC: UPDEPS_LABEL_NAME_POETRY_LOCK="poetry.lock"
-    if: github.event_name != 'workflow_dispatch'
+    if: github.event_name == 'pull_request'
       && github.event.pull_request.merged == true
       && contains(github.event.pull_request.labels.*.name, 'poetry.lock')
 
