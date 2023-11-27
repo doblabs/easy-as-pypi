@@ -442,7 +442,7 @@ jobs:
       # Example how to avoid hardcoding paths defined elsewhere.
       - name: Suss pseudo subproject directory name
         run: echo "PYPROJECT_DOC8_DIR=$(
-               echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')"
+               echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
              )" >> $GITHUB_ENV
         shell: bash
 

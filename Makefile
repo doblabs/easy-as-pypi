@@ -55,7 +55,7 @@ VENV_ARGS =
 # and the only recourse you find yourself with is moving the 'bar'
 # dependencies to their own pyproject.toml).
 
-PYPROJECT_DOC8_DIR = .pyproject-doc8
+PYPROJECT_DOC8_DIR ?= .pyproject-doc8
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
