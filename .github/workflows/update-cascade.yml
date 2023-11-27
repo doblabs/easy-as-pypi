@@ -37,7 +37,7 @@ on:
 
 jobs:
   wrangle-ci-tags:
-    name: Wrangle CI tags
+    name: Wrangle (read) CI tags
     uses: ./.github/workflows/ci-tags-wrangle.yml
 
   # ***

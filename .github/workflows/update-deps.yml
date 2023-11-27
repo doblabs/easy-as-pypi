@@ -34,7 +34,7 @@ on:
         default: 'alpha'
 
       cascade-dispatch:
-        description: 'Start the cascade!'
+        description: 'Start the cascade'
         type: boolean
         default: false
 
