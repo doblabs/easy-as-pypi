@@ -66,6 +66,13 @@ EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 #           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
 #           EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
 #           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
+#
+#        The corresponding delete tags each default false:
+#
+#           EAPP_DELETE_INHIBIT_CASCADE: ${{ inputs.delete-inhibit-cascade }}
+#           EAPP_DELETE_INHIBIT_FOREVER: ${{ inputs.delete-inhibit-forever }}
+#           EAPP_DELETE_CASCADE_UPDATEDEPS: ${{ inputs.delete-cascade-updatedeps }}
+#           EAPP_DELETE_CASCADE_VERSIONING: ${{ inputs.delete-cascade-versioning }}
 
 # The git-push remote, only used if $CI, so should always be 'origin'.
 EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
@@ -91,6 +98,7 @@ wrangle_tags () {
     local tag_scope
     local default_value
     local new_tag_value
+    local delete_if
     local skip_if
     # CRUDE: Set `local` vars for specified tag.
     set_tag_locals "${which_tag}"
@@ -101,6 +109,7 @@ wrangle_tags () {
       "${tag_scope}" \
       "${default_value}" \
       "${new_tag_value}" \
+      "${delete_if}" \
       "${skip_if}"
 
     trace_full
@@ -127,7 +136,8 @@ wrangle_tag () {
   local tag_scope="$3"
   local default_value="$4"
   local new_tag_value="$5"
-  local skip_if="$6"
+  local delete_if="$6"
+  local skip_if="$7"
 
   trace_full "manage-ci-tag @ $(git rev-parse HEAD)"
   trace_full "- tag_name: ${tag_name}"
@@ -135,6 +145,7 @@ wrangle_tag () {
   trace_full "- tag_scope: ${tag_scope}"
   trace_full "- default_value: ${default_value}"
   trace_full "- new_tag_value: ${new_tag_value}"
+  trace_full "- delete_if: ${delete_if}"
   trace_full "- skip_if?: ${skip_if}"
 
   # ***
@@ -192,6 +203,7 @@ wrangle_tag () {
 
   if [ -n "${EAPP_CI_DELETE_KEYWORD}" ] \
     && [ "${new_tag_value}" = "${EAPP_CI_DELETE_KEYWORD}" ] \
+    || ${delete_if} \
   ; then
     # Only need to delete branch tag if tag_exists,
     # because otherwise already doesn't exist.
@@ -293,6 +305,7 @@ set_tag_locals_inhibit_cascade () {
     tag_scope="HEAD"
     default_value="false"
     new_tag_value="${EAPP_INHIBIT_CASCADE}"
+    delete_if=${EAPP_DELETE_INHIBIT_CASCADE:-false}
   fi
 }
 
@@ -304,6 +317,7 @@ set_tag_locals_inhibit_forever () {
     tag_scope="branch"
     default_value="false"
     new_tag_value="${EAPP_INHIBIT_FOREVER}"
+    delete_if=${EAPP_DELETE_INHIBIT_FOREVER:-false}
   fi
 }
 
@@ -315,6 +329,7 @@ set_tag_locals_cascade_updatedeps () {
     tag_scope="HEAD"
     default_value="true"
     new_tag_value="${EAPP_CASCADE_UPDATEDEPS}"
+    delete_if=${EAPP_DELETE_CASCADE_UPDATEDEPS:-false}
   fi
 }
 
@@ -335,6 +350,7 @@ set_tag_locals_cascade_versioning () {
     # But we'll use 'alpha' to match update-merged.yml.
     default_value="alpha"
     new_tag_value="${EAPP_CASCADE_VERSIONING}"
+    delete_if=${EAPP_DELETE_CASCADE_VERSIONING:-false}
   fi
 }
 
