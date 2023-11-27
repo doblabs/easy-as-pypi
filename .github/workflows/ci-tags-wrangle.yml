@@ -17,11 +17,17 @@ on:
       inhibit-cascade:
         type: string
         required: false
+      delete-inhibit-cascade:
+        type: boolean
+        default: false
 
       # If tagged on any commit in current branch, don't do cascade.
       inhibit-forever:
         type: string
         required: false
+      delete-inhibit-forever:
+        type: boolean
+        default: false
 
       # *** Cascade-time tags
       #
@@ -33,6 +39,9 @@ on:
       cascade-updatedeps:
         type: string
         required: false
+      delete-cascade-updatedeps:
+        type: boolean
+        default: false
 
       # If tagged on HEAD, determines versioning increment this cascade.
       # - Use "skip" to not version, and also to not release any projects.
@@ -42,6 +51,9 @@ on:
         #       or '' to merely read the tag.
         type: string
         required: false
+      delete-cascade-versioning:
+        type: boolean
+        default: false
 
     # Maps workflow outputs to job outputs.
     # - SAVVY: Returns old/current values, before applying new values.
@@ -106,6 +118,10 @@ jobs:
           ./.github/bin/wrangle-tags
         env:
           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
+          EAPP_DELETE_INHIBIT_CASCADE: ${{ inputs.delete-inhibit-cascade }}
           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
+          EAPP_DELETE_INHIBIT_FOREVER: ${{ inputs.delete-inhibit-forever }}
           EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
+          EAPP_DELETE_CASCADE_UPDATEDEPS: ${{ inputs.delete-cascade-updatedeps }}
           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
+          EAPP_DELETE_CASCADE_VERSIONING: ${{ inputs.delete-cascade-versioning }}

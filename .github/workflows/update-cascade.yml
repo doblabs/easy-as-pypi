@@ -147,11 +147,7 @@ jobs:
     name: Remove (temporary) CI tags
     uses: ./.github/workflows/ci-tags-wrangle.yml
     with:
-      # USYNC: EAPP_CI_DELETE_KEYWORD="FALSE"
-      #   Use "FALSE" values to delete matching tags.
-      #   (A sad hack in lieu of adding more inputs.)
-      #
-      inhibit-cascade: "FALSE"
-      # LEAVE: inhibit-forever
-      cascade-updatedeps: "FALSE"
-      cascade-versioning: "FALSE"
+      delete-inhibit-cascade: true
+      delete-inhibit-forever: false
+      delete-cascade-updatedeps: true
+      delete-cascade-versioning: true
