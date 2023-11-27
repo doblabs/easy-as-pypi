@@ -28,7 +28,7 @@
 #
 
 EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
-EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS="ci-inhibit-cascade-always"
+EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
 
 EAPP_CI_TAG_CASCADE_LEAST="ci-cascade-least"
 EAPP_CI_TAG_CASCADE_ALPHA="ci-cascade-alpha"
@@ -174,7 +174,7 @@ set_tag_locals () {
 
   set_tag_locals_inhibit_cascade
 
-  set_tag_locals_inhibit_cascade_always
+  set_tag_locals_inhibit_forever
 
   set_tag_locals_cascade_least
 
@@ -221,13 +221,13 @@ set_tag_locals_inhibit_cascade () {
   fi
 }
 
-set_tag_locals_inhibit_cascade_always () {
-  # E.g., "ci-inhibit-cascade-always"
-  tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE_ALWAYS}"
+set_tag_locals_inhibit_forever () {
+  # E.g., "ci-inhibit-forever"
+  tag_name="${EAPP_CI_TAG_INHIBIT_FOREVER}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
-    out_name="old_inhibit_cascade_always"
+    out_name="old_inhibit_forever"
     tag_scope="branch"
-    new_tag_value="${EAPP_INHIBIT_CASCADE_ALWAYS}"
+    new_tag_value="${EAPP_INHIBIT_FOREVER}"
   fi
 }
 

@@ -19,7 +19,7 @@ on:
         required: false
 
       # If tagged on any commit in current branch, don't do cascade.
-      inhibit-cascade-always:
+      inhibit-forever:
         type: string
         required: false
 
@@ -53,9 +53,9 @@ on:
       old-inhibit-cascade:
         description: "The old ci-inhibit-cascade value"
         value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade }}
-      old-inhibit-cascade-always:
-        description: "The old ci-inhibit-cascade-always value"
-        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-cascade-always }}
+      old-inhibit-forever:
+        description: "The old ci-inhibit-forever value"
+        value: ${{ jobs.manage-ci-tags.outputs.old-inhibit-forever }}
       old-cascade-least:
         description: "The old ci-cascade-least value"
         value: ${{ jobs.manage-ci-tags.outputs.old-cascade-least }}
@@ -86,8 +86,8 @@ jobs:
       old-inhibit-cascade: "${{
         steps.manage-ci-tag.outputs.old_inhibit_cascade
       }}"
-      old-inhibit-cascade-always: "${{
-        steps.manage-ci-tag.outputs.old_inhibit_cascade_always
+      old-inhibit-forever: "${{
+        steps.manage-ci-tag.outputs.old_inhibit_forever
       }}"
       old-cascade-least: "${{
         steps.manage-ci-tag.outputs.old_cascade_least
@@ -126,7 +126,7 @@ jobs:
           ./.github/bin/wrangle-tags
         env:
           EAPP_INHIBIT_CASCADE: ${{ inputs.inhibit-cascade }}
-          EAPP_INHIBIT_CASCADE_ALWAYS: ${{ inputs.inhibit-cascade-always }}
+          EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
           EAPP_CASCADE_LEAST: ${{ inputs.ci-cascade-least }}
           EAPP_CASCADE_ALPHA: ${{ inputs.ci-cascade-alpha }}
           EAPP_CASCADE_PATCH: ${{ inputs.ci-cascade-patch }}
