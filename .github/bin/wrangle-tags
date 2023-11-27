@@ -77,6 +77,8 @@ EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 # The git-push remote, only used if $CI, so should always be 'origin'.
 EAPP_CI_REMOTE_NAME="${EAPP_CI_REMOTE_NAME:-origin}"
 
+# Optional special keyword, e.g., "FALSE", you could use to delete
+# tags, vs. using the EAPP_DELETE_* environs.
 EAPP_CI_DELETE_KEYWORD="${EAPP_CI_DELETE_KEYWORD}"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
