@@ -18,6 +18,7 @@ on:
     # This workflow looks for the following inputs:
     #
     #   inputs:
+    #     - cascade-updatedeps
     #     - cascade-versioning
 
   # Via GitHub Actions website button, from user
@@ -37,6 +38,11 @@ on:
         description: 'Start the cascade'
         type: boolean
         default: false
+
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: boolean
+        default: true
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -76,6 +82,10 @@ jobs:
     if: true
       && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
       && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
+      && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps == 'true'
+      && (github.event_name != 'repository_dispatch'
+          || github.event.client_payload.cascade-updatedeps == 'true')
+
     runs-on: ubuntu-latest
 
     steps:
@@ -163,6 +173,9 @@ jobs:
       }}
 
     with:
+      cascade-updatedeps: ${{
+        github.event_name == 'workflow_dispatch' && inputs.cascade-updatedeps
+        || github.event.client_payload.cascade-updatedeps == 'true' }}
       cascade-versioning: ${{
         github.event_name == 'workflow_dispatch' && inputs.cascade-versioning
         || github.event.client_payload.cascade-versioning }}
