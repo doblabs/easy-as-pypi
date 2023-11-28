@@ -59,6 +59,13 @@ PYPROJECT_DOC8_DIR ?= .pyproject-doc8
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+# Use a special pyproject.toml to install our deps from test.PyPI
+# and to include prereleases, so user can end-to-end test alphas.
+
+PYPROJECT_PRERELEASE_DIR ?= .pyproject-prerelease
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 # `make docs` docs/ subdir HTML target, e.g.,
 #   ./docs/_build/html/index.html
 DOCS_BUILDDIR ?= _build
@@ -504,6 +511,13 @@ _warn_unless_virtualenvwrapper:
 		echo; \
 	fi;
 .PHONY: _warn_unless_virtualenvwrapper
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+install-prerelease:
+	@. "$(MAKETASKS_SH)" && \
+		install_prerelease "$(PYPROJECT_PRERELEASE_DIR)" "$(EDITABLE_PJS)"
+.PHONY: install-prerelease
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 

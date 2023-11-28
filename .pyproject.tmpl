@@ -884,6 +884,13 @@ optional = true
 {%- endblock %}
 # ***
 
+# **** Pre-release wiring (used by `make install-prerelease`)
+
+[[tool.poetry.source]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+secondary = true
+
 # **** What RTD installs when it builds docs
 
 [tool.poetry.extras]
