@@ -290,6 +290,49 @@ make_editable () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+install_release () {
+  local PACKAGE_NAME="$1"
+  local VENV_ARGS="$2"
+
+	eval "$$($$(which pyenv) init -)"; \
+	pyenv shell --unset; \
+	\
+	project_dir="$$(pwd)"; \
+	workon_home="$${WORKON_HOME:-$${HOME}/.virtualenvs}"; \
+	mkdir -p "$${workon_home}"; \
+	cd "$${workon_home}"; \
+	if [ ! -d "$(PACKAGE_NAME)" ]; then \
+		python3 -m venv $(VENV_ARGS) "$(PACKAGE_NAME)"; \
+		echo "$${project_dir}" > "$(PACKAGE_NAME)/.project"; \
+	fi; \
+	. "$(PACKAGE_NAME)/bin/activate"; \
+	cd "$${project_dir}"; \
+	\
+	echo; \
+	echo "pip install -U pip setuptools"; \
+	pip install -U pip setuptools; \
+	\
+	echo; \
+	echo "pip install poetry"; \
+	pip install poetry; \
+	\
+	echo; \
+	echo "poetry self add 'poetry-dynamic-versioning[plugin]'"; \
+	poetry self add "poetry-dynamic-versioning[plugin]"; \
+	\
+	echo; \
+	echo "poetry install"; \
+	poetry install; \
+	\
+	echo; \
+	echo "Ready to rock:"; \
+	echo "  . $${workon_home}/$(PACKAGE_NAME)/bin/activate"; \
+	echo "Or if using virtualenvwrapper:"; \
+	echo "  workon $(PACKAGE_NAME)";
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
 install_prerelease () {
   local PYPROJECT_PRERELEASE_DIR="$1"
   local EDITABLE_PJS="$2"
