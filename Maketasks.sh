@@ -297,8 +297,8 @@ install_release () {
 	eval "$($(which pyenv) init -)"
 	pyenv shell --unset
 
-	project_dir="$(pwd)"
-	workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
+	local project_dir="$(pwd)"
+	local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
 	mkdir -p "${workon_home}"
 	cd "${workon_home}"
 	if [ ! -d "${PACKAGE_NAME}" ]; then
