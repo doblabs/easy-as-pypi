@@ -302,16 +302,16 @@ install_release () {
 poetry_install_to_venv () {
   local venv_name="$1"
   local venv_args="$2"
-  local workon_home="$3"
+  local venv_home="$3"
 
   eval "$($(which pyenv) init -)"
   pyenv shell --unset
 
   local project_dir="$(pwd)"
 
-  mkdir -p "${workon_home}"
+  mkdir -p "${venv_home}"
 
-  cd "${workon_home}"
+  cd "${venv_home}"
 
   if [ ! -d "${venv_name}" ]; then
     python3 -m venv ${venv_args} "${venv_name}"
@@ -341,7 +341,7 @@ poetry_install_to_venv () {
 
   echo
   echo "Ready to rock:"
-  echo "  . ${workon_home}/${venv_name}/bin/activate"
+  echo "  . ${venv_home}/${venv_name}/bin/activate"
   echo "Or if using virtualenvwrapper:"
   echo "  workon ${venv_name}"
 }
