@@ -202,10 +202,10 @@ jobs:
 
   # ***
 
-  update-cascade:
+  spread-updates:
     name: Run update & release cascade
 
-    uses: ./.github/workflows/update-cascade.yml
+    uses: ./.github/workflows/spread-updates.yml
     secrets: inherit
 
     needs: [pip-smoke-test, pipx-smoke-test]

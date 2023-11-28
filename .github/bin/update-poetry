@@ -47,7 +47,7 @@ poetry.lock}"
 UPDEPS_LABEL_DESC_POETRY_LOCK="${UPDEPS_LABEL_DESC_POETRY_LOCK:-\
 Pull requests that update poetry.lock}"
 
-# The 'ci-inhibit-cascade' label, if set, tells update-cascade.yml
+# The 'ci-inhibit-cascade' label, if set, tells spread-updates.yml
 # to not send the repo-dispatch downstream.
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"

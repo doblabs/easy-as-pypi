@@ -309,10 +309,10 @@ jobs:
 
   # If no new version/release, continue cascade; otherwise checks-versioned.yml
   # et al run, and cascade eventually continues from release-smoke-test.yml.
-  update-cascade:
+  spread-updates:
     name: "Cascade maybe"
 
-    uses: ./.github/workflows/update-cascade.yml
+    uses: ./.github/workflows/spread-updates.yml
     secrets: inherit
 
     needs: [verify-merged-pr, env-outputs]
