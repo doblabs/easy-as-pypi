@@ -827,8 +827,9 @@ setuptools_scm = ">=8.0.4"
 
 # - "Command-line YAML, XML, TOML processor -
 #    jq wrapper for YAML/XML/TOML documents"
-#   - For running bin/update-faithful more quickly
-#     (it can skip the temp venv).
+#   - For more quickly running bin/update-faithful,
+#     which uses `tomlq`, a YAML/XML/TOML jq wrapper,
+#     otherwise update-faithful creates a temp venv.
 #
 #   https://pypi.org/project/yq
 #   https://github.com/kislyuk/yq
