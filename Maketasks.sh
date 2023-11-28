@@ -294,48 +294,48 @@ install_release () {
   local PACKAGE_NAME="$1"
   local VENV_ARGS="$2"
 
-	eval "$($(which pyenv) init -)"
-	pyenv shell --unset
+  eval "$($(which pyenv) init -)"
+  pyenv shell --unset
 
-	local project_dir="$(pwd)"
+  local project_dir="$(pwd)"
 
-	local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
+  local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
 
-	mkdir -p "${workon_home}"
+  mkdir -p "${workon_home}"
 
-	cd "${workon_home}"
+  cd "${workon_home}"
 
-	if [ ! -d "${PACKAGE_NAME}" ]; then
-		python3 -m venv ${VENV_ARGS} "${PACKAGE_NAME}"
+  if [ ! -d "${PACKAGE_NAME}" ]; then
+    python3 -m venv ${VENV_ARGS} "${PACKAGE_NAME}"
 
-		echo "${project_dir}" > "${PACKAGE_NAME}/.project"
-	fi
+    echo "${project_dir}" > "${PACKAGE_NAME}/.project"
+  fi
 
-	. "${PACKAGE_NAME}/bin/activate"
+  . "${PACKAGE_NAME}/bin/activate"
 
-	cd "${project_dir}"
+  cd "${project_dir}"
 
-	echo
-	echo "pip install -U pip setuptools"
-	pip install -U pip setuptools
+  echo
+  echo "pip install -U pip setuptools"
+  pip install -U pip setuptools
 
-	echo
-	echo "pip install poetry"
-	pip install poetry
+  echo
+  echo "pip install poetry"
+  pip install poetry
 
-	echo
-	echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
-	poetry self add "poetry-dynamic-versioning[plugin]"
+  echo
+  echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
+  poetry self add "poetry-dynamic-versioning[plugin]"
 
-	echo
-	echo "poetry install"
-	poetry install
+  echo
+  echo "poetry install"
+  poetry install
 
-	echo
-	echo "Ready to rock:"
-	echo "  . ${workon_home}/${PACKAGE_NAME}/bin/activate"
-	echo "Or if using virtualenvwrapper:"
-	echo "  workon ${PACKAGE_NAME}"
+  echo
+  echo "Ready to rock:"
+  echo "  . ${workon_home}/${PACKAGE_NAME}/bin/activate"
+  echo "Or if using virtualenvwrapper:"
+  echo "  workon ${PACKAGE_NAME}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
