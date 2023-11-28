@@ -300,7 +300,7 @@ install_release () {
 }
 
 poetry_install_to_venv () {
-  local PACKAGE_NAME="$1"
+  local venv_name="$1"
   local VENV_ARGS="$2"
   local workon_home="$3"
 
@@ -313,13 +313,13 @@ poetry_install_to_venv () {
 
   cd "${workon_home}"
 
-  if [ ! -d "${PACKAGE_NAME}" ]; then
-    python3 -m venv ${VENV_ARGS} "${PACKAGE_NAME}"
+  if [ ! -d "${venv_name}" ]; then
+    python3 -m venv ${VENV_ARGS} "${venv_name}"
 
-    echo "${project_dir}" > "${PACKAGE_NAME}/.project"
+    echo "${project_dir}" > "${venv_name}/.project"
   fi
 
-  . "${PACKAGE_NAME}/bin/activate"
+  . "${venv_name}/bin/activate"
 
   cd "${project_dir}"
 
@@ -341,9 +341,9 @@ poetry_install_to_venv () {
 
   echo
   echo "Ready to rock:"
-  echo "  . ${workon_home}/${PACKAGE_NAME}/bin/activate"
+  echo "  . ${workon_home}/${venv_name}/bin/activate"
   echo "Or if using virtualenvwrapper:"
-  echo "  workon ${PACKAGE_NAME}"
+  echo "  workon ${venv_name}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
