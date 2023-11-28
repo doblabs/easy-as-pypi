@@ -301,7 +301,7 @@ install_release () {
 
 poetry_install_to_venv () {
   local venv_name="$1"
-  local VENV_ARGS="$2"
+  local venv_args="$2"
   local workon_home="$3"
 
   eval "$($(which pyenv) init -)"
@@ -314,7 +314,7 @@ poetry_install_to_venv () {
   cd "${workon_home}"
 
   if [ ! -d "${venv_name}" ]; then
-    python3 -m venv ${VENV_ARGS} "${venv_name}"
+    python3 -m venv ${venv_args} "${venv_name}"
 
     echo "${project_dir}" > "${venv_name}/.project"
   fi
