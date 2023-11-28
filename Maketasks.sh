@@ -294,12 +294,20 @@ install_release () {
   local PACKAGE_NAME="$1"
   local VENV_ARGS="$2"
 
+  local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
+
+  poetry_install_to_venv "${PACKAGE_NAME}" "${VENV_ARGS}" "${workon_home}"
+}
+
+poetry_install_to_venv () {
+  local PACKAGE_NAME="$1"
+  local VENV_ARGS="$2"
+  local workon_home="$3"
+
   eval "$($(which pyenv) init -)"
   pyenv shell --unset
 
   local project_dir="$(pwd)"
-
-  local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
 
   mkdir -p "${workon_home}"
 
