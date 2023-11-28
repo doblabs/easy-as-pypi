@@ -298,14 +298,21 @@ install_release () {
 	pyenv shell --unset
 
 	local project_dir="$(pwd)"
+
 	local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
+
 	mkdir -p "${workon_home}"
+
 	cd "${workon_home}"
+
 	if [ ! -d "${PACKAGE_NAME}" ]; then
 		python3 -m venv ${VENV_ARGS} "${PACKAGE_NAME}"
+
 		echo "${project_dir}" > "${PACKAGE_NAME}/.project"
 	fi
+
 	. "${PACKAGE_NAME}/bin/activate"
+
 	cd "${project_dir}"
 
 	echo
