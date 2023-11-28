@@ -301,11 +301,11 @@ install_release () {
 	workon_home="$${WORKON_HOME:-$${HOME}/.virtualenvs}"
 	mkdir -p "$${workon_home}"
 	cd "$${workon_home}"
-	if [ ! -d "$(PACKAGE_NAME)" ]; then
-		python3 -m venv $(VENV_ARGS) "$(PACKAGE_NAME)"
-		echo "$${project_dir}" > "$(PACKAGE_NAME)/.project"
+	if [ ! -d "${PACKAGE_NAME}" ]; then
+		python3 -m venv ${VENV_ARGS} "${PACKAGE_NAME}"
+		echo "$${project_dir}" > "${PACKAGE_NAME}/.project"
 	fi
-	. "$(PACKAGE_NAME)/bin/activate"
+	. "${PACKAGE_NAME}/bin/activate"
 	cd "$${project_dir}"
 
 	echo
@@ -326,9 +326,9 @@ install_release () {
 
 	echo
 	echo "Ready to rock:"
-	echo "  . $${workon_home}/$(PACKAGE_NAME)/bin/activate"
+	echo "  . $${workon_home}/${PACKAGE_NAME}/bin/activate"
 	echo "Or if using virtualenvwrapper:"
-	echo "  workon $(PACKAGE_NAME)"
+	echo "  workon ${PACKAGE_NAME}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
