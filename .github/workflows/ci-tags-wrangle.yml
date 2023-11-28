@@ -33,7 +33,7 @@ on:
       #
       # These tags are set per-project when they start (update-deps.yml), and
       # cleared when they pass along the cascading stick (by release-smoke-test.yml,
-      # after calling update-cascade.yml).
+      # after calling spread-updates.yml).
 
       # If tagged on HEAD and not "true", skip bin/update-poetry this cascade.
       cascade-updatedeps:

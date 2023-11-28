@@ -33,9 +33,9 @@
 - When the smoke test completes, it notifies downstream project(s),
   starting a *release cascade*:
 
-    [.github/workflows/update-cascade.yml](https://github.com/doblabs/easy-as-pypi/blob/release/.github/workflows/update-cascade.yml)
+    [.github/workflows/spread-updates.yml](https://github.com/doblabs/easy-as-pypi/blob/release/.github/workflows/spread-updates.yml)
 
-    [//]: # (~/.kit/py/easy-as-pypi/.github/workflows/update-cascade.yml)
+    [//]: # (~/.kit/py/easy-as-pypi/.github/workflows/spread-updates.yml)
 
 - Each downstream project will update its dependencies to start using the
   latest version of the upstream project. And they'll each use a PR to run
@@ -83,7 +83,7 @@ Many of the workflows can be started manually
 
 - You can send a dispatch to the closest downstream repo(s)
   using the *Release Cascade — Dispatch* workflow
-  ([.github/workflows/update-cascade.yml](https://github.com/doblabs/easy-as-pypi/blob/release/.github/workflows/update-cascade.yml)).
+  ([.github/workflows/spread-updates.yml](https://github.com/doblabs/easy-as-pypi/blob/release/.github/workflows/spread-updates.yml)).
 
   This starts the release cascade, but skips the current
   project and begins downstream instead.

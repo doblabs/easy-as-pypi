@@ -437,7 +437,10 @@ update_faithful_files_excluding_pyproject_toml () {
   update-faithful-file ".github/workflows/release-github.yml"
   update-faithful-file ".github/workflows/release-pypi.yml"
   update-faithful-file ".github/workflows/release-smoke-test.yml"
-  update-faithful-file ".github/workflows/update-cascade.yml"
+  update-faithful-file ".github/workflows/spread-updates.yml"
+  # ISOFF/2023-11-28: Rename: update-cascade.yml → spread-updates.yml
+  # - LATER: Remove this remove-faithful-file after propagated.
+  remove-faithful-file ".github/workflows/update-cascade.yml"
   update-faithful-file ".github/workflows/update-deps.yml"
   update-faithful-file ".github/workflows/update-merged.yml"
 

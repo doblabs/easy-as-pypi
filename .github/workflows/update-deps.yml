@@ -11,7 +11,7 @@ run-name: 👣 — Cascade — 2.) Update deps ${{
   github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
-  # Via update-cascade.yml from upstream project
+  # Via spread-updates.yml from upstream project
   repository_dispatch:
     types: [update-deps]
     # Inputs are not defined, but are part of github.event.client_payload.
