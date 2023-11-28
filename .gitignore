@@ -37,6 +37,7 @@
 __pycache__/
 
 # Editable pyproject.toml and .venv-<project> — `make develop`.
+# - USYNC: EDITABLE_DIR ?= .pyproject-editable
 /.pyproject-editable/
 .venv*/
 
