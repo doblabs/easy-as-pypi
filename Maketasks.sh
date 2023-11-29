@@ -301,7 +301,7 @@ install_release () {
 
 poetry_install_to_venv () {
   local venv_name="$1"
-  local venv_home="$2"
+  local venv_home="${2:-.}"
   local venv_args="$3"
   local pyproject_dir="${4:-.}"
 
