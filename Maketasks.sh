@@ -324,17 +324,12 @@ poetry_install_to_venv () {
 
   cd "${project_dir}"
 
-  echo
-  echo "pip install -U pip setuptools"
-  pip install -U pip setuptools
+  # ***
 
-  echo
-  echo "pip install poetry"
-  pip install poetry
+  local verbose=true
 
-  echo
-  echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
-  poetry self add "poetry-dynamic-versioning[plugin]"
+  _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin \
+    ${verbose}
 
   # ***
 
@@ -542,8 +537,20 @@ _venv_manage_and_activate () {
 }
 
 _venv_install_pip_setuptools_poetry_and_poetry_dynamic_versioning_plugin () {
+  local verbose="${1:-false}"
+
+  _echo () { ${verbose} || return 0; echo "$@"; }
+
+  _echo
+  _echo "pip install -U pip setuptools"
   pip install -U pip setuptools
+
+  _echo
+  _echo "pip install poetry"
   pip install poetry
+
+  _echo
+  _echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
   poetry self add "poetry-dynamic-versioning[plugin]"
 }
 
