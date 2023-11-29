@@ -90,7 +90,7 @@ UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 # ***
 
 # Optional: Customizable Git and GitHub message.
-UPDEPS_COMMIT_MESSAGE="${UPDEPS_COMMIT_MESSAGE:-\
+UPDEPS_COMMIT_MESSAGE_NORMAL="${UPDEPS_COMMIT_MESSAGE_NORMAL:-\
 Build: Deps: Update poetry.lock [update-deps cascade]}"
 UPDEPS_PR_TITLE="${UPDEPS_PR_TITLE:-Build: Bump poetry.lock (bump all)}"
 UPDEPS_PR_BODY="${UPDEPS_PR_BODY:-Cascading release}"
@@ -257,7 +257,7 @@ poetry_update_commit_changes () {
 
   print_prog "git commit... "
 
-  git commit -q -m "${UPDEPS_COMMIT_MESSAGE}"
+  git commit -q -m "${UPDEPS_COMMIT_MESSAGE_NORMAL}"
 
   print_prog "✓\n"
 }
