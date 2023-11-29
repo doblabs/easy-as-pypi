@@ -387,10 +387,26 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-        if: env.PRERELEASE == 'true'
+        # Always publish to test.PyPI, so that "our" downstream deps always
+        # get the latest package version when they use the test.PyPI source
+        # (which is what happens on a pre-release cascade).
+        #
+        # - Note that smoke-test only checks the release indicated by
+        #   env.PRERELEASE, because that's the only source that matters.
+        #
+        #   - E.g., we release normals to both test.PyPI and to PyPI, but
+        #     smoke-test only blocks repository_dispatch until the PyPI
+        #     package is alive, because that's all that downstreams need.
+        #
+        #     Likewise, because we release alphas only to test.PyPI,
+        #     smoke-test only blocks repository_dispatch until the
+        #     test.PyPI package is alive.
+        if: true
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        # Unlike test.PyPI, only publish normal releases to PyPI proper,
+        # never alphas.
         if: env.PRERELEASE == 'false'
 
   # ***
