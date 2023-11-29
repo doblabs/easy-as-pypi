@@ -460,12 +460,12 @@ jobs:
       #   virtualenv: error: argument --prompt: expected one argument
       - name: Install dependencies
         # E.g.,
-        #   run: poetry install -C ".pyproject-doc8/" --no-interaction --no-root --with dev
-        run: poetry install -C "${{ env.PYPROJECT_DOC8_DIR }}" --no-interaction --no-root --with dev
+        #   run: poetry -C ".pyproject-doc8/" install --no-interaction --no-root --with dev
+        run: poetry -C "${{ env.PYPROJECT_DOC8_DIR }}" install --no-interaction --no-root --with dev
         # shell: bash
 
       - name: Run doc8
-        run: poetry run -C "${{ env.PYPROJECT_DOC8_DIR }}" python -m doc8 *.rst docs/
+        run: poetry -C "${{ env.PYPROJECT_DOC8_DIR }}" run python -m doc8 *.rst docs/
 
   # *** DOCS
 
