@@ -22,10 +22,10 @@ make_develop () {
 
     # MAYBE: Also move pip installs herein and skip if VENV_CREATED already?
     #
-    #   _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin
+    #   _install_poetry_and_plugins
   fi
 
-  _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin
+  _install_poetry_and_plugins
 
   # Don't assume user's pyproject.toml's poetry.group's match ours.
   local install_with="${PO_INSTALL_WITH}"
@@ -100,7 +100,7 @@ make_doc8_poetry () {
   # local VENV_CREATED=false
   _venv_manage_and_activate "${VENV_DOC8}" "" "" ""
 
-  _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin
+  _install_poetry_and_plugins
 
   poetry install --no-interaction --no-root --with dev
 
@@ -141,7 +141,7 @@ make_docs_html () {
 
   # E.g., `VENV_FORCE=true make docs`.
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
-    _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin
+    _install_poetry_and_plugins
 
     local install_with="--with docs"
 
@@ -314,7 +314,7 @@ poetry_install_to_venv () {
 
   local verbose=true
 
-  _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin ${verbose}
+  _install_poetry_and_plugins ${verbose}
 
   # ***
 
@@ -549,7 +549,7 @@ _venv_create_and_metaize () {
   fi
 }
 
-_pip_install_poetry_and_poetry_add_dynamic_versioning_plugin () {
+_install_poetry_and_plugins () {
   local verbose="${1:-false}"
 
   _echo () { ${verbose} || return 0; echo "$@"; }
