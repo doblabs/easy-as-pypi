@@ -319,8 +319,8 @@ poetry_install_to_venv () {
   # ***
 
   echo
-  echo "poetry install -C ${pyproject_dir}"
-  poetry install -C "${pyproject_dir}"
+  echo "poetry -C ${pyproject_dir}" install
+  poetry -C "${pyproject_dir}" install
 
   # ***
 
