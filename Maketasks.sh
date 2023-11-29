@@ -264,7 +264,8 @@ make_editable () {
     if [ -d "${pyprojs_full}/${project}" ]; then
       concat_pjs="${concat_pjs}${project}|"
     else
-      echo "ALERT: Missing project: ${pyprojs_full}/${project}"
+      # Apparently this is not a dire failure.
+      >&2 echo "ALERT: Missing project: ${pyprojs_full}/${project}"
     fi
   done
 
@@ -530,7 +531,7 @@ gvim_find_first_running_gvim_servername () {
   # ***
 
   if [ ${n_gvims} -gt 1 ] && [ -z "${GVIM_OPEN_SERVERNAME+x}" ]; then
-    >&2 echo "Found ${n_gvims} gvim and picked “${servername}”"
+    >&2 echo "ALERT: Found ${n_gvims} gvim and picked “${servername}”"
     >&2 echo "- Use GVIM_OPEN_SERVERNAME to specify which gvim to always pick,"
     >&2 echo "  or \`GVIM_OPEN_SERVERNAME=\` in your shell inhibits this message."
   fi
