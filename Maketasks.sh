@@ -303,12 +303,16 @@ poetry_install_to_venv () {
   local venv_name="$1"
   local venv_home="${2:-.}"
   local venv_args="$3"
-  local pyproject_dir="${4:-.}"
+  local venv_default="$4"
+  local pyproject_dir="${5:-.}"
 
   eval "$($(which pyenv) init -)"
+
+  # Ensure make-install uses default Python version.
   pyenv shell --unset
 
-  _venv_manage_and_activate "${venv_name}" "${venv_args}" "${venv_home}" ""
+  _venv_manage_and_activate \
+    "${venv_name}" "${venv_args}" "${venv_home}" "${venv_default}"
 
   # ***
 
@@ -334,10 +338,56 @@ poetry_install_to_venv () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 install_prerelease () {
+  local VENV_NAME_PRERELEASE="$1"
+  local VENV_ARGS="$2"
+  local VENV_NAME="$3"
+  local PYPROJECT_PRERELEASE_DIR="$4"
+  local EDITABLE_PJS="$5"
+
+  prepare_poetry_prerelease "${PYPROJECT_PRERELEASE_DIR}" "${EDITABLE_PJS}"
+
+  local venv_name="${VENV_NAME_PRERELEASE}"
+  # Prefer local venv, especially because venv space adds up, and users
+  # likely to see all the .venv-*'s in the project directory than to
+  # remember to clean out ~/.virtualenvs occasionally.
+  local venv_home="${VENV_NAME_PRERELEASE:-${WORKON_HOME:-${HOME}/.virtualenvs}}"
+  local venv_default="${VENV_NAME}"
+
+  poetry_install_to_venv \
+    "${venv_name}" "${venv_home}" "${VENV_ARGS}" "${venv_default}" \
+    "${PYPROJECT_PRERELEASE_DIR}"
+}
+
+prepare_poetry_prerelease () {
   local PYPROJECT_PRERELEASE_DIR="$1"
   local EDITABLE_PJS="$2"
 
+  # This fcn clobbery (of <dir>/pyproject.toml and <dir>/poetry.lock).
+
+  # Check pre-release dir not project dir, so we don't clobber canon.
+  if [ "." -ef "${PYPROJECT_PRERELEASE_DIR}" ]; then
+    # This is a dev error :wink:.
+    >&2 echo "ERROR: prepare-poetry-prerelease requires offshore pre-re dir"
+
+    exit 1
+  fi
+
+  # Clobber <dir>/pyproject.toml
   make_pyproject_prerelease "${PYPROJECT_PRERELEASE_DIR}" "${EDITABLE_PJS}"
+
+  # Clobber <dir>/poetry.lock
+  command cp "poetry.lock" "${PYPROJECT_PRERELEASE_DIR}/poetry.lock"
+
+  # Update poetry.lock to use "our" deps' versions from test.PyPI.
+  # - Here's how "priority" from [[tool.poetry.source]] works:
+  #   - Poetry uses the first package it finds from any source,
+  #     whether priority=supplemental (search multiple sources),
+  #     or whether priority=explicit (to probe a single source).
+  #   - There's no option for Poetry to use the highest-versioned
+  #     package it finds from *any* source.
+  # - So EAPP publishes *every* release, pre-release and normal,
+  #   to test.PyPI, ensuring this poetry-update uses our latests.
+  poetry -C "${PYPROJECT_PRERELEASE_DIR}" update --lock ${EDITABLE_PJS}
 }
 
 make_pyproject_prerelease () {

@@ -64,6 +64,8 @@ PYPROJECT_DOC8_DIR ?= .pyproject-doc8
 
 PYPROJECT_PRERELEASE_DIR ?= .pyproject-prerelease
 
+VENV_NAME_PRERELEASE ?= .venv-alpha
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # `make docs` docs/ subdir HTML target, e.g.,
@@ -483,8 +485,20 @@ _warn_unless_virtualenvwrapper:
 
 install-prerelease:
 	@. "$(MAKETASKS_SH)" && \
-		install_prerelease "$(PYPROJECT_PRERELEASE_DIR)" "$(EDITABLE_PJS)"
+		install_prerelease \
+			"$(VENV_NAME_PRERELEASE)" \
+			"$(VENV_ARGS)" \
+			"$(VENV_NAME)" \
+			"$(PYPROJECT_PRERELEASE_DIR)" \
+			"$(EDITABLE_PJS)"
 .PHONY: install-prerelease
+
+prepare-poetry-prerelease:
+	@. "$(MAKETASKS_SH)" && \
+		prepare_poetry_prerelease \
+			"$(PYPROJECT_PRERELEASE_DIR)" \
+			"$(EDITABLE_PJS)"
+.PHONY: prepare-poetry-prerelease
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
