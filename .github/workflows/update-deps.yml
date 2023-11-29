@@ -142,6 +142,7 @@ jobs:
           UPDEPS_LABEL_VERSIONING_PART: ${{
             github.event_name == 'workflow_dispatch' && inputs.bump-part
             || github.event.client_payload.cascade-versioning }}
+          UPDEPS_COMMIT_MESSAGE_NORMAL: 'Build: Deps: Update poetry.lock [update-deps.yml]'
           # DEVXX: Mock poetry-update w/ UPDEPS_FAKE_UPDATE=true to test/dev faster.
           UPDEPS_FAKE_UPDATE: false
 
