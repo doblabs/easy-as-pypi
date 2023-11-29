@@ -13,13 +13,6 @@ make_develop () {
   local EDITABLE_DIR="$4"
   local EDITABLE_PJS="$5"
 
-  _pyenv_prepare_shell "${VENV_PYVER}"
-
-  # IGNOR: This fcn. sets VENV_CREATED
-  _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "" "${VENV_NAME}"
-
-  _install_poetry_and_plugins
-
   # Don't assume user's pyproject.toml's poetry.group's match ours.
   local install_with="${PO_INSTALL_WITH}"
   if [ -z "${install_with}" ]; then
@@ -37,7 +30,12 @@ make_develop () {
     install_with="$(add_with_group_if_defined "${install_with}" "project_extras")"
   fi
 
-  # ***
+  _pyenv_prepare_shell "${VENV_PYVER}"
+
+  # IGNOR: This fcn. sets VENV_CREATED
+  _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "" "${VENV_NAME}"
+
+  _install_poetry_and_plugins
 
   # Assumptions:
   # - For new projects, that Caller called `make install`
