@@ -15,7 +15,7 @@ make_develop () {
   _pyenv_prepare_shell "${VENV_PYVER}"
 
   local VENV_CREATED=false
-  _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "${VENV_NAME}"
+  _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "" "${VENV_NAME}"
 
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
     command rm -f ${EDITABLE_DIR}/poetry.lock
@@ -73,7 +73,7 @@ make_doc8_pip () {
   _pyenv_prepare_shell "${VENV_PYVER}"
 
   # local VENV_CREATED=false
-  _venv_manage_and_activate "${VENV_DOC8}" "" "${VENV_NAME}"
+  _venv_manage_and_activate "${VENV_DOC8}" "" "" "${VENV_NAME}"
 
   python -c "import doc8" 2> /dev/null \
     || pip install -U pip "doc8>=1.1.1"
@@ -98,7 +98,7 @@ make_doc8_poetry () {
   local VENV_DOC8=".venv"
 
   # local VENV_CREATED=false
-  _venv_manage_and_activate "${VENV_DOC8}" "" ""
+  _venv_manage_and_activate "${VENV_DOC8}" "" "" ""
 
   _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin
 
@@ -137,7 +137,7 @@ make_docs_html () {
   _pyenv_prepare_shell "${VENV_PYVER}"
 
   local VENV_CREATED=false
-  _venv_manage_and_activate "${VENV_DOCS}" "" "${VENV_NAME}"
+  _venv_manage_and_activate "${VENV_DOCS}" "" "" "${VENV_NAME}"
 
   # E.g., `VENV_FORCE=true make docs`.
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
@@ -308,21 +308,7 @@ poetry_install_to_venv () {
   eval "$($(which pyenv) init -)"
   pyenv shell --unset
 
-  local project_dir="$(pwd)"
-
-  mkdir -p "${venv_home}"
-
-  cd "${venv_home}"
-
-  if [ ! -d "${venv_name}" ]; then
-    python3 -m venv ${venv_args} "${venv_name}"
-
-    echo "${project_dir}" > "${venv_name}/.project"
-  fi
-
-  . "${venv_name}/bin/activate"
-
-  cd "${project_dir}"
+  _venv_manage_and_activate "${venv_name}" "${venv_args}" "${venv_home}" ""
 
   # ***
 
@@ -519,6 +505,23 @@ _pyenv_prepare_shell () {
 _venv_manage_and_activate () {
   local venv_name="$1"
   local venv_args="$2"
+  local venv_home="${3:-.}"
+  local venv_default="$4"
+
+  mkdir -p "${venv_home}"
+
+  (
+    cd "${venv_home}"
+
+    _venv_create_and_metaize "${venv_name}" "${venv_args}" "${venv_default}"
+  )
+
+  . "${venv_home}/${venv_name}/bin/activate"
+}
+
+_venv_create_and_metaize () {
+  local venv_name="$1"
+  local venv_args="$2"
   local venv_default="$3"
 
   if [ ! -d "${venv_name}" ]; then
@@ -531,8 +534,6 @@ _venv_manage_and_activate () {
       touch "${venv_default}/bin/activate"
     fi
   fi
-
-  . "${venv_name}/bin/activate"
 }
 
 _pip_install_poetry_and_poetry_add_dynamic_versioning_plugin () {
