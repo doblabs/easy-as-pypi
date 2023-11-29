@@ -508,12 +508,16 @@ _venv_manage_and_activate () {
   local venv_home="${3:-.}"
   local venv_default="$4"
 
+  # Assumes caller calls us from project root.
+  local project_dir="$(pwd)"
+
   mkdir -p "${venv_home}"
 
   (
     cd "${venv_home}"
 
-    _venv_create_and_metaize "${venv_name}" "${venv_args}" "${venv_default}"
+    _venv_create_and_metaize \
+      "${venv_name}" "${venv_args}" "${venv_default}" "${project_dir}"
   )
 
   . "${venv_home}/${venv_name}/bin/activate"
@@ -523,14 +527,23 @@ _venv_create_and_metaize () {
   local venv_name="$1"
   local venv_args="$2"
   local venv_default="$3"
+  local project_dir="$4"
 
   if [ ! -d "${venv_name}" ]; then
     python3 -m venv ${venv_args} "${venv_name}"
 
     VENV_CREATED=true
 
+    # Set crumb used by `cdproject` command.
+    # - USYNC: VIRTUALENVWRAPPER_PROJECT_FILENAME=".project"
+    # - CXREF: https://github.com/landonb/virtualenvwrapper
+    #   https://github.com/python-virtualenvwrapper/virtualenvwrapper
+    echo "${project_dir}" > "${venv_name}/.project"
+
     if [ -d "${venv_default}" ]; then
       # So that bare `workon` picks the `make develop` virtualenv.
+      # - CXREF: https://github.com/landonb/virtualenvwrapper
+      #   (Unique to my fork)
       touch "${venv_default}/bin/activate"
     fi
   fi
