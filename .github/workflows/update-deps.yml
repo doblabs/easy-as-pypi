@@ -117,11 +117,12 @@ jobs:
 
       - name: Run bin/update-poetry
         id: run-update-poetry
-        # Run poetry-update.
         run: |
           env | grep -e "^UPDEPS_"
 
-          new_pr_num="$(./.github/bin/update-poetry)"
+          new_pr_num="$(
+            ./.github/bin/update-poetry
+          )"
 
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
