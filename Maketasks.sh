@@ -29,7 +29,7 @@ make_develop () {
 
   # Don't assume user's pyproject.toml's poetry.group's match ours.
   local install_with="${PO_INSTALL_WITH}"
-  if test -z "${install_with}"; then
+  if [ -z "${install_with}" ]; then
     # Specific to EAPP's pyproject.toml, and *many* of its followers
     # (but not all).
     install_with="--with dist,i18n,lint,test,docstyle,docs,extras"
