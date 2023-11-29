@@ -594,8 +594,6 @@ _venv_create_and_metaize () {
 _install_poetry_and_plugins () {
   local verbose="${1:-false}"
 
-  _echo () { ${verbose} || return 0; echo "$@"; }
-
   _echo
   _echo "pip install -U pip setuptools"
   pip install -U pip setuptools
@@ -607,6 +605,15 @@ _install_poetry_and_plugins () {
   _echo
   _echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
   poetry self add "poetry-dynamic-versioning[plugin]"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+_echo () {
+  ${verbose} \
+    || return 0
+
+  echo "$@"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
