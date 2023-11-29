@@ -296,13 +296,13 @@ install_release () {
 
   local workon_home="${WORKON_HOME:-${HOME}/.virtualenvs}"
 
-  poetry_install_to_venv "${PACKAGE_NAME}" "${VENV_ARGS}" "${workon_home}"
+  poetry_install_to_venv "${PACKAGE_NAME}" "${workon_home}" "${VENV_ARGS}"
 }
 
 poetry_install_to_venv () {
   local venv_name="$1"
-  local venv_args="$2"
-  local venv_home="$3"
+  local venv_home="$2"
+  local venv_args="$3"
 
   eval "$($(which pyenv) init -)"
   pyenv shell --unset
