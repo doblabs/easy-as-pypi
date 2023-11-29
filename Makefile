@@ -535,7 +535,11 @@ ifndef EAPP_MAKEFILE_DEVELOP_DEFINED
 
 develop: editables editable
 	@. "$(MAKETASKS_SH)" && \
-		make_develop "$(VENV_NAME)" "$(VENV_PYVER)" "$(VENV_ARGS)" "$(EDITABLE_DIR)"
+		make_develop \
+			"$(VENV_NAME)" \
+			"$(VENV_PYVER)" \
+			"$(VENV_ARGS)" \
+			"$(EDITABLE_DIR)"
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop
