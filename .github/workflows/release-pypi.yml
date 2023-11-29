@@ -376,9 +376,13 @@ jobs:
       - name: Inspect dist/
         run: echo && echo dist/ && ls -la dist/
 
-      # https://github.com/marketplace/actions/pypi-publish
-      # https://docs.pypi.org/trusted-publishers/using-a-publisher/
-      # https://github.com/pypa/gh-action-pypi-publish
+      # ***
+
+      # REFER:
+      #   https://github.com/marketplace/actions/pypi-publish
+      #   https://docs.pypi.org/trusted-publishers/using-a-publisher/
+      #   https://github.com/pypa/gh-action-pypi-publish
+
       - name: Publish package distributions to test.PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
