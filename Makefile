@@ -553,7 +553,8 @@ develop: editables editable
 			"$(VENV_NAME)" \
 			"$(VENV_PYVER)" \
 			"$(VENV_ARGS)" \
-			"$(EDITABLE_DIR)"
+			"$(EDITABLE_DIR)" \
+			"$(EDITABLE_PJS)"
 	@echo
 	@echo "$(VENV_NAME) is ready — if \`workon\` is installed, run that"
 .PHONY: develop

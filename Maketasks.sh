@@ -11,19 +11,12 @@ make_develop () {
   local VENV_PYVER="$2"
   local VENV_ARGS="$3"
   local EDITABLE_DIR="$4"
+  local EDITABLE_PJS="$5"
 
   _pyenv_prepare_shell "${VENV_PYVER}"
 
-  local VENV_CREATED=false
+  # IGNOR: This fcn. sets VENV_CREATED
   _venv_manage_and_activate "${VENV_NAME}" "${VENV_ARGS}" "" "${VENV_NAME}"
-
-  if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
-    command rm -f ${EDITABLE_DIR}/poetry.lock
-
-    # MAYBE: Also move pip installs herein and skip if VENV_CREATED already?
-    #
-    #   _install_poetry_and_plugins
-  fi
 
   _install_poetry_and_plugins
 
@@ -46,11 +39,28 @@ make_develop () {
 
   # ***
 
+  # Assumptions:
+  # - For new projects, that Caller called `make install`
+  #   to generate poetry.lock, and committed the file.
+  # - For new clones, that Caller called `make develop`
+  #   to copy and modify <dir>/pyproject.toml)
+  #
+  # Here we copy the poetry.lock from `make install` (which
+  # has all the pinned versions that end users use), and then
+  # update solely "our" deps to use the local sources instead.
 
+  # Clobber <dir>/poetry.lock with release copy
+  command cp "poetry.lock" "${EDITABLE_DIR}/poetry.lock"
 
-  poetry -C ${EDITABLE_DIR} lock
+  # Convert "our" deps in poetry.lock to local paths
+  _echo
+  _echo "poetry -C ${EDITABLE_DIR} update --lock ${EDITABLE_PJS}"
 
+  poetry -C "${EDITABLE_DIR}" update --lock ${EDITABLE_PJS}
 
+  # Install to venv using *local* ("editable") paths for "our" deps
+  _echo
+  _echo "poetry -C ${EDITABLE_DIR} install ${install_with}"
 
   poetry -C ${EDITABLE_DIR} install ${install_with}
 }
@@ -64,7 +74,7 @@ make_doc8_pip () {
 
   _pyenv_prepare_shell "${VENV_PYVER}"
 
-  # local VENV_CREATED=false
+  # IGNOR: This fcn. sets VENV_CREATED
   _venv_manage_and_activate "${VENV_DOC8}" "" "" "${VENV_NAME}"
 
   python -c "import doc8" 2> /dev/null \
@@ -89,7 +99,7 @@ make_doc8_poetry () {
 
   local VENV_DOC8=".venv"
 
-  # local VENV_CREATED=false
+  # IGNOR: This fcn. sets VENV_CREATED
   _venv_manage_and_activate "${VENV_DOC8}" "" "" ""
 
   _install_poetry_and_plugins
@@ -132,6 +142,7 @@ make_docs_html () {
   _venv_manage_and_activate "${VENV_DOCS}" "" "" "${VENV_NAME}"
 
   # E.g., `VENV_FORCE=true make docs`.
+  # - SAVVY/2023-11-29: Only VENV_FORCE usage. (Prev. used by make-develop.)
   if ${VENV_CREATED} || ${VENV_FORCE:-false} ; then
     _install_poetry_and_plugins
 
@@ -303,6 +314,7 @@ poetry_install_to_venv () {
   # Ensure make-install uses default Python version.
   pyenv shell --unset
 
+  # IGNOR: This fcn. sets VENV_CREATED
   _venv_manage_and_activate \
     "${venv_name}" "${venv_args}" "${venv_home}" "${venv_default}"
 
