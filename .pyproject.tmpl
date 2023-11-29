@@ -886,10 +886,25 @@ optional = true
 
 # **** Pre-release wiring (used by `make install-prerelease`)
 
+# REFER:
+# https://python-poetry.org/docs/repositories/#installing-from-private-package-sources
 [[tool.poetry.source]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"
-secondary = true
+# This is an "explicit" source, not "supplemental".
+# - If "supplemental", Poetry searches PyPI first and uses any package
+#   it finds there, and treats "supplemental" as a fallback.
+#   - Because we only publish pre-release to test.PyPI, using
+#     "supplemental" fails because Poetry will always find the
+#     latest normal release from PyPI, and never the latest
+#     pre-release from test.PyPI.
+# - Alternatively, "explicit" tells Poetry to only search this source.
+# - Ideally, or maybe not, perhaps it's a weird (okay, it is) use case,
+#   there's no "priority" that tells Poetry to use the highest version
+#   from any source that it searches.
+# - Note this means that we must publish normal release to test.PyPI,
+#   and not solely pre-releases.
+priority = "explicit"
 
 # **** What RTD installs when it builds docs
 
