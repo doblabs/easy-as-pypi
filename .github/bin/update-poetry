@@ -222,6 +222,12 @@ prepare_branch () {
   print_prog "git checkout -b ${branch_name} ${scoped_head}\n"
 
   git checkout -q -b "${branch_name}" "${scoped_head}"
+
+  # Prepare for commit if running on CI.
+  if ${CI:-false}; then
+    git config user.email "${UPDEPS_USER_EMAIL}"
+    git config user.name "${UPDEPS_USER_NAME}"
+  fi
 }
 
 resume_old_branch_and_cleanup () {
@@ -250,12 +256,6 @@ poetry_update_commit_changes () {
   git add poetry.lock
 
   print_prog "git commit... "
-
-  # See comment above: GHA defines CI=true.
-  if ${CI:-false}; then
-    git config user.email "${UPDEPS_USER_EMAIL}"
-    git config user.name "${UPDEPS_USER_NAME}"
-  fi
 
   git commit -q -m "${UPDEPS_COMMIT_MESSAGE}"
 
