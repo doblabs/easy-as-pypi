@@ -11,14 +11,21 @@
 UPDEPS_USER_EMAIL="${UPDEPS_USER_EMAIL}"
 UPDEPS_USER_NAME="${UPDEPS_USER_NAME_UPDEPS:-${UPDEPS_USER_NAME:-update-poetry}}"
 
-# The UPDEPS_REPO_ORG_PROJ environ will be inferred at runtime.
-# - You can also set from workflow, e.g.,
-#     UPDEPS_REPO_ORG_PROJ="${{ github.repository }}" ./.github/bin/update-poetry
+# UPDEPS_REPO_ORG_PROJ is inferred at runtime when this script is run locally.
+# - The CI workflow sets this to ${{ github.repository }}, e.g., <org>/<proj>.
 UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
+# ***
+
 # Cascade options.
+# - Whether to repository_dispatch after PR completes.
 UPDEPS_LABEL_INHIBIT_CASCADE="${UPDEPS_LABEL_INHIBIT_CASCADE:-false}"
+# - The cascade_versioning value to send on repository_dispatch.
+#   - Also what update-merged.yml uses when versioning current project.
+#   - Also what determines if we poetry-update pre-release assets, see below.
 UPDEPS_LABEL_VERSIONING_PART="${UPDEPS_LABEL_VERSIONING_PART:-alpha}"
+
+# ***
 
 # Optional: Set faker true to skip poetry-update (useful for developing).
 UPDEPS_FAKE_UPDATE="${UPDEPS_FAKE_UPDATE:-false}"
@@ -47,12 +54,15 @@ poetry.lock}"
 UPDEPS_LABEL_DESC_POETRY_LOCK="${UPDEPS_LABEL_DESC_POETRY_LOCK:-\
 Pull requests that update poetry.lock}"
 
-# The 'ci-inhibit-cascade' label, if set, tells spread-updates.yml
-# to not send the repo-dispatch downstream.
+# ***
+
+# The 'ci-inhibit-cascade' label tells spread-updates.yml to not repo-dispatch.
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
 Tells CI not to cascade after release}"
+
+# ***
 
 # The next 4 labels represent the 'cascade-versioning' Git tag.
 # - An annotated Git tag contains a message we kluge to hold our
@@ -87,11 +97,13 @@ Tells CI to skip version bump}"
 # Optional: Customizable PR label color (same color used for all).
 UPDEPS_LABELS_COLOR="${UPDEPS_LABELS_COLOR:-74e34f}"
 
-# ***
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-# Optional: Customizable Git and GitHub message.
+# Optional: Customizable Git commit messages.
 UPDEPS_COMMIT_MESSAGE_NORMAL="${UPDEPS_COMMIT_MESSAGE_NORMAL:-\
 Build: Deps: Update poetry.lock [bin/update-poetry]}"
+
+# Optional: Customizable GitHub PR title and body.
 UPDEPS_PR_TITLE="${UPDEPS_PR_TITLE:-Build: Bump poetry.lock (bump all)}"
 UPDEPS_PR_BODY="${UPDEPS_PR_BODY:-Cascading release}"
 
@@ -129,8 +141,8 @@ _updeps_insist_cmd () {
   exit 1
 }
 
-# Program prints "true" or "false" to stdout for CI workflow.
-# Program prints to stderr for trace/progress messages.
+# Program prints a single "true" or "false" to stdout for CI workflow.
+# - Program prints other trace/progress messages to stderr for you ᵒᴥᵒ.
 print_prog () {
   >&2 printf "$1"
 }
