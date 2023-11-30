@@ -193,8 +193,9 @@ jobs:
           # Whether to version, and how, after PR is approved.
           # - Also passed along in the cascade.
           UPDEPS_CASCADE_VERSIONING: ${{ env.CASCADE_VERSIONING }}
-          # Tweak the commit message slightly to leave a source crumb.
-          UPDEPS_COMMIT_MESSAGE_NORMAL: 'Build: Deps: Update poetry.lock [update-deps.yml]'
+          # Tweak the commit messages slightly to leave a source crumb.
+          UPDEPS_COMMIT_MESSAGE_NORMAL: |
+            'Build: Deps: Update poetry.lock [update-deps.yml]'
           # DEVXX: Use this to mock poetry-update, for faster dev/test.
           UPDEPS_FAKE_UPDATE: false
 
