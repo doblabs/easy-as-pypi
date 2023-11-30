@@ -21,7 +21,20 @@ on:
     #     - cascade-updatedeps
     #     - cascade-versioning
 
-  # Via GitHub Actions website button, from user
+  # Via sprout-updates.yml, via GitHub Actions button, via user
+  workflow_call:
+    inputs:
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: string
+        default: 'all'
+
+      cascade-versioning:
+        description: 'Cascade version bump'
+        type: string
+        default: 'alpha'
+
+  # Via GitHub Actions website button, via user
   workflow_dispatch:
     inputs:
       bump-part:
@@ -70,6 +83,11 @@ env:
     github.event.client_payload.cascade-updatedeps
     || inputs.cascade-updatedeps
     || 'skip' }}
+  CASCADE_VERSIONING: ${{
+    github.event.client_payload.cascade-versioning
+    || inputs.bump-part
+    || inputs.cascade-versioning
+    || 'skip' }}
 
 jobs:
   # Here we check for branch tags (ci-inhibit-forever) and HEAD tags the
@@ -90,6 +108,9 @@ jobs:
     #   cascade, and no further downstream repos will be dispatched.
     # - If ci-cascade-updatedeps is set and 'skip' — of course! — skip
     #   this poetry-update job, but keep the cascade going.
+    # Also check the cascade-updatedeps input, either from upstream
+    # repository_dispatch, or from user-initiated workflow_call (via
+    # sprout-updates.yml, which exposes the workflow_dispatch inputs).
     if: true
       && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
       && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
@@ -148,16 +169,21 @@ jobs:
           UPDEPS_USER_NAME_UPDEPS: ${{ vars.UPDEPS_USER_NAME_UPDEPS }}
           # Project identifier (used to deduce remote name for git-push).
           UPDEPS_REPO_ORG_PROJ: ${{ github.repository }}
-          # Script inputs.
-          UPDEPS_CASCADE_INHIBIT: ${{ ! inputs.cascade-dispatch }}
-          UPDEPS_CASCADE_VERSIONING: ${{
-            github.event_name == 'workflow_dispatch' && inputs.bump-part
-            || github.event.client_payload.cascade-versioning }}
+          # Inhibit cascade if "workflow_dispatch" and user didn't opt-in to
+          # start the cascade (which happens after PR approved, after version
+          # tag created, after checks pass, and after package is released and
+          # smoke-tested).
+          UPDEPS_CASCADE_INHIBIT: ${{
+            github.event_name == 'workflow_dispatch'
+            && ! inputs.cascade-dispatch }}
           UPDEPS_COMMIT_MESSAGE_NORMAL: 'Build: Deps: Update poetry.lock [update-deps.yml]'
-          # DEVXX: Mock poetry-update w/ UPDEPS_FAKE_UPDATE=true to test/dev faster.
           # Whether to update all deps, or just "ours".
           # - This value is passed to the next project in the cascade, too.
           UPDEPS_CASCADE_UPDATEDEPS: ${{ env.CASCADE_UPDATEDEPS }}
+          # Whether to version, and how, after PR is approved.
+          # - Also passed along in the cascade.
+          UPDEPS_CASCADE_VERSIONING: ${{ env.CASCADE_VERSIONING }}
+          # DEVXX: Use this to mock poetry-update, for faster dev/test.
           UPDEPS_FAKE_UPDATE: false
 
     outputs:
@@ -171,8 +197,10 @@ jobs:
     steps:
       - run: |
           echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
+          echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
     outputs:
       cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
+      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
 
   # ***
 
@@ -200,6 +228,4 @@ jobs:
 
     with:
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
-      cascade-versioning: ${{
-        github.event_name == 'workflow_dispatch' && inputs.cascade-versioning
-        || github.event.client_payload.cascade-versioning }}
+      cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}
