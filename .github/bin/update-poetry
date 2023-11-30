@@ -221,8 +221,14 @@ shorten_string () {
   printf "${string}" | sed -E 's/^(.{'${maxlen}'}).*/\1/g'
 }
 
+# COPYD: From git-nubs.
 git_HEAD_commit_sha () {
   git rev-parse HEAD
+}
+
+# Paired-down variant of git-nubs fcn.
+git_branch_name () {
+  git rev-parse --abbrev-ref=loose HEAD
 }
 
 generate_branch_name () {
@@ -233,6 +239,14 @@ generate_branch_name () {
 
 prepare_branch () {
   local branch_name="$1"
+
+  if [ "$(git_branch_name)" = "${branch_name}" ]; then
+    # Assumed previously called and all setup.
+
+    return 0
+  fi
+
+  # ***
 
   local scoped_head="HEAD"
   scoped_head="$(print_scoped_head ".")"
