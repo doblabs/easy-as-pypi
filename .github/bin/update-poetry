@@ -106,7 +106,12 @@ Build: Deps: Update poetry.lock [bin/update-poetry]}"
 
 # Optional: Customizable GitHub PR title and body.
 UPDEPS_PR_TITLE="${UPDEPS_PR_TITLE:-Build: Bump poetry.lock (bump all)}"
-UPDEPS_PR_BODY="${UPDEPS_PR_BODY:-Cascading release}"
+UPDEPS_PR_BODY="${UPDEPS_PR_BODY:-Called with:
+  UPDEPS_FAKE_UPDATE=${UPDEPS_FAKE_UPDATE} \
+  UPDEPS_CASCADE_INHIBIT=${UPDEPS_CASCADE_INHIBIT} \
+  UPDEPS_CASCADE_VERSIONING=${UPDEPS_CASCADE_VERSIONING} \
+  UPDEPS_CASCADE_UPDATEDEPS=${UPDEPS_CASCADE_UPDATEDEPS} \
+}"
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
