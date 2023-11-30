@@ -295,16 +295,24 @@ resume_old_branch_and_cleanup () {
   fi
 }
 
-poetry_update_commit_changes_normal () {
-  print_prog "git add poetry.lock\n"
+poetry_update_commit_changes () {
+  local commit_message="$1"
 
-  git add poetry.lock
+  if has_changes_poetry_lock; then
+    print_prog "git add poetry.lock\n"
+
+    git add poetry.lock
+  fi
 
   print_prog "git commit... "
 
-  git commit -q -m "${UPDEPS_COMMIT_MESSAGE_NORMAL}"
+  git commit -q -m "${commit_message}"
 
   print_prog "✓\n"
+}
+
+poetry_update_commit_changes_normal () {
+  poetry_update_commit_changes "${UPDEPS_COMMIT_MESSAGE_NORMAL}"
 }
 
 # ***
@@ -669,6 +677,25 @@ assert_git_status_only_poetry_lock_changed_if_any () {
   >&2 echo "ERROR: Unexpected: poetry.lock is not sole change after poetry-update?!"
 
   exit 1
+}
+
+# ***
+
+has_changes_poetry_lock () {
+  has_unstaged_changes "poetry.lock"
+}
+
+has_unstaged_changes () {
+  local filename="$1"
+
+  local modified_file
+
+  while IFS= read -r modified_file; do
+    test "${modified_file}" = " M ${filename}" \
+      && return 0 || true
+  done <<< "$(git status --porcelain=v1)"
+
+  return 1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
