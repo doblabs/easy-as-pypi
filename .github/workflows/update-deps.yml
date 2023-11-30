@@ -139,7 +139,7 @@ jobs:
           # Project identifier (used to deduce remote name for git-push).
           UPDEPS_REPO_ORG_PROJ: ${{ github.repository }}
           # Script inputs.
-          UPDEPS_LABEL_INHIBIT_CASCADE: ${{ ! inputs.cascade-dispatch }}
+          UPDEPS_CASCADE_INHIBIT: ${{ ! inputs.cascade-dispatch }}
           UPDEPS_CASCADE_VERSIONING: ${{
             github.event_name == 'workflow_dispatch' && inputs.bump-part
             || github.event.client_payload.cascade-versioning }}
