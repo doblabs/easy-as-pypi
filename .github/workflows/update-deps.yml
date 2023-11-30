@@ -11,17 +11,8 @@ run-name: 👣 — Cascade — 2.) Update deps ${{
   github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
 
 on:
-  # Via spread-updates.yml from upstream project
-  repository_dispatch:
-    types: [update-deps]
-    # Inputs are not defined, but are part of github.event.client_payload.
-    # This workflow looks for the following inputs:
-    #
-    #   inputs:
-    #     - cascade-updatedeps
-    #     - cascade-versioning
-
-  # Via sprout-updates.yml, via GitHub Actions button, via user
+  # Via sprout-updates.yml, either from user workflow_dispatch, or from
+  # upstream project repository_dispatch (from spread-updates.yml).
   workflow_call:
     inputs:
       cascade-updatedeps:
@@ -90,12 +81,10 @@ env:
 
   # *** Munge possible input sources
   CASCADE_UPDATEDEPS: ${{
-    github.event.client_payload.cascade-updatedeps
-    || inputs.cascade-updatedeps
+    inputs.cascade-updatedeps
     || 'skip' }}
   CASCADE_VERSIONING: ${{
-    github.event.client_payload.cascade-versioning
-    || inputs.bump-part
+    inputs.bump-part
     || inputs.cascade-versioning
     || 'skip' }}
 
@@ -141,11 +130,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # SAVVY: How we'd access repository_dispatch args if we needed to add any:
-      #  - run: |
-      #      echo "event.client_payload.sha: ${{ github.event.client_payload.sha }}"
-      #      echo "event.client_payload.ref: ${{ github.event.client_payload.ref }}"
-
       - name: Checkout this repo
         uses: actions/checkout@v4
         with:
