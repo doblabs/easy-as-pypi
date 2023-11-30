@@ -23,7 +23,7 @@ UPDEPS_LABEL_INHIBIT_CASCADE="${UPDEPS_LABEL_INHIBIT_CASCADE:-false}"
 # - The cascade_versioning value to send on repository_dispatch.
 #   - Also what update-merged.yml uses when versioning current project.
 #   - Also what determines if we poetry-update pre-release assets, see below.
-UPDEPS_LABEL_VERSIONING_PART="${UPDEPS_LABEL_VERSIONING_PART:-alpha}"
+UPDEPS_CASCADE_VERSIONING="${UPDEPS_CASCADE_VERSIONING:-alpha}"
 
 # ***
 
@@ -38,7 +38,7 @@ __UPDEPS__CPYST__="
   # This command does nothing more than make CI busy for a bit
   UPDEPS_FAKE_UPDATE=true \
   UPDEPS_LABEL_INHIBIT_CASCADE=true \
-  UPDEPS_LABEL_VERSIONING_PART=skip \
+  UPDEPS_CASCADE_VERSIONING=skip \
     ./.github/bin/update-poetry
 "
 
@@ -510,7 +510,7 @@ gh_label_create () {
 # Meh: This feels like TMBL — Too Much Business Logic — than maybe belongs here.
 print_pr_ci_labels () {
   print_pr_ci_labels_inhibit_cascade
-  print_pr_ci_labels_versioning_part
+  print_pr_ci_labels_cascade_versioning
 }
 
 print_pr_ci_labels_inhibit_cascade () {
@@ -523,26 +523,26 @@ print_pr_ci_labels_inhibit_cascade () {
   fi
 }
 
-print_pr_ci_labels_versioning_part () {
-  if [ "${UPDEPS_LABEL_VERSIONING_PART}" = "least" ]; then
+print_pr_ci_labels_cascade_versioning () {
+  if [ "${UPDEPS_CASCADE_VERSIONING}" = "least" ]; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_VERSION_LEAST}" \
       "${UPDEPS_LABEL_DESC_VERSION_LEAST}"
 
     printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_LEAST} "
-  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "alpha" ]; then
+  elif [ "${UPDEPS_CASCADE_VERSIONING}" = "alpha" ]; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_VERSION_ALPHA}" \
       "${UPDEPS_LABEL_DESC_VERSION_ALPHA}"
 
     printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_ALPHA} "
-  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "patch" ]; then
+  elif [ "${UPDEPS_CASCADE_VERSIONING}" = "patch" ]; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_VERSION_PATCH}" \
       "${UPDEPS_LABEL_DESC_VERSION_PATCH}"
 
     printf "%s" "--label ${UPDEPS_LABEL_NAME_VERSION_PATCH} "
-  elif [ "${UPDEPS_LABEL_VERSIONING_PART}" = "skip" ]; then
+  elif [ "${UPDEPS_CASCADE_VERSIONING}" = "skip" ]; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_VERSION_SKIP}" \
       "${UPDEPS_LABEL_DESC_VERSION_SKIP}"

@@ -140,7 +140,7 @@ jobs:
           UPDEPS_REPO_ORG_PROJ: ${{ github.repository }}
           # Script inputs.
           UPDEPS_LABEL_INHIBIT_CASCADE: ${{ ! inputs.cascade-dispatch }}
-          UPDEPS_LABEL_VERSIONING_PART: ${{
+          UPDEPS_CASCADE_VERSIONING: ${{
             github.event_name == 'workflow_dispatch' && inputs.bump-part
             || github.event.client_payload.cascade-versioning }}
           UPDEPS_COMMIT_MESSAGE_NORMAL: 'Build: Deps: Update poetry.lock [update-deps.yml]'
