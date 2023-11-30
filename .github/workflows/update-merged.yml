@@ -36,6 +36,8 @@ on:
       # If user wants to make a more "serious" release, they can bump major
       # or minor part from terminal, e.g., using `git-bump-version-tag`:
       #   https://github.com/thegittinsgood/git-bump-version-tag#🐫
+      # - SAVVY: Note that *pushing* a version tag will trigger cascade,
+      #          whereas using this workflow's workflow_dispatch will not.
       bump-part:
         description: 'Increment version'
         type: choice
