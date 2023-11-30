@@ -19,7 +19,7 @@ UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
 # Cascade options.
 # - Whether to repository_dispatch after PR completes.
-UPDEPS_LABEL_INHIBIT_CASCADE="${UPDEPS_LABEL_INHIBIT_CASCADE:-false}"
+UPDEPS_CASCADE_INHIBIT="${UPDEPS_CASCADE_INHIBIT:-false}"
 # - The cascade_versioning value to send on repository_dispatch.
 #   - Also what update-merged.yml uses when versioning current project.
 #   - Also what determines if we poetry-update pre-release assets, see below.
@@ -37,7 +37,7 @@ UPDEPS_FAKE_UPDATE="${UPDEPS_FAKE_UPDATE:-false}"
 __UPDEPS__CPYST__="
   # This command does nothing more than make CI busy for a bit
   UPDEPS_FAKE_UPDATE=true \
-  UPDEPS_LABEL_INHIBIT_CASCADE=true \
+  UPDEPS_CASCADE_INHIBIT=true \
   UPDEPS_CASCADE_VERSIONING=skip \
     ./.github/bin/update-poetry
 "
@@ -514,7 +514,7 @@ print_pr_ci_labels () {
 }
 
 print_pr_ci_labels_inhibit_cascade () {
-  if ${UPDEPS_LABEL_INHIBIT_CASCADE:-false}; then
+  if ${UPDEPS_CASCADE_INHIBIT:-false}; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_INHIBIT_CASCADE}" \
       "${UPDEPS_LABEL_DESC_INHIBIT_CASCADE}"
