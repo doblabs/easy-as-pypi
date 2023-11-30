@@ -1,0 +1,71 @@
+# vim:tw=0:ts=2:sw=2:et:norl
+# Author: Landon Bouma <https://tallybark.com/>
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+---
+
+# USAGE: Use this workflow to start a release cascade,
+#        beginning on the current project.
+#
+#        The user can choose both cascade options:
+#
+#        - Whether to call poetry-update, and whether to update
+#          all deps, or just "our" deps.
+#
+#        - Whether to bump the version, and by how much.
+#
+# - SAVVY: If both inputs are 'skip', workflows will run from
+#   one project to another, but nothing really happens.
+#
+# - SAVVY: If user choose 'alpha' or 'least' cascade-deps option, workflow
+#   will publish to test.PyPI (and smoke-test will pip-install from there).
+#   - For 'alpha', this is obvious: The EAPP workflow advertises that
+#     if only publishes pre-release versions to test.PyPI.
+#   - For 'least', this is less obvious: If one package is already
+#     pre-release, 'least' will publish another pre-release version.
+#     Thus, we can only assure that downstream packages always get the
+#     latest upstream versions, whether pre-release or normal, if all
+#     projects along the cascade stick to using test.PyPI.
+#
+# - SAVVY: If user just wants to update third-party deps, they can set
+#   cascade-version to 'skip' (and cascade-updatedeps to not 'skip').
+#   Then, because none of "our" deps will be versioned and released,
+#   poetry-update will likely not see any new versions of "our" deps,
+#   but poetry-update may find third-party deps with newer versions.
+
+name: Start Cascade!
+
+run-name: 👣 — Cascade — 1.) Start Cascade! (via User)
+
+on:
+  # Via GitHub Actions website button, from user
+  workflow_dispatch:
+    inputs:
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'all'
+
+      cascade-versioning:
+        description: 'Cascade version bump'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'alpha'
+
+jobs:
+  update-deps:
+    name: "Dispatch"
+    uses: ./.github/workflows/update-deps.yml
+    secrets: inherit
+    with:
+      cascade-updatedeps: inputs.cascade-updatedeps
+      cascade-versioning: inputs.cascade-versioning

@@ -28,8 +28,7 @@ on:
 
       cascade-versioning:
         type: string
-        # Use empty string to fallback Git tag value if input not set.
-        default: ''
+        default: 'skip'
 
   # Via GitHub Actions website button
   workflow_dispatch:
