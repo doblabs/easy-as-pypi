@@ -35,41 +35,51 @@ on:
         default: 'alpha'
 
   # Via GitHub Actions website button, via user
+  # - Runs bin/update-poetry, but does not version
+  #   nor start the release cascade.
   workflow_dispatch:
-    inputs:
-      bump-part:
-        description: 'Increment version'
-        type: choice
-        options:
-          - 'alpha'
-          - 'patch'
-          - 'least'
-          - 'skip'
-        default: 'alpha'
-
-      cascade-dispatch:
-        description: 'Start the cascade'
-        type: boolean
-        default: false
-
-      cascade-updatedeps:
-        description: 'Cascade poetry-update'
-        type: choice
-        options:
-          - 'all'
-          - 'ours'
-          - 'skip'
-        default: 'all'
-
-      cascade-versioning:
-        description: 'Cascade version bump'
-        type: choice
-        options:
-          - 'alpha'
-          - 'patch'
-          - 'least'
-          - 'skip'
-        default: 'alpha'
+    # ISOFF/2023-11-30: Users now use sprout-updates.yml to start cascade.
+    # - This workflow's workflow_dispatch will now only run bin/update-poetry
+    #   and will not start the release cascade.
+    # - NOTED: This code not removed because some (now benign) wiring still
+    #   below (inputs.bump-part reffed once, and cascade-dispatch twice).
+    #   - LATER: Drop these inputs, and add comment reffing the drop commit.
+    #     - (For now, disabled, while convincing myself I don't want these.)
+    #
+    # inputs:
+    #   bump-part:
+    #     description: 'Increment version'
+    #     type: choice
+    #     options:
+    #       - 'alpha'
+    #       - 'patch'
+    #       - 'least'
+    #       - 'skip'
+    #     default: 'alpha'
+    #
+    #   cascade-dispatch:
+    #     description: 'Start the cascade'
+    #     type: boolean
+    #     default: false
+    #
+    #   cascade-updatedeps:
+    #     description: 'Cascade poetry-update'
+    #     type: choice
+    #     options:
+    #       - 'all'
+    #       - 'ours'
+    #       - 'skip'
+    #     default: 'all'
+    #
+    #   cascade-versioning:
+    #     description: 'Cascade version bump'
+    #     type: choice
+    #     options:
+    #       - 'alpha'
+    #       - 'patch'
+    #       - 'least'
+    #       - 'skip'
+    #     default: 'alpha'
 
 # ***
 
@@ -185,8 +195,8 @@ jobs:
           # tag created, after checks pass, and after package is released and
           # smoke-tested).
           UPDEPS_CASCADE_INHIBIT: ${{
-            github.event_name == 'workflow_dispatch'
-            && ! inputs.cascade-dispatch }}
+            inputs.cascade-dispatch != ''
+            && inputs.cascade-dispatch }}
           # Whether to update all deps, or just "ours".
           # - This value is passed to the next project in the cascade, too.
           UPDEPS_CASCADE_UPDATEDEPS: ${{ env.CASCADE_UPDATEDEPS }}
@@ -222,7 +232,7 @@ jobs:
         && (needs.poetry-update.result == 'skipped'
             || (needs.poetry-update.result == 'success'
                 && needs.poetry-update.outputs.new_pr_num == ''))
-        && (github.event_name != 'workflow_dispatch'
+        && (inputs.cascade-dispatch == ''
             || inputs.cascade-dispatch)
       }}
 
