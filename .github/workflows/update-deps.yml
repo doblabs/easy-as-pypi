@@ -223,7 +223,7 @@ jobs:
             || (needs.poetry-update.result == 'success'
                 && needs.poetry-update.outputs.new_pr_num == ''))
         && (github.event_name != 'workflow_dispatch'
-            || inputs.cascade-dispatch == 'true')
+            || inputs.cascade-dispatch)
       }}
 
     with:
