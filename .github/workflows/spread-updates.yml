@@ -137,7 +137,7 @@ jobs:
           # Personal access token created for *my user* with public_repo permissions.
           token: ${{ secrets.PAT__PUBLIC_REPO }}
           repository: ${{ matrix.repo }}
-          event-type: update-deps
+          event-type: sprout-updates
           # These vals default '', so fallback CI tag value if not an input.
           client-payload: '
             {
