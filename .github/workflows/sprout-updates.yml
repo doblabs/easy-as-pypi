@@ -39,6 +39,16 @@ name: Start Cascade!
 run-name: 👣 — Cascade — 1.) Start Cascade! (via User)
 
 on:
+  # Via spread-updates.yml from upstream project
+  repository_dispatch:
+    types: [sprout-updates]
+    # Inputs are not defined, but are part of github.event.client_payload.
+    # This workflow looks for the following inputs:
+    #
+    #   inputs:
+    #     - cascade-updatedeps
+    #     - cascade-versioning
+
   # Via GitHub Actions website button, from user
   workflow_dispatch:
     inputs:
@@ -67,5 +77,9 @@ jobs:
     uses: ./.github/workflows/update-deps.yml
     secrets: inherit
     with:
-      cascade-updatedeps: inputs.cascade-updatedeps
-      cascade-versioning: inputs.cascade-versioning
+      cascade-updatedeps: ${{
+        github.event.client_payload.cascade-updatedeps
+        || inputs.cascade-updatedeps }}
+      cascade-versioning: ${{
+        github.event.client_payload.cascade-versioning
+        || inputs.cascade-versioning }}
