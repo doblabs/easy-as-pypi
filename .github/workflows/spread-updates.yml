@@ -19,8 +19,9 @@ on:
   workflow_call:
     inputs:
       cascade-updatedeps:
-        type: boolean
-        default: true
+        type: string
+        # Use empty string to fallback Git tag value if input not set.
+        default: ''
 
       cascade-versioning:
         type: string
@@ -32,8 +33,12 @@ on:
     inputs:
       cascade-updatedeps:
         description: 'Cascade poetry-update'
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'skip'
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -133,15 +138,12 @@ jobs:
           token: ${{ secrets.PAT__PUBLIC_REPO }}
           repository: ${{ matrix.repo }}
           event-type: update-deps
-          # - The `inputs.cascade-updatedeps && ci-tags.old-cascade-updatedeps`
-          #   is because both default true, so if either is set false, use false.
-          # - The `inputs.cascade-versioning`, on the other hand, defaults to
-          #   the empty string, so fallback CI tag value if not an input
+          # These vals default '', so fallback CI tag value if not an input.
           client-payload: '
             {
               "cascade-updatedeps": "${{
                 inputs.cascade-updatedeps
-                && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps
+                || needs.wrangle-ci-tags.outputs.old-cascade-updatedeps
               }}",
               "cascade-versioning": "${{
                 inputs.cascade-versioning

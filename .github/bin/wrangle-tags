@@ -328,7 +328,7 @@ set_tag_locals_cascade_updatedeps () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_updatedeps"
     tag_scope="HEAD"
-    default_value="true"
+    default_value="all"
     new_tag_value="${EAPP_CASCADE_UPDATEDEPS}"
     delete_if=${EAPP_DELETE_CASCADE_UPDATEDEPS:-false}
   fi

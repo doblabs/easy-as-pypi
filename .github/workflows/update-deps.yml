@@ -41,8 +41,12 @@ on:
 
       cascade-updatedeps:
         description: 'Cascade poetry-update'
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'all'
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -61,6 +65,12 @@ env:
   # USYNC: workflows/ (PYTHON_VERSION), tox.ini (basepython), Makefile (VENV_PYVER).
   PYTHON_VERSION: 3.11
 
+  # *** Munge possible input sources
+  CASCADE_UPDATEDEPS: ${{
+    github.event.client_payload.cascade-updatedeps
+    || inputs.cascade-updatedeps
+    || 'skip' }}
+
 jobs:
   # Here we check for branch tags (ci-inhibit-forever) and HEAD tags the
   # user might've set deliberately on this project. Because this is the
@@ -75,16 +85,16 @@ jobs:
 
     needs: [wrangle-ci-tags]
 
-    # If called from upstream repo, it tells us to updatedeps or not.
-    # - If triggered via workflow_dispatch, updatedeps this repo unless
-    #   user proactively tagged us not to.
-    #   - And tell downstream repos to do whatever user chose them to do.
+    # Check for CI Git tags:
+    # - Either ci-inhibit-cascade or ci-inhibit-forever will kill the
+    #   cascade, and no further downstream repos will be dispatched.
+    # - If ci-cascade-updatedeps is set and 'skip' — of course! — skip
+    #   this poetry-update job, but keep the cascade going.
     if: true
       && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
       && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
-      && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps == 'true'
-      && (github.event_name != 'repository_dispatch'
-          || github.event.client_payload.cascade-updatedeps == 'true')
+      && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps != 'skip'
+      && env.CASCADE_UPDATEDEPS != 'skip'
 
     runs-on: ubuntu-latest
 
@@ -145,10 +155,24 @@ jobs:
             || github.event.client_payload.cascade-versioning }}
           UPDEPS_COMMIT_MESSAGE_NORMAL: 'Build: Deps: Update poetry.lock [update-deps.yml]'
           # DEVXX: Mock poetry-update w/ UPDEPS_FAKE_UPDATE=true to test/dev faster.
+          # Whether to update all deps, or just "ours".
+          # - This value is passed to the next project in the cascade, too.
+          UPDEPS_CASCADE_UPDATEDEPS: ${{ env.CASCADE_UPDATEDEPS }}
           UPDEPS_FAKE_UPDATE: false
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
+
+  # ***
+
+  # `env.` doesn't work from `with:`, so kluge it.
+  env-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
+    outputs:
+      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
 
   # ***
 
@@ -162,7 +186,7 @@ jobs:
     uses: ./.github/workflows/update-merged.yml
     secrets: inherit
 
-    needs: [wrangle-ci-tags, poetry-update]
+    needs: [env-outputs, wrangle-ci-tags, poetry-update]
 
     if: ${{ !cancelled()
         && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
@@ -175,9 +199,7 @@ jobs:
       }}
 
     with:
-      cascade-updatedeps: ${{
-        github.event_name == 'workflow_dispatch' && inputs.cascade-updatedeps
-        || github.event.client_payload.cascade-updatedeps == 'true' }}
+      cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       cascade-versioning: ${{
         github.event_name == 'workflow_dispatch' && inputs.cascade-versioning
         || github.event.client_payload.cascade-versioning }}
