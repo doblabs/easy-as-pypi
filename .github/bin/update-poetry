@@ -61,7 +61,7 @@ Pull requests that update poetry.lock}"
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
-Tells CI not to cascade after release}"
+Tells CI not to cascade after versioning and release}"
 
 # ***
 
@@ -76,22 +76,22 @@ Tells CI not to cascade after release}"
 UPDEPS_LABEL_NAME_VERSION_ALPHA="${UPDEPS_LABEL_NAME_VERSION_ALPHA:-\
 ci-version-alpha}"
 UPDEPS_LABEL_DESC_VERSION_ALPHA="${UPDEPS_LABEL_DESC_VERSION_ALPHA:-\
-Tells CI to bump alpha version}"
+Tells CI to bump alpha version after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_PATCH="${UPDEPS_LABEL_NAME_VERSION_PATCH:-\
 ci-version-patch}"
 UPDEPS_LABEL_DESC_VERSION_PATCH="${UPDEPS_LABEL_DESC_VERSION_PATCH:-\
-Tells CI to bump patch version}"
+Tells CI to bump patch version after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_LEAST="${UPDEPS_LABEL_NAME_VERSION_LEAST:-\
 ci-version-least}"
 UPDEPS_LABEL_DESC_VERSION_LEAST="${UPDEPS_LABEL_DESC_VERSION_LEAST:-\
-Tells CI to bump least version}"
+Tells CI to bump least version after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_SKIP="${UPDEPS_LABEL_NAME_VERSION_SKIP:-\
 ci-version-skip}"
 UPDEPS_LABEL_DESC_VERSION_SKIP="${UPDEPS_LABEL_DESC_VERSION_SKIP:-\
-Tells CI to skip version bump}"
+Tells CI to skip version bump after PR is approved}"
 
 # ***
 
