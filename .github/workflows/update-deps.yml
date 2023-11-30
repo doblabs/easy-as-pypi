@@ -190,6 +190,8 @@ jobs:
           # Tweak the commit messages slightly to leave a source crumb.
           UPDEPS_COMMIT_MESSAGE_NORMAL: |
             'Build: Deps: Update poetry.lock [update-deps.yml]'
+          UPDEPS_COMMIT_MESSAGE_PRERELEASE: |
+            'Build: Deps: Update pre-release assets [update-deps.yml]'
           # DEVXX: Use this to mock poetry-update, for faster dev/test.
           UPDEPS_FAKE_UPDATE: false
 

@@ -126,9 +126,51 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
           cache: 'poetry'
 
+      # NOICE: DRY: Use `make --eval` to add temp. make target that prints
+      # the pre-release pyproject.toml directory (avoids USYNC/hardcoding).
+      - name: Determine pyproject.toml to use (normal or alpha)
+        run: |
+          pyproject_dir="."
+          if [ "${PRERELEASE}" = "--prerelease" ]; then
+            pyproject_dir="$(
+              make \
+                --eval='print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)' \
+                print-var
+            )"
+          fi
+          echo "PYPROJECT_DIR=${pyproject_dir}" >> "${GITHUB_ENV}"
+
+      - name: Verify Poetry assets — pyproject.toml and poetry.lock
+        run: |
+          assets_exist () {
+            local pyproject_dir="${1:-.}"
+
+            [ -f "${pyproject_dir}/pyproject.toml" ] \
+            && [ -f "${pyproject_dir}/poetry.lock" ]
+          }
+
+          if [ "${PRERELEASE}" = "--prerelease" ]; then
+            if ! assets_exist "${PYPROJECT_DIR}"; then
+              >&2 echo "ERROR: Where are the ${PYPROJECT_DIR} Poetry assets?"
+              >&2 echo "- Missing pyproject.toml and/or poetry.lock"
+              >&2 echo "- HINT: Run the update-deps.yml workflow"
+              >&2 echo "  - OR: Run \`make prepare-poetry-prerelease\`"
+              >&2 echo "        and then commit the two files to the repo"
+
+              exit 1
+            fi
+          elif ! assets_exist; then
+            >&2 echo "ERROR: Missing pyproject.toml and/or poetry.lock"
+            >&2 echo "- HINT: Run the update-deps.yml workflow"
+            >&2 echo "  - OR: Run \`make install\`"
+            >&2 echo "        and then commit the lock file to the repo"
+
+            exit 1
+          fi
+
       - name: Poetry build
         run: |
-          poetry build
+          poetry -C "${PYPROJECT_DIR}" build
 
       - name: Probe filename
         run: |
