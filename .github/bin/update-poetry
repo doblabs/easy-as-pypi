@@ -148,17 +148,13 @@ update_poetry_update () {
   local remote_name
   remote_name="$(git_upstream_remote)"
 
-  poetry_update_lock_normal
+  local has_changes=false
 
-  assert_git_status_0_or_1_changes
+  if update_and_commit_lock_normal "${branch_name}"; then
+    has_changes=true
+  fi
 
-  assert_git_status_only_poetry_lock_changed_if_any
-
-  if test -n "$(git status --porcelain=v1)"; then
-    prepare_branch "${branch_name}"
-
-    poetry_update_commit_changes_normal "${branch_name}"
-
+  if ${has_changes}; then
     push_branch "${branch_name}" "${remote_name}"
 
     local NEW_PR_URL
@@ -170,6 +166,28 @@ update_poetry_update () {
     echo "$(basename "${NEW_PR_URL}")"
   fi
   # else, print nothing, means po-update was a no-op.
+}
+
+# ***
+
+update_and_commit_lock_normal () {
+  local branch_name="$1"
+
+  poetry_update_lock_normal
+
+  assert_git_status_0_or_1_changes
+
+  assert_git_status_only_poetry_lock_changed_if_any
+
+  if test -n "$(git status --porcelain=v1)"; then
+    prepare_branch "${branch_name}"
+
+    poetry_update_commit_changes_normal
+
+    return 0
+  fi
+
+  return 1
 }
 
 # ***
