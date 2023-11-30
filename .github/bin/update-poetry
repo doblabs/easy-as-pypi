@@ -148,7 +148,7 @@ update_poetry_update () {
   local remote_name
   remote_name="$(git_upstream_remote)"
 
-  poetry_update_lock
+  poetry_update_lock_normal
 
   assert_git_status_0_or_1_changes
 
@@ -157,7 +157,7 @@ update_poetry_update () {
   if test -n "$(git status --porcelain=v1)"; then
     prepare_branch "${branch_name}"
 
-    poetry_update_commit_changes "${branch_name}"
+    poetry_update_commit_changes_normal "${branch_name}"
 
     push_branch "${branch_name}" "${remote_name}"
 
@@ -174,7 +174,7 @@ update_poetry_update () {
 
 # ***
 
-poetry_update_lock () {
+poetry_update_lock_normal () {
   print_prog "poetry update... "
 
   if ! ${UPDEPS_FAKE_UPDATE:-false}; then
@@ -250,7 +250,7 @@ resume_old_branch_and_cleanup () {
   fi
 }
 
-poetry_update_commit_changes () {
+poetry_update_commit_changes_normal () {
   print_prog "git add poetry.lock\n"
 
   git add poetry.lock
