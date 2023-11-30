@@ -164,6 +164,18 @@ env:
 # ***
 
 jobs:
+  # `env.` doesn't work from within `with:`, so kluge it.
+  env-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
+          echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
+    outputs:
+      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
+      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
+
+  # ***
 
   verify-merged-pr:
 
@@ -194,7 +206,7 @@ jobs:
   wrangle-ci-tags:
     name: Wrangle (write) CI tag(s)
 
-    needs: [verify-merged-pr]
+    needs: [env-outputs, verify-merged-pr]
 
     # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
     # SAVVY: When called via upstream repo-dispatch and update-deps.yml
@@ -220,9 +232,10 @@ jobs:
         || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
       # LEAVE: "ci-inhibit-forever"
       # Manage "ci-cascade-updatedeps"
-      cascade-updatedeps: env.CASCADE_UPDATEDEPS
+      cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       # Manage "ci-cascade-versioning"
-      cascade-versioning: inputs.bump-part || env.CASCADE_VERSIONG
+      cascade-versioning: ${{ inputs.bump-part
+        || needs.env-outputs.outputs.cascade-versioning }}
 
   # ***
 
@@ -308,19 +321,6 @@ jobs:
 
   # ***
 
-  # `envs.` doesn't work from `with:`, so kluge it.
-  env-outputs:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
-          echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
-    outputs:
-      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
-      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
-
-  # ***
-
   # If no new version/release, continue cascade; otherwise checks-versioned.yml
   # et al run, and cascade eventually continues from release-smoke-test.yml.
   spread-updates:
@@ -329,7 +329,7 @@ jobs:
     uses: ./.github/workflows/spread-updates.yml
     secrets: inherit
 
-    needs: [verify-merged-pr, env-outputs]
+    needs: [env-outputs, verify-merged-pr]
 
     # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     # SAVVY: Note this won't casade if git-bump ran but didn't change the version.
