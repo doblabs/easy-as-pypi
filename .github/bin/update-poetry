@@ -625,10 +625,16 @@ assert_git_status_tidy () {
 
 # Overly cautious git-status check (expect 0 or 1 changes).
 assert_git_status_0_or_1_changes () {
-  test $(git status --porcelain=v1 | wc -l) -le 1 \
+  assert_git_status_changes_le_max 1
+}
+
+assert_git_status_changes_le_max () {
+  local max="$1"
+
+  test $(git status --porcelain=v1 | wc -l) -le ${max} \
     && return 0 || true
 
-  >&2 echo "ERROR: Unexpected: More than 1 file changed by poetry-update?!"
+  >&2 echo "ERROR: Unexpected: More than ${max} file(s) changed by poetry-update?!"
 
   exit 1
 }
