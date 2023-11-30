@@ -19,12 +19,12 @@ on:
     types:
       - closed
 
-  # Via .github/workflows/update-deps.yml, when !cascade-updatedeps.
+  # Via .github/workflows/update-deps.yml, when cascade-updatedeps is 'skip'.
   workflow_call:
     inputs:
       cascade-updatedeps:
-        type: boolean
-        default: true
+        type: string
+        default: 'skip'
 
       cascade-versioning:
         type: string
@@ -54,8 +54,12 @@ on:
 
       cascade-updatedeps:
         description: 'Cascade poetry-update'
-        type: boolean
-        default: true
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'all'
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -128,9 +132,18 @@ on:
 # ***
 
 env:
+  # USYNC: .github/bin/update-poetry defines these strings:
+  #   UPDEPS_LABEL_NAME_UPDATE_(OURS|ALL|SKIP)=\
+  #     "ci-update-(ours|all|skip)"
   CASCADE_UPDATEDEPS: ${{
     inputs.cascade-updatedeps
-    || contains(github.event.pull_request.labels.*.name, 'ci-cascade-updatedeps') }}
+    || (contains(github.event.pull_request.labels.*.name, 'ci-update-ours')
+        && 'ours')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-update-all')
+        && 'all')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-update-skip')
+        && 'skip')
+    || 'skip' }}
 
   # USYNC: .github/bin/update-poetry defines these strings:
   #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
@@ -330,5 +343,5 @@ jobs:
          ) }}
 
     with:
-      cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps == 'true' }}
+      cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}
