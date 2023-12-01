@@ -118,7 +118,12 @@ jobs:
         run: |
           # USYNC: The name is from .github/workflows/update-deps.yml
           workflow_name="Release Cascade — Update"
-          echo "gh workflow run \"${workflow_name}\""
+          echo "\
+            gh workflow run \"${workflow_name}\" \\
+              -f \"cascade-dispatch=true\" \\
+              -f \"cascade-updatedeps=${CASCADE_UPDATEDEPS}\" \\
+              -f \"cascade-versioning=${CASCADE_VERSIONING}\" \\
+            "
           gh workflow run "${workflow_name}" \
             -f "cascade-dispatch=true" \
             -f "cascade-updatedeps=${CASCADE_UPDATEDEPS}" \
