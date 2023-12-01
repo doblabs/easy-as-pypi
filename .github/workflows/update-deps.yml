@@ -112,7 +112,7 @@ jobs:
   poetry-update:
     name: Update lock deps
 
-    needs: [wrangle-ci-tags]
+    needs: [env-outputs, wrangle-ci-tags]
 
     # Check for CI Git tags:
     # - Either ci-inhibit-cascade or ci-inhibit-forever will kill the
@@ -123,10 +123,10 @@ jobs:
     # repository_dispatch, or from user-initiated workflow_call (via
     # sprout-updates.yml, which exposes the workflow_dispatch inputs).
     if: true
+      && needs.env-outputs.outputs.cascade-updatedeps != 'skip'
       && needs.wrangle-ci-tags.outputs.old-inhibit-cascade == 'false'
       && needs.wrangle-ci-tags.outputs.old-inhibit-forever == 'false'
       && needs.wrangle-ci-tags.outputs.old-cascade-updatedeps != 'skip'
-      && env.CASCADE_UPDATEDEPS != 'skip'
 
     runs-on: ubuntu-latest
 
