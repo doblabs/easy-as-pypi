@@ -43,6 +43,11 @@ on:
         default: ''
 
   # Via GitHub Actions website button
+  # - Note user should really just go to the downstream repo and use
+  #   its start-cascade.yml workflow_dispatch to start the cascade.
+  #   - But this is convenient for testing that *this* module works
+  #     without having to start the CI at start-cascade.yml and then
+  #     wait for it to run through to this workflow.
   workflow_dispatch:
     inputs:
       cascade-updatedeps:
