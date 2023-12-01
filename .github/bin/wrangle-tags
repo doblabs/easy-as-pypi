@@ -88,6 +88,9 @@ wrangle_tags () {
   # CRUDE: Set tag_names array.
   set_tag_locals ""
 
+  local GIT_PUSH_OUTPUT_DUMP
+  GIT_PUSH_OUTPUT_DUMP="$(mktemp -t wrangle-tags-XXXXX)"
+
   trace_full
 
   trace_lite "┌─ CI Wrangler: tag-name: ────┬─🥚─┬─ new-val: ─┬─ output-name and val: ────────────┐"
@@ -119,12 +122,29 @@ wrangle_tags () {
 
   local footer_rhs="─────────────────────────────┴────┴────────────┴───────────────────────────────────┘"
 
+  local piping="└"
+  if [ -n "${GIT_PUSH_OUTPUT_DUMP}" ] || [ -n "${GITHUB_OUTPUT}" ]; then
+    piping="├"
+  fi
+
+  trace_lite "${piping}${footer_rhs}"
+
+  if [ -s "${GIT_PUSH_OUTPUT_DUMP}" ]; then
+    if [ -z "${GITHUB_OUTPUT}" ]; then
+      piping="└"
+    fi
+
+    trace_lite "${piping}→ git pushes:"
+    trace_lite "$(cat "${GIT_PUSH_OUTPUT_DUMP}" | sed 's/^/    /')"
+  fi
+
+  command rm "${GIT_PUSH_OUTPUT_DUMP}"
+
   if [ -s "${GITHUB_OUTPUT}" ]; then
-    trace_lite "├${footer_rhs}"
-    trace_lite "└→ GITHUB_OUTPUT:"
+    piping="└"
+
+    trace_lite "${piping}→ GITHUB_OUTPUT:"
     trace_lite "$(cat "${GITHUB_OUTPUT}" | sed 's/^/    /')"
-  else
-    trace_lite "└${footer_rhs}"
   fi
 
   # Obvi, don't remove ${GITHUB_OUTPUT}, which GHA uses.
@@ -215,7 +235,8 @@ wrangle_tag () {
       git tag -d "${tag_name}" 2> /dev/null || true
 
       if ${CI:-false}; then
-        git push "${EAPP_CI_REMOTE_NAME}" ":refs/tags/${tag_name}"
+        git push "${EAPP_CI_REMOTE_NAME}" ":refs/tags/${tag_name}" \
+          > "${GIT_PUSH_OUTPUT_DUMP}"
       fi
     fi
   elif [ -n "${new_tag_value}" ]; then
@@ -224,7 +245,8 @@ wrangle_tag () {
       git tag -f -a "${tag_name}" -m "${new_tag_value}"
 
       if ${CI:-false}; then
-        git push -f "${EAPP_CI_REMOTE_NAME}" "refs/tags/${tag_name}"
+        git push -f "${EAPP_CI_REMOTE_NAME}" "refs/tags/${tag_name}" \
+          > "${GIT_PUSH_OUTPUT_DUMP}"
       fi
     fi
   fi
