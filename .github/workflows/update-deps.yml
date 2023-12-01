@@ -78,6 +78,16 @@ env:
   PYTHON_VERSION: 3.11
 
   # *** Munge possible input sources
+  # PLESS/2023-12-01: These env's are pointless now that there's only one
+  # triggering event, workflow_dispatch, which specifies default values
+  # for both of these.
+  # - These env's were originally plumbed for the 'repository_dispatch'
+  #   event, which has since been moved to sprout-updates.yml. Because back
+  #   then, we wanted to fallback on a default value if the caller didn't
+  #   specify the input. But now there's always gonna be a default value.
+  # Nonetheless, let's keep this as-is, because it's a nice example of how
+  # you need to convert env.values to job.outputs.values if you want to
+  # use env.values in an `if` or a `with` (see env-outputs usage).
   CASCADE_UPDATEDEPS: ${{
     inputs.cascade-updatedeps
     || 'skip' }}
