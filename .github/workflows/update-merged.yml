@@ -392,7 +392,7 @@ jobs:
     env:
       # Uses bump-part input if workflow_dispatch;
       # or looks for special CI label if pull_request;
-      # finally falls-back 'alpha' (which is bump's default).
+      # falls-back 'alpha' (which is the bump-part default).
       BUMP_PART: ${{ inputs.bump-part
         || needs.env-outputs.outputs.cascade-versioning }}
 
