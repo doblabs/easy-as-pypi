@@ -175,6 +175,36 @@ jobs:
 
   # ***
 
+  trace:
+    name: Trace vars
+    needs: [env-outputs, wrangle-ci-tags, poetry-update]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      # yamllint disable rule:line-length
+      - run: |
+          echo "needs.old-inhibit-cascade: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-cascade }}"
+          echo "needs.old-inhibit-forever: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-forever }}"
+          #
+          echo "needs.poetry-update.result: ${{ needs.poetry-update.result }}"
+          echo "needs.poetry-update.outputs.new_pr_num: ${{ needs.poetry-update.outputs.new_pr_num }}"
+          #
+          echo "inputs.cascade-dispatch: ${{ inputs.cascade-dispatch }}"
+          # When caller specifies false, the next three lines OUTPUT:
+          #   'false', 'false', 'foo'
+          # i.e., it *is* a true boolean.
+          # - Note that `false != ''` is false, because '' evaluates false.
+          # - When caller specifies true, OUTPUTs are: 'true', 'true', 'true'
+          #   (and `true != ''` is true, because '' is false).
+          #
+          #   echo "inputs.cascade-dispatch: ${{ inputs.cascade-dispatch }}"
+          #   echo "inputs.cascade-dispatch != '': ${{ inputs.cascade-dispatch != '' }}"
+          #   echo "inputs.cascade-dispatch || foo: ${{ inputs.cascade-dispatch || 'foo' }}"
+          #
+          echo "needs.cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}"
+          echo "needs.cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}"
+      # yamllint enable rule:line-length
+
   # If no PR, move on to versioning here. And if versioning being skipped,
   # versioning workflow will dispatch immediately to downstream repo(s).
   # Otherwise, if PR created, update-merged.yml workflow will continue
