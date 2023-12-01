@@ -60,6 +60,20 @@ on:
       #   https://github.com/thegittinsgood/git-bump-version-tag#🐫
       # - SAVVY: Note that *pushing* a version tag will trigger cascade,
       #          whereas using this workflow's workflow_dispatch will not.
+      # - OWELL: There's a slight UX disconnect here: This input, bump-part,
+      #   is used for the current repo versioning, but then the other input,
+      #   cascade-versioning, is used for all the downstream repo versionings.
+      #   - This is just how it works, because the cascade-* inputs are
+      #     somewhat imposed upon us by GH. Ideally, we wouldn't have them,
+      #     but because some of the workflow has to call `gh workflow run`
+      #     to avoid exceeding the GHA nested reusable workflow limit
+      #     (rather than being able to use a `uses`), and because GHA uses
+      #     (there's that word again) the same event type (workflow_dispatch)
+      #     for both `gh` and for what buttons GitHub shows on the workflow
+      #     web page, we have to include them.
+      #     - Which means we end up with one input for the current project
+      #       (bump-part) and a separate input for the downstream projects
+      #       (cascade-versioning), both of which control the same operation.
       bump-part:
         description: 'Increment version'
         type: choice
