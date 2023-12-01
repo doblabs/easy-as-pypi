@@ -12,16 +12,32 @@ name: Release Cascade — Update
 run-name: 👣 — Cascade — 2.) Update deps ${{
   ! inputs.from-upstream && '(via User)' || '(from up)' }}
 
+# This workflow is triggered by 1 of 3 events:
+# - Via sprout-updates.yml, from user workflow_dispatch (GH website button)
+# - Via sprout-updates.yml, from upstream project repository_dispatch,
+#                           from its spread-updates.yml
+# - Via update-deps (this), from user workflow_dispatch (GH website button)
 on:
-  # Via sprout-updates.yml, either from user workflow_dispatch, or from
-  # upstream project repository_dispatch (from spread-updates.yml).
-  # - Or via GitHub Actions website button for this workflow itself.
-  # SAVVY: Ideally, user will use sprout-updates.yml to start cascade.
-  # - But we still need workflow_dispatch inputs, so that sprout-updates
-  #   can call this workflow via `gh workflow run`, to avoid exceeding the
-  #   nested reusable workflow limit (see comments elsewhere).
-  # - So the user can still start the cascade from this workflow's
-  #   GH Actions buttons, but they'll have to opt-in.
+  # SAVVY: Ideally, a user would use sprout-updates.yml to start a release
+  # cascade, but that's not our world:
+  # - We must define workflow_dispatch inputs here, which the user will see
+  #   on the GitHub Actions page.
+  # - This because GH uses the same workflow_dispatch inputs for both the
+  #   GitHub Actions page, as well as for `gh` command-line options, e.g.,
+  #     `gh workflow run -f "foo=bar"`.
+  # - This isn't, like, the end of our world, but (lb) I think it'd be more
+  #   clear if the GH website buttons for this workflow was simply the ever-
+  #   present "Run workflow" button.
+  #   - Then the user (I'd assume) would understand that running this
+  #     workflow *only runs this workflow*, nothing more; i.e., no cascade.
+  # - However, sprout-updates must call this workflow via `gh workflow run`,
+  #   to avoid exceeding the nested reusable workflow limit (see comments in
+  #   sprout-updates.yml).
+  # - As such, the user can start the cascade via this workflow via the GH
+  #   Actions buttons for these inputs, but the user has to opt-in.
+  #   - So the default behavior if the user clicks the "Run workflow" button
+  #     but does not change any input defaults is that this workflow will
+  #     update the current project's deps, but it won't propagate the cascade.
   workflow_dispatch:
     inputs:
       cascade-dispatch:
