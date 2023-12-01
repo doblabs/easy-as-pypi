@@ -153,9 +153,7 @@ jobs:
           # start the cascade (which happens after PR approved, after version
           # tag created, after checks pass, and after package is released and
           # smoke-tested).
-          UPDEPS_CASCADE_INHIBIT: ${{
-            inputs.cascade-dispatch != ''
-            && inputs.cascade-dispatch }}
+          UPDEPS_CASCADE_INHIBIT: ${{ inputs.cascade-dispatch && 'false' || 'true' }}
           # Whether to update all deps, or just "ours".
           # - This value is passed to the next project in the cascade, too.
           UPDEPS_CASCADE_UPDATEDEPS: ${{ env.CASCADE_UPDATEDEPS }}
@@ -223,10 +221,10 @@ jobs:
         && (needs.poetry-update.result == 'skipped'
             || (needs.poetry-update.result == 'success'
                 && needs.poetry-update.outputs.new_pr_num == ''))
-        && (inputs.cascade-dispatch == ''
-            || inputs.cascade-dispatch)
+        && inputs.cascade-dispatch
       }}
 
     with:
+      cascade-dispatch: true
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}
