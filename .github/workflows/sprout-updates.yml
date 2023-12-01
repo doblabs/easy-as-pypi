@@ -59,7 +59,9 @@ on:
           - 'all'
           - 'ours'
           - 'skip'
-        default: 'all'
+        # LATER/2023-11-30: Revert to 'all', after testing
+        #  default: 'all'
+        default: 'skip'
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -69,7 +71,9 @@ on:
           - 'patch'
           - 'least'
           - 'skip'
-        default: 'alpha'
+        # LATER/2023-11-30: Revert to 'alpha', after testing
+        #  default: 'alpha'
+        default: 'skip'
 
 # SAVVY: GitHub imposes a nested reusable workflow limit of 3, so we cannot
 # call update-deps as a reusable workflow. I.e., this won't work:
