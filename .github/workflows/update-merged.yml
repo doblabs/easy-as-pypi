@@ -48,36 +48,34 @@ on:
           - 'skip'
         default: 'alpha'
 
-      # ISOFF/2023-11-30: Users now use sprout-updates.yml to start cascade.
-      # - SAVVY: Note that *pushing* a version tag will trigger cascade, too.
-      # - NOTED: This code not removed because some (now benign) wiring still
-      #   below (cascade-dispatch reffed 3 times).
-      #   - LATER: Drop these inputs, and add comment reffing the drop commit.
-      #     - (For now, disabled, while convincing myself I don't want these.)
-      #
-      # cascade-dispatch:
-      #   description: 'Start the cascade'
-      #   type: boolean
-      #   default: false
-      #
-      # cascade-updatedeps:
-      #   description: 'Cascade poetry-update'
-      #   type: choice
-      #   options:
-      #     - 'all'
-      #     - 'ours'
-      #     - 'skip'
-      #   default: 'all'
-      #
-      # cascade-versioning:
-      #   description: 'Cascade version bump'
-      #   type: choice
-      #   options:
-      #     - 'alpha'
-      #     - 'patch'
-      #     - 'least'
-      #     - 'skip'
-      #   default: 'alpha'
+      # MEH: Ideally, user will use sprout-updates.yml to start cascade.
+      # - But we'll support start-cascade here, too, mostly because
+      #   update-deps.yml *has* to include simimlar workflow_dispatch
+      #   inputs, and it's *parity over perfect*.
+
+      cascade-dispatch:
+        description: 'Start the cascade'
+        type: boolean
+        default: false
+
+      cascade-updatedeps:
+        description: 'Cascade poetry-update'
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'skip'
+
+      cascade-versioning:
+        description: 'Cascade version bump'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'skip'
 
 # ***
 

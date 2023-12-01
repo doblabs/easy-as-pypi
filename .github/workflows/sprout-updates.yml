@@ -71,15 +71,59 @@ on:
           - 'skip'
         default: 'alpha'
 
+# SAVVY: GitHub imposes a nested reusable workflow limit of 3, so we cannot
+# call update-deps as a reusable workflow. I.e., this won't work:
+#
+#   jobs:
+#     update-deps:
+#       uses: ./.github/workflows/update-deps.yml
+#       secrets: inherit
+#       with:
+#         cascade-updatedeps: ${{ ... }}
+#         cascade-versioning: ${{ ... }}
+#
+# Because we'll end up at the disallowed fourth level if both values
+# are 'skip' and each workflow keeps calling the next one, e.g.,:
+# - First (1), this workflow (sprout-updates) runs. Then it calls
+#   (2) update-deps, which, because 'skip', calls
+#   (3) update-merged, which because 'skip', calls
+#   (4) spread-updates, which is fine, this is depth 3,
+#   *however*, spread-updates uses (5) ci-tags-wrangle, and
+#   then we've exceeded the limit, which GH Actions actually
+#   sees before running any jobs, during parsing, and fails:
+#     job "wrangle-ci-tags-cleanup" calls workflow
+#     "./.github/workflows/ci-tags-wrangle.yml", but doing
+#     so would exceed the limit on called workflow depth of 3
+#
+# So here rather than nesting update-deps, we'll dispatch it
+# using `gh`.
+
 jobs:
   update-deps:
     name: "Dispatch"
-    uses: ./.github/workflows/update-deps.yml
-    secrets: inherit
-    with:
-      cascade-updatedeps: ${{
-        github.event.client_payload.cascade-updatedeps
-        || inputs.cascade-updatedeps }}
-      cascade-versioning: ${{
-        github.event.client_payload.cascade-versioning
-        || inputs.cascade-versioning }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository (so `gh` works)
+        uses: actions/checkout@v4
+
+      # REFER:
+      # https://docs.github.com/en/actions/using-workflows/reusing-workflows#nesting-reusable-workflows
+      - name: Run update-deps workflow (bypass nested reusable workflow limit)
+        run: |
+          # USYNC: The name is from .github/workflows/update-deps.yml
+          workflow_name="Release Cascade — Update"
+          echo "gh workflow run \"${workflow_name}\""
+          gh workflow run "${workflow_name}" \
+            -f "cascade-dispatch=true" \
+            -f "cascade-updatedeps=${CASCADE_UPDATEDEPS}" \
+            -f "cascade-versioning=${CASCADE_VERSIONING}" \
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CASCADE_UPDATEDEPS: ${{
+            github.event.client_payload.cascade-updatedeps
+            || inputs.cascade-updatedeps }}
+          CASCADE_VERSIONING: ${{
+            github.event.client_payload.cascade-versioning
+            || inputs.cascade-versioning }}
