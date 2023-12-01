@@ -219,8 +219,10 @@ update_poetry_update () {
 
     # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
     echo "$(basename "${NEW_PR_URL}")"
+  else
+    # Aka, "po-update was a no-op\n"
+    print_prog "po-up was a no-op\n"
   fi
-  # else, print nothing, means po-update was a no-op.
 }
 
 # ***
