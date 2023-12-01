@@ -90,6 +90,17 @@ env:
     || 'skip' }}
 
 jobs:
+  # `env.` doesn't work from within `with:`, so kluge it.
+  env-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
+          echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
+    outputs:
+      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
+      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
+
   # Here we check for branch tags (ci-inhibit-forever) and HEAD tags the
   # user might've set deliberately on this project. Because this is the
   # cascade entry point for a project (via repository_dispatch), HEAD
@@ -188,19 +199,6 @@ jobs:
 
     outputs:
       new_pr_num: ${{ steps.run-update-poetry.outputs.new_pr_num }}
-
-  # ***
-
-  # `env.` doesn't work from `with:`, so kluge it.
-  env-outputs:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
-          echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
-    outputs:
-      cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
-      cascade-versioning: ${{ env.CASCADE_VERSIONING }}
 
   # ***
 
