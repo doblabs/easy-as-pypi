@@ -204,6 +204,9 @@ update_poetry_update () {
   local remote_name
   remote_name="$(git_upstream_remote)"
 
+  local POETRY_OUTPUT_DUMP
+  POETRY_OUTPUT_DUMP="$(mktemp -t update-poetry-XXXXX)"
+
   local has_changes=false
 
   if update_and_commit_lock_normal "${branch_name}"; then
@@ -228,6 +231,8 @@ update_poetry_update () {
     # Aka, "po-update was a no-op\n"
     print_prog "po-up was a no-op\n"
   fi
+
+  command rm "${POETRY_OUTPUT_DUMP}"
 }
 
 # ***
@@ -316,11 +321,11 @@ poetry_update_lock_normal () {
       editable_pjs="$(make_inspect_var "EDITABLE_PJS")"
 
       # Restrict to updating just our org's repos (aka "our" deps).
-      poetry update -q --lock ${editable_pjs}
+      poetry update --lock ${editable_pjs} >> "${POETRY_OUTPUT_DUMP}"
     elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "all" ]; then
       print_prog "all... "
 
-      poetry update -q --lock
+      poetry update --lock >> "${POETRY_OUTPUT_DUMP}"
     else
       # Note that UPDEPS_CASCADE_UPDATEDEPS cannot be 'skip', because
       # caller precludes calling this script otherwise.
@@ -351,7 +356,7 @@ poetry_update_lock_prerelease () {
   #     pip --index-url https://test.pypi.org/simple \
   #       --extra-index-url=https://pypi.org/simple/ \
   #       <pkg>
-  make prepare-poetry-prerelease
+  make prepare-poetry-prerelease >> "${POETRY_OUTPUT_DUMP}" 2>&1
 }
 
 # ***
@@ -628,6 +633,13 @@ gh_pr_create_and_auto_merge_when_checks_finish () {
   gh_pr_set_auto_merge_delete_rebase "${NEW_PR_URL}"
 
   gh_pr_approve "${NEW_PR_URL}"
+
+  if [ -s "${POETRY_OUTPUT_DUMP}" ]; then
+    print_prog
+    print_prog "poetry dump:"
+    print_prog "${POETRY_OUTPUT_DUMP} | sed 's/^/  /'"
+    print_prog
+  fi
 
   print_prog "New PR\n  ${NEW_PR_URL}\n"
 }
