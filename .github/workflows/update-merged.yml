@@ -206,6 +206,30 @@ jobs:
 
   # ***
 
+  trace:
+    name: Trace vars
+    needs: [env-outputs, verify-merged-pr]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    steps:
+      # yamllint disable rule:line-length
+      - run: |
+          echo "github.event_name: ${{ github.event_name }}"
+          #
+          echo "inputs.bump-part: ${{ inputs.bump-part }}"
+          echo "inputs.cascade-dispatch: ${{ inputs.cascade-dispatch }}"
+          echo "inputs.cascade-updatedeps: ${{ inputs.cascade-updatedeps }}"
+          echo "inputs.cascade-versioning: ${{ inputs.cascade-versioning }}"
+          #
+          echo "env-outputs...cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}"
+          echo "env-outputs...cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}"
+          #
+          echo "needs.verify-merged-pr.result: ${{ needs.verify-merged-pr.result }}"
+          #
+          echo "github.event.pull_request.labels.*.name: ${{
+            toJson(github.event.pull_request.labels.*.name) }}"
+      # yamllint enable rule:line-length
+
   # Temporarily set HEAD tags pertinent to the current cascade. We
   # will clear these tags when we pass the cascade torch along later.
   wrangle-ci-tags:
