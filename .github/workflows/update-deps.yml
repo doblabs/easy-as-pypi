@@ -5,6 +5,8 @@
 
 ---
 
+# USYNC: This name is used by `gh workflow run`.
+# - Search for: 'Release Cascade — Update'
 name: Release Cascade — Update
 
 run-name: 👣 — Cascade — 2.) Update deps ${{
@@ -13,64 +15,38 @@ run-name: 👣 — Cascade — 2.) Update deps ${{
 on:
   # Via sprout-updates.yml, either from user workflow_dispatch, or from
   # upstream project repository_dispatch (from spread-updates.yml).
-  workflow_call:
+  # - Or via GitHub Actions website button for this workflow itself.
+  # SAVVY: Ideally, user will use sprout-updates.yml to start cascade.
+  # - But we still need workflow_dispatch inputs, so that sprout-updates
+  #   can call this workflow via `gh workflow run`, to avoid exceeding the
+  #   nested reusable workflow limit (see comments elsewhere).
+  # - So the user can still start the cascade from this workflow's
+  #   GH Actions buttons, but they'll have to opt-in.
+  workflow_dispatch:
     inputs:
+      cascade-dispatch:
+        description: 'Start the cascade'
+        type: boolean
+        default: false
+
       cascade-updatedeps:
         description: 'Cascade poetry-update'
-        type: string
-        default: 'all'
+        type: choice
+        options:
+          - 'all'
+          - 'ours'
+          - 'skip'
+        default: 'skip'
 
       cascade-versioning:
         description: 'Cascade version bump'
-        type: string
-        default: 'alpha'
-
-  # Via GitHub Actions website button, via user
-  # - Runs bin/update-poetry, but does not version
-  #   nor start the release cascade.
-  workflow_dispatch:
-    # ISOFF/2023-11-30: Users now use sprout-updates.yml to start cascade.
-    # - This workflow's workflow_dispatch will now only run bin/update-poetry
-    #   and will not start the release cascade.
-    # - NOTED: This code not removed because some (now benign) wiring still
-    #   below (inputs.bump-part reffed once, and cascade-dispatch twice).
-    #   - LATER: Drop these inputs, and add comment reffing the drop commit.
-    #     - (For now, disabled, while convincing myself I don't want these.)
-    #
-    # inputs:
-    #   bump-part:
-    #     description: 'Increment version'
-    #     type: choice
-    #     options:
-    #       - 'alpha'
-    #       - 'patch'
-    #       - 'least'
-    #       - 'skip'
-    #     default: 'alpha'
-    #
-    #   cascade-dispatch:
-    #     description: 'Start the cascade'
-    #     type: boolean
-    #     default: false
-    #
-    #   cascade-updatedeps:
-    #     description: 'Cascade poetry-update'
-    #     type: choice
-    #     options:
-    #       - 'all'
-    #       - 'ours'
-    #       - 'skip'
-    #     default: 'all'
-    #
-    #   cascade-versioning:
-    #     description: 'Cascade version bump'
-    #     type: choice
-    #     options:
-    #       - 'alpha'
-    #       - 'patch'
-    #       - 'least'
-    #       - 'skip'
-    #     default: 'alpha'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'skip'
 
 # ***
 
@@ -84,8 +60,7 @@ env:
     inputs.cascade-updatedeps
     || 'skip' }}
   CASCADE_VERSIONING: ${{
-    inputs.bump-part
-    || inputs.cascade-versioning
+    inputs.cascade-versioning
     || 'skip' }}
 
 jobs:
