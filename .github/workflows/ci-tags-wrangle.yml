@@ -149,3 +149,20 @@ jobs:
           EAPP_DELETE_CASCADE_UPDATEDEPS: ${{ inputs.delete-cascade-updatedeps }}
           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
           EAPP_DELETE_CASCADE_VERSIONING: ${{ inputs.delete-cascade-versioning }}
+
+      # ***
+
+      - name: Trace vars
+        run: |
+          echo "old-inhibit-cascade: ${{
+            steps.wrangle-ci-tags.outputs.old_inhibit_cascade
+          }}"
+          echo "old-inhibit-forever: ${{
+            steps.wrangle-ci-tags.outputs.old_inhibit_forever
+          }}"
+          echo "old-cascade-updatedeps: ${{
+            steps.wrangle-ci-tags.outputs.old_cascade_updatedeps
+          }}"
+          echo "old-cascade-versioning: ${{
+            steps.wrangle-ci-tags.outputs.old_cascade_versioning
+          }}"
