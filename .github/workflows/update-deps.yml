@@ -40,6 +40,28 @@ on:
   #     update the current project's deps, but it won't propagate the cascade.
   workflow_dispatch:
     inputs:
+      which-deps:
+        description: 'Update deps'
+        type: choice
+        options:
+          - 'ours'
+          - 'all'
+          # ISOFF: There's no 'skip' option when this workflow is run
+          #        directly from the GitHub Actions page.
+          #        - If user wants to skip poetry-update, then should
+          #          set cascade-updatedeps to 'skip' and call one of
+          #          the other workflows (spread-updates.yml,
+          #          sprout-updates.yml or update-merged.yml).
+          #
+          #  - 'skip'
+        # Use the empty string ('') as the default, and also list the 'ours'
+        # option first, above. This causes the GH Actions page button to
+        # default to 'ours', and then the env.CASCADE_UPDATEDEPS var, set
+        # below, defaults to inputs.cascade-updatedeps.
+        default: ''
+
+      # ***
+
       cascade-dispatch:
         description: 'Start the cascade'
         type: boolean
@@ -89,7 +111,8 @@ env:
   # you need to convert env.values to job.outputs.values if you want to
   # use env.values in an `if` or a `with` (see env-outputs usage).
   CASCADE_UPDATEDEPS: ${{
-    inputs.cascade-updatedeps
+    inputs.which-deps
+    || inputs.cascade-updatedeps
     || 'skip' }}
   CASCADE_VERSIONING: ${{
     inputs.cascade-versioning
