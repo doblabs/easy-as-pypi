@@ -285,6 +285,7 @@ jobs:
 
     needs: [env-outputs, verify-merged-pr]
 
+    # If we're not gonna bump, we don't need to write tags.
     # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
     # SAVVY: When called via upstream repo-dispatch and update-deps.yml
     #        calls us via workflow_call, event is still repo-dispatch.
