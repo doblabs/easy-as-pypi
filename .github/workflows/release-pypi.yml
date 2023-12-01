@@ -478,12 +478,6 @@ jobs:
       && !contains(needs.*.result, 'cancelled') }}
 
     steps:
-      - name: Dump github object
-        run: echo "${GITHUB_OBJ}"
-        shell: bash
-        env:
-          GITHUB_OBJ: ${{ toJson(github) }}
-
       - name: Checkout repository (not workflow_dispatch)
         uses: actions/checkout@v4
 
