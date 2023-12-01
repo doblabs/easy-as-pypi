@@ -311,8 +311,7 @@ jobs:
       # Manage "ci-cascade-updatedeps"
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       # Manage "ci-cascade-versioning"
-      cascade-versioning: ${{ inputs.bump-part
-        || needs.env-outputs.outputs.cascade-versioning }}
+      cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}
 
   # ***
 
