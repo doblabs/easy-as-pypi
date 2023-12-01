@@ -730,7 +730,7 @@ gh_pr_create () {
   local new_pr_url
 
   print_prog "gh pr create --title \"${pr_title}\" --body \"${pr_body}\"" \
-    "--label "${UPDEPS_LABEL_NAME_POETRY_LOCK}" ${pr_ci_labels}\n"
+    "--label \"${UPDEPS_LABEL_NAME_POETRY_LOCK}\" ${pr_ci_labels}\n"
 
   # Create PR from user PAT so on auto-merge, it triggers workflow events.
 
