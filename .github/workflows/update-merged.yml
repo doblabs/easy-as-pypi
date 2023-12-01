@@ -22,6 +22,19 @@ on:
   # Via .github/workflows/update-deps.yml, when cascade-updatedeps is 'skip'.
   workflow_call:
     inputs:
+      # ODDLY: Note that we don't really need to specify cascade-dispatch.
+      # - It's a workflow_dispatch input to update-deps.yml, which calls
+      #   this workflow, so inputs.cascade-dispatch will always be set
+      #   (including whether or not update-deps specifies cascade-dispatch
+      #   in its `with` list).
+      #   - Note that we still need to define the `workflow_call` event
+      #     so that update-deps.yml can call this workflow, and that the
+      #     the github event is workflow_dispatch, not workflow_call.
+      # Nonetheless, we'll define cascade-dispatch here for readability.
+      cascade-dispatch:
+        type: boolean
+        default: false
+
       cascade-updatedeps:
         type: string
         default: 'skip'
@@ -243,8 +256,7 @@ jobs:
     if: ${{ ! cancelled()
       && inputs.cascade-versioning != 'skip'
       && ((github.event_name == 'repository_dispatch')
-          || (inputs.cascade-dispatch != ''
-              && inputs.cascade-dispatch
+          || (inputs.cascade-dispatch
               && inputs.bump-part != 'skip')
           || (github.event_name == 'pull_request'
               && needs.verify-merged-pr.result == 'success'
@@ -258,7 +270,7 @@ jobs:
       # Manage "ci-inhibit-cascade"
       inhibit-cascade: ${{
         contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
-        || (inputs.cascade-dispatch != '' && ! inputs.cascade-dispatch) }}
+        || (! inputs.cascade-dispatch) }}
       # LEAVE: "ci-inhibit-forever"
       # Manage "ci-cascade-updatedeps"
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
@@ -366,7 +378,7 @@ jobs:
     # SAVVY: Note this won't casade is git-bump ran but didn't change the version.
     if: ${{ ! cancelled()
       && ((github.event_name == 'repository_dispatch')
-          || (inputs.cascade-dispatch != ''
+          || (inputs.cascade-dispatch
               && inputs.cascade-dispatch
               && inputs.bump-part == 'skip')
           || (github.event_name == 'pull_request'
