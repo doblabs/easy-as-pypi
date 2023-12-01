@@ -67,8 +67,20 @@ on:
           - 'alpha'
           - 'patch'
           - 'least'
-          - 'skip'
+          # ISOFF: If the user is using this workflow's workflow_dispatch,
+          #        there's no reason to skip versioning.
+          #        - If user doesn't want to version this project but also
+          #          wants to start the cascade, there are other
+          #          workflow_dispatch calls they could use:
+          #            spread-updates.yml
+          #            sprout-updates.yml
+          #            update-deps.yml
+          #          In each case setting cascade-versioning to 'skip'.
+          #
+          #  - 'skip'
         default: 'alpha'
+
+      # ***
 
       # MEH: Ideally, user will use sprout-updates.yml to start cascade.
       # - But we'll support start-cascade here, too, mostly because
