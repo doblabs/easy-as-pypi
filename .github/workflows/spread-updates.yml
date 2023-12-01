@@ -16,6 +16,20 @@ on:
   # - Or via update-merged.yml, if nothing new was released (no PR,
   #   no new version tag, no GH or PyPI release or smoke test),
   #   in which case CI tags are not set but these 2 inputs are.
+  # - BWARE: When both 'skip', we're at the nested reusable workflow limit
+  #   imposed by GH Actions, which is 3, i.e., 1.yml can call 2.yml, which
+  #   uses 3.yml, which uses 4.yml, but 4.yml is not allowed to call yet
+  #   another reusable workflow.
+  #   - In this case, update-deps (1) calls update-merged (2) directly
+  #     if cascade-updatedeps is 'skip'. Then update-merged (2) calls
+  #     spread-updates (3) (this workflow) if cascade-versioning
+  #     is 'skip'. And then, below, this workflow (3) calls ('uses')
+  #     ci-tags-wrangle (4), which is the max depth!
+  #     - SAVVY: You can use `gh workflow run` to call a workflow
+  #       without it being nested (which shows up as a separate
+  #       workflow run under GH Actions).
+  #   - REFER:
+  # https://docs.github.com/en/actions/using-workflows/reusing-workflows#nesting-reusable-workflows
   workflow_call:
     inputs:
       cascade-updatedeps:
