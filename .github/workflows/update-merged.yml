@@ -8,7 +8,11 @@
 name: Release Cascade — Version
 
 run-name: 👣 — Cascade — 3.) Version ${{
-  github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
+  false
+  || (inputs.bump-part != '' && '(via User)')
+  || (github.event_name == 'pull_request' && '(PR closed)')
+  || (inputs.from-upstream && '(from up)')
+  || '(from the unknown)' }}
 
 on:
   # CXREF:
@@ -42,6 +46,11 @@ on:
       cascade-versioning:
         type: string
         default: 'skip'
+
+      # Just for the UX of it.
+      from-upstream:
+        type: boolean
+        default: false
 
   # Via GitHub Actions website button
   workflow_dispatch:
