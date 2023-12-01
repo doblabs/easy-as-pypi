@@ -8,7 +8,7 @@
 name: Release Cascade — Dispatch
 
 run-name: 👣 — Cascade — 1.) Dispatch ${{
-  github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
+  inputs.cascade-updatedeps == '' && '(Smoke-tested)' || '(via User)' }}
 
 on:
   # Via release-smoke-test.yml after PyPI release, which doesn't
