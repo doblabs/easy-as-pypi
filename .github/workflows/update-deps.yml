@@ -10,7 +10,7 @@
 name: Release Cascade — Update
 
 run-name: 👣 — Cascade — 2.) Update deps ${{
-  github.event_name == 'workflow_dispatch' && '(via User)' || '' }}
+  ! inputs.from-upstream && '(via User)' || '(from up)' }}
 
 on:
   # Via sprout-updates.yml, either from user workflow_dispatch, or from
@@ -47,6 +47,12 @@ on:
           - 'least'
           - 'skip'
         default: 'skip'
+
+      # Just for the UX of it.
+      from-upstream:
+        description: 'Internal flag (from-upstream)'
+        type: boolean
+        default: false
 
 # ***
 
@@ -228,3 +234,4 @@ jobs:
       cascade-dispatch: true
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
       cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}
+      from-upstream: ${{ inputs.from-upstream }}
