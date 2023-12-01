@@ -184,7 +184,7 @@ jobs:
       - name: Run bin/update-poetry
         id: run-update-poetry
         run: |
-          env | grep -e "^UPDEPS_"
+          env | grep -e "^UPDEPS_" | sort
 
           new_pr_num="$(
             ./.github/bin/update-poetry
