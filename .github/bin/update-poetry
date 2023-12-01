@@ -312,8 +312,13 @@ poetry_update_lock_normal () {
     if [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "ours" ]; then
       print_prog "ours... "
 
+      # Use intermediate var. so errexit catches make_inspect_var non-zero
+      # exit (vs. calling $(...) as poetry-update arg and nonzero ignored).
+      local editable_pjs
+      editable_pjs="$(make_inspect_var "EDITABLE_PJS")"
+
       # Restrict to updating just our org's repos (aka "our" deps).
-      poetry update -q --lock $(make_inspect_var "EDITABLE_PJS")
+      poetry update -q --lock ${editable_pjs}
     elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "all" ]; then
       print_prog "all... "
 
