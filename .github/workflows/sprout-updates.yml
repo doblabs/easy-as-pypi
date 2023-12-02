@@ -125,16 +125,16 @@ jobs:
           from_upstream="${{ github.event_name == 'repository_dispatch' }}"
           echo "\
             gh workflow run \"${workflow_name}\" \\
+              -f \"which-deps=${CASCADE_UPDATEDEPS}\" \\
               -f \"include-prerelease-lock=\" \\
               -f \"cascade-dispatch=true\" \\
-              -f \"cascade-updatedeps=${CASCADE_UPDATEDEPS}\" \\
               -f \"cascade-versioning=${CASCADE_VERSIONING}\" \\
               -f \"from-upstream=${from_upstream}\" \\
             "
           gh workflow run "${workflow_name}" \
+            -f "which-deps=${CASCADE_UPDATEDEPS}" \
             -f "include-prerelease-lock=" \
             -f "cascade-dispatch=true" \
-            -f "cascade-updatedeps=${CASCADE_UPDATEDEPS}" \
             -f "cascade-versioning=${CASCADE_VERSIONING}" \
             -f "from-upstream=${from_upstream}" \
         env:
