@@ -499,7 +499,7 @@ push_branch () {
   local branch_name="$1"
   local remote_name="$2"
 
-  print_prog "git push '${remote_name}'... "
+  print_prog "git push -q -u '${remote_name}' HEAD:refs/heads/${branch_name}..."
 
   # Even though --quiet, any message from the remote is printed to stderr, e.g.,:
   #   remote:
