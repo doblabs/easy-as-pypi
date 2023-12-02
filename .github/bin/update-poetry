@@ -218,10 +218,12 @@ update_poetry_update () {
 
   local has_changes=false
 
+  # CXREF: poetry_update_lock_normal
   if update_and_commit_lock_normal "${branch_name}"; then
     has_changes=true
   fi
 
+  # CXREF: poetry_update_lock_prerelease
   if update_and_commit_lock_prerelease "${branch_name}"; then
     has_changes=true
   fi
