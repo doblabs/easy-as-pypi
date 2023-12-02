@@ -197,6 +197,9 @@ jobs:
             ./.github/bin/update-poetry
           )"
 
+          echo "new_pr_num=${new_pr_num}"
+          echo "GITHUB_OUTPUT=${GITHUB_OUTPUT}"
+
           echo "new_pr_num=${new_pr_num}" >> $GITHUB_OUTPUT
         env:
           # USER_TOKEN used with gh-label (manage 'poetry.lock' label),
