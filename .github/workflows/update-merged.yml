@@ -379,7 +379,8 @@ jobs:
     if: ${{ ! cancelled()
       && ((github.event_name == 'pull_request'
            && needs.verify-merged-pr.result == 'success'
-           && contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
+           && contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
+           && ! contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade'))
           || (github.event_name != 'pull_request'
               && inputs.cascade-dispatch
               && (inputs.bump-part == 'skip'
