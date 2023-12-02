@@ -46,9 +46,6 @@ __pycache__/
 # - This is jinja2 template source data compiled from pyproject.toml.
 /.pyproject-cache.data
 
-# USYNC: PYPROJECT_PRERELEASE_DIR ?= .pyproject-prerelease
-/.pyproject-prerelease/
-
 # DX artifacts.
 # - USYNC: Matches VIM_QUICKFIX_FLAKE8 from `make flake8`.
 #   - If you use a different path, add yours to .git/info/exclude
