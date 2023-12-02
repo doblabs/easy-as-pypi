@@ -29,13 +29,16 @@ UPDEPS_CASCADE_VERSIONING="${UPDEPS_CASCADE_VERSIONING:-alpha}"
 #   - There's another option, "skip", but then this script is not called.
 UPDEPS_CASCADE_UPDATEDEPS="${UPDEPS_CASCADE_UPDATEDEPS:-all}"
 
-# Just a convenience value for this module.
+# Calculated value. Caller can specify explicitly (UPDEPS_INCLUDE_PRERELEASE)
+# or we'll figure it out.
 UPDEPS_INCLUDE_PRERELEASE="$(
-  true \
-  && [ "${UPDEPS_CASCADE_VERSIONING}" != "least" ] \
-  && [ "${UPDEPS_CASCADE_VERSIONING}" != "alpha" ] \
-  && echo false \
-  || echo true
+  (${UPDEPS_INCLUDE_PRERELEASE:-false} \
+   || (! ${UPDEPS_CASCADE_INHIBIT} \
+       && (false \
+           || [ "${UPDEPS_CASCADE_VERSIONING}" = "least" ] \
+           || [ "${UPDEPS_CASCADE_VERSIONING}" = "alpha" ]))) \
+  && echo true \
+  || echo false
 )"
 
 # ***
@@ -52,6 +55,7 @@ __UPDEPS__CPYST__="
   UPDEPS_CASCADE_INHIBIT=true \
   UPDEPS_CASCADE_UPDATEDEPS=skip \
   UPDEPS_CASCADE_VERSIONING=skip \
+  UPDEPS_INCLUDE_PRERELEASE=false \
     ./.github/bin/update-poetry
 "
 
