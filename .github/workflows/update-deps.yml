@@ -72,14 +72,17 @@ on:
         type: boolean
         default: false
 
-      cascade-updatedeps:
-        description: 'Cascade poetry-update'
-        type: choice
-        options:
-          - 'all'
-          - 'ours'
-          - 'skip'
-        default: 'skip'
+      # ISOFF: User should assume which-deps will be used for the cascade.
+      # - If user wants to 'skip' updatedeps, send them to sprout-updates.yml.
+      #
+      # cascade-updatedeps:
+      #    description: 'Cascade poetry-update'
+      #    type: choice
+      #    options:
+      #      - 'all'
+      #      - 'ours'
+      #      - 'skip'
+      #    default: 'skip'
 
       cascade-versioning:
         description: 'Cascade version bump'
@@ -117,7 +120,6 @@ env:
   # use env.values in an `if` or a `with` (see env-outputs usage).
   CASCADE_UPDATEDEPS: ${{
     inputs.which-deps
-    || inputs.cascade-updatedeps
     || 'skip' }}
   CASCADE_VERSIONING: ${{
     inputs.cascade-versioning
