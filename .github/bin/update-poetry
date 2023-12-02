@@ -192,7 +192,8 @@ _updeps_insist_cmd () {
 # Program prints a single "true" or "false" to stdout for CI workflow.
 # - Program prints other trace/progress messages to stderr for you ᵒᴥᵒ.
 print_prog () {
-  >&2 printf "%s" "$@"
+  # SAVVY: %b, not %s, so \n'ewlines and the like honored.
+  >&2 printf "%b" "$@"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
