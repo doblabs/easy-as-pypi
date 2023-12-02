@@ -519,7 +519,14 @@ push_branch () {
   # workflow to run. (The normal GH_TOKEN=${{ github.token }} inhibits
   # workflow events.)
 
-  git push -q -u ${remote_name} "HEAD:refs/heads/${branch_name}" 2> /dev/null
+  local git_output
+
+  if ! git_output="$(git push -q -u "${remote_name}" "HEAD:refs/heads/${branch_name}" 2>&1)"; then
+    >&2 echo -e "\n\nERROR: git-push failed:"
+    echo "${git_output}" | >&2 sed 's/^/  /'
+
+    exit 1
+  fi
 
   print_prog "✓\n"
 }
