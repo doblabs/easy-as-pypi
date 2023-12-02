@@ -554,9 +554,12 @@ git_upstream_remote () {
 
     if [ -n "${repo_url}" ]; then
       # Trim, e.g., https://github.com/doblabs/easy-as-pypi → doblabs/easy-as-pypi
+      # - Also trim comments, e.g., doblabs/easy-as-pypi#🥧 → doblabs/easy-as-pypi
       # - Result is same as ${{ github.repository }}
       UPDEPS_REPO_ORG_PROJ="$(
-        echo "${repo_url}" | sed 's#^.*/\([^/]*/[^/]*\)$#\1#'
+        echo "${repo_url}" \
+          | sed 's#^.*/\([^/]*/[^/]*\)$#\1#' \
+          | sed 's/\([^#]*\).*/\1/'
       )"
 
       if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
