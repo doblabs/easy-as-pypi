@@ -652,8 +652,8 @@ gh_pr_create_and_auto_merge_when_checks_finish () {
 
   if [ -s "${POETRY_OUTPUT_DUMP}" ]; then
     print_prog
-    print_prog "${POETRY_OUTPUT_DUMP} | sed 's/^/  /'"
     print_prog "poetry dump:\n"
+    print_prog "$(cat "${POETRY_OUTPUT_DUMP}" | sed 's/^/  /')\n"
     print_prog
   fi
 
