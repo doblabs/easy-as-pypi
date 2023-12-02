@@ -63,6 +63,11 @@ on:
       # - OWELL: There's a slight UX disconnect here: This input, bump-part,
       #   is used for the current repo versioning, and also for all the
       #   downstream repo versionings, if user opts-in the cascade-dispatch.
+      #   - We could use separate buttons, one for this project (bump-part),
+      #     and one for downstream (cascade-versioning). But having two
+      #     versioning options seems more confusing than having just the
+      #     one option, especially considering how little influence we have
+      #     over the GH Actions page "Run workflow" dropdown.
       bump-part:
         description: 'Increment version'
         type: choice
@@ -104,15 +109,21 @@ on:
           - 'skip'
         default: 'skip'
 
-      cascade-versioning:
-        description: 'Cascade version bump'
-        type: choice
-        options:
-          - 'alpha'
-          - 'patch'
-          - 'least'
-          - 'skip'
-        default: 'skip'
+      # ISOFF: User should assume bump-part will be used for the cascade.
+      # - Otherwise there's a disconnect in my brain trying to support
+      #   both bump-part (for the current project) and cascade-versioning
+      #   (for all the downstream projects).
+      # - If user wants to 'skip' versioning, send them to sprout-updates.yml.
+      #
+      #  cascade-versioning:
+      #    description: 'Cascade version bump'
+      #    type: choice
+      #    options:
+      #      - 'alpha'
+      #      - 'patch'
+      #      - 'least'
+      #      - 'skip'
+      #    default: 'skip'
 
 # ***
 
@@ -194,6 +205,7 @@ env:
   #     "ci-version-(alpha|patch|least|skip)"
   CASCADE_VERSIONING: ${{
     false
+    || inputs.bump-part
     || inputs.cascade-versioning
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
         && 'alpha')
@@ -287,14 +299,9 @@ jobs:
     #        - Note it is assumed on repository_dispatch that
     #          cascade-dispatch is true, ci-inhibit-cascade false, etc.
     if: ${{ ! cancelled()
-      && inputs.cascade-versioning != 'skip'
-      && ((github.event_name == 'repository_dispatch')
-          || (inputs.cascade-dispatch
-              && inputs.bump-part != 'skip')
-          || (github.event_name == 'pull_request'
-              && needs.verify-merged-pr.result == 'success'
-              && ! contains(github.event.pull_request.labels.*.name, 'ci-version-skip'))
-         ) }}
+      && needs.env-outputs.outputs.cascade-versioning != 'skip'
+      && (github.event_name != 'pull_request'
+          || needs.verify-merged-pr.result == 'success') }}
 
     uses: ./.github/workflows/ci-tags-wrangle.yml
 
