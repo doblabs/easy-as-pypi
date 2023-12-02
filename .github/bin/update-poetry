@@ -547,7 +547,11 @@ push_branch () {
 # - We don't default to the sole remote if that's all there is.
 #   We're looking for a specific github.com/<org>/<proj> remote.
 git_upstream_remote () {
-  if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
+  local updeps_repo_org_proj
+
+  if [ -n "${UPDEPS_REPO_ORG_PROJ}" ]; then
+    updeps_repo_org_proj="${UPDEPS_REPO_ORG_PROJ}"
+  else
     local repo_url
 
     repo_url="$(print_upstream_remote_url)" || exit_1
@@ -556,13 +560,13 @@ git_upstream_remote () {
       # Trim, e.g., https://github.com/doblabs/easy-as-pypi → doblabs/easy-as-pypi
       # - Also trim comments, e.g., doblabs/easy-as-pypi#🥧 → doblabs/easy-as-pypi
       # - Result is same as ${{ github.repository }}
-      UPDEPS_REPO_ORG_PROJ="$(
+      updeps_repo_org_proj="$(
         echo "${repo_url}" \
           | sed 's#^.*/\([^/]*/[^/]*\)$#\1#' \
           | sed 's/\([^#]*\).*/\1/'
       )"
 
-      if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
+      if [ -z "${updeps_repo_org_proj}" ]; then
         >&2 echo "ERROR: Could not deduce project repo from URL: ${repo_url}"
 
         exit_1
@@ -577,11 +581,11 @@ git_upstream_remote () {
     fi
   fi
 
-  if ! git_upstream_remote_deduce; then
+  if ! git_upstream_remote_deduce "${updeps_repo_org_proj}"; then
     # Note that we're ignoring the tracking branch. We want our GH
     # org/proj repo. Which we didn't find.
     >&2 echo "ERROR: Could not determine the upstream GitHub remote"
-    >&2 echo "- We checked UPDEPS_REPO_ORG_PROJ (“${UPDEPS_REPO_ORG_PROJ}”)"
+    >&2 echo "- We checked UPDEPS_REPO_ORG_PROJ (“${updeps_repo_org_proj}”)"
     >&2 echo "  against these remotes:"
     >&2 git remote -v
 
@@ -625,10 +629,12 @@ print_upstream_remote_url_from_pyproject_toml () {
 }
 
 git_upstream_remote_deduce () {
+  local updeps_repo_org_proj="$1"
+
   git remote -v \
     | grep \
-        -e "[[:space:]]git@.*:${UPDEPS_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
-        -e "github.com/${UPDEPS_REPO_ORG_PROJ}\(\.git\)\? (push)\$" \
+        -e "[[:space:]]git@.*:${updeps_repo_org_proj}\(\.git\)\? (push)\$" \
+        -e "github.com/${updeps_repo_org_proj}\(\.git\)\? (push)\$" \
     | sed 's/^\([^[:space:]]\+\).*/\1/'
 }
 
