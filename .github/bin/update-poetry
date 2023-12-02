@@ -906,18 +906,22 @@ assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any () {
     && return 0 || true
 
   local git_status
-  git_status="$(cd "${pyproject_dir}" && git status --porcelain=v1)"
+  git_status="$(cd "${pyproject_dir}" && git_status_short)"
 
   test -z "${git_status}" \
     && return 0 || true
 
   local expect_if_both_changed="\
- M poetry.lock
- M pyproject.toml"
+( M|\?\?) poetry.lock
+( M|\?\?) pyproject.toml"
 
-  if [ "${git_status}" = " M poetry.lock" ] \
-    || [ "${git_status}" = " M pyproject.toml" ] \
-    || [ "${git_status}" = "${expect_if_both_changed}" ] \
+  local expect_if_all_uncommitted="?? ./"
+
+  if false \
+    || [[ "${git_status}" =~ ( M|\?\?)" poetry.lock" ]] \
+    || [[ "${git_status}" =~ ( M|\?\?)" pyproject.toml" ]] \
+    || [[ "${git_status}" =~ ${expect_if_both_changed} ]] \
+    || [ "${git_status}" = "${expect_if_all_uncommitted}" ] \
   ; then
 
     return 0
@@ -941,15 +945,44 @@ has_changes_pyproject_toml () {
   has_unstaged_changes "pyproject.toml"
 }
 
+# Note we use `git status --short`, not `git status --porcelain=v1`,
+# because the latter ignores status.relativePaths and always shows
+# paths relative to the repository root. But rather than pass around
+# pyproject_dir, we just assume the current working directory is either
+# project root or pyproject_dir, and then we rely on status.relativePaths
+# so our status-checkers don't have to worry about directory paths.
+#
+# Note that git-status docs make it sound like --short might break
+# between versions or between environments, but I'd like to see that,
+# especially when we force the config value at ruuntime.
+git_status_short () {
+  git -c status.relativePaths=true status --short
+}
+
 has_unstaged_changes () {
   local filename="$1"
+
+  local git_status
+  git_status="$(git_status_short)"
+
+  if [ "$(git_status_short)" = "?? ./" ] \
+    && [ -f "${filename}" ]; then
+
+    return 0
+  fi
+
+  # ***
 
   local modified_file
 
   while IFS= read -r modified_file; do
-    test "${modified_file}" = " M ${filename}" \
-      && return 0 || true
-  done <<< "$(git status --porcelain=v1)"
+    if [ "${modified_file}" = " M ${filename}" ] \
+      || [ "${modified_file}" = "?? ${filename}" ] \
+    ; then
+      
+      return 0
+    fi
+  done <<< "${git_status}"
 
   return 1
 }
