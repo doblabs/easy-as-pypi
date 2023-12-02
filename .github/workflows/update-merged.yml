@@ -61,19 +61,8 @@ on:
       # - SAVVY: Note that *pushing* a version tag will trigger cascade,
       #          whereas using this workflow's workflow_dispatch will not.
       # - OWELL: There's a slight UX disconnect here: This input, bump-part,
-      #   is used for the current repo versioning, but then the other input,
-      #   cascade-versioning, is used for all the downstream repo versionings.
-      #   - This is just how it works, because the cascade-* inputs are
-      #     somewhat imposed upon us by GH. Ideally, we wouldn't have them,
-      #     but because some of the workflow has to call `gh workflow run`
-      #     to avoid exceeding the GHA nested reusable workflow limit
-      #     (rather than being able to use a `uses`), and because GHA uses
-      #     (there's that word again) the same event type (workflow_dispatch)
-      #     for both `gh` and for what buttons GitHub shows on the workflow
-      #     web page, we have to include them.
-      #     - Which means we end up with one input for the current project
-      #       (bump-part) and a separate input for the downstream projects
-      #       (cascade-versioning), both of which control the same operation.
+      #   is used for the current repo versioning, and also for all the
+      #   downstream repo versionings, if user opts-in the cascade-dispatch.
       bump-part:
         description: 'Increment version'
         type: choice
@@ -280,17 +269,23 @@ jobs:
             toJson(github.event.pull_request.labels.*.name) }}"
       # yamllint enable rule:line-length
 
-  # Temporarily set HEAD tags pertinent to the current cascade. We
-  # will clear these tags when we pass the cascade torch along later.
+  # Temporarily set tags on HEAD pertinent to the current cascade, but
+  # only if we're going to version. After checks pass, and the release
+  # is published, and smoke-tested, we'll clear these tags, just prior
+  # to when we pass the cascade torch along.
   wrangle-ci-tags:
     name: Wrangle (write) CI tag(s)
 
     needs: [env-outputs, verify-merged-pr]
 
     # If we're not gonna bump, we don't need to write tags.
-    # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
-    # SAVVY: When called via upstream repo-dispatch and update-deps.yml
-    #        calls us via workflow_call, event is still repo-dispatch.
+    # SAVVY: When called via repository_dispatch from upstream project,
+    #        if cascade-updatedeps is 'skip', update-deps.yml calls us
+    #        via workflow_call, and the event is still repo-dispatch
+    #        (otherwise that cascade would enter here on a pull_request,
+    #        after poetry-update changes checked and rebase-merged).
+    #        - Note it is assumed on repository_dispatch that
+    #          cascade-dispatch is true, ci-inhibit-cascade false, etc.
     if: ${{ ! cancelled()
       && inputs.cascade-versioning != 'skip'
       && ((github.event_name == 'repository_dispatch')
@@ -413,6 +408,8 @@ jobs:
 
     # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     # SAVVY: Note this won't casade is git-bump ran but didn't change the version.
+    # USYNC: UPDEPS_LABEL_NAME_VERSION_SKIP="ci-version-skip"
+    # USYNC: UPDEPS_LABEL_NAME_INHIBIT_CASCADE="ci-inhibit-cascade"
     if: ${{ ! cancelled()
       && ((github.event_name == 'pull_request'
            && needs.verify-merged-pr.result == 'success'
