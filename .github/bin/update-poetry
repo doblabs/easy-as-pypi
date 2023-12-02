@@ -19,15 +19,15 @@ UPDEPS_REPO_ORG_PROJ="${UPDEPS_REPO_ORG_PROJ}"
 
 # Cascade options.
 # - Whether to repository_dispatch after PR completes.
-UPDEPS_CASCADE_INHIBIT="${UPDEPS_CASCADE_INHIBIT:-false}"
+UPDEPS_CASCADE_INHIBIT="${UPDEPS_CASCADE_INHIBIT:-true}"
 # - The cascade_updatedeps value to send on repository_dispatch.
 #   - Also what to po-update: "our" deps, or "all" (incl. 3rd-party), see below.
 #   - There's another option, "skip", but then this script is not called.
-UPDEPS_CASCADE_UPDATEDEPS="${UPDEPS_CASCADE_UPDATEDEPS:-all}"
+UPDEPS_CASCADE_UPDATEDEPS="${UPDEPS_CASCADE_UPDATEDEPS:-skip}"
 # - The cascade_versioning value to send on repository_dispatch.
 #   - Also what update-merged.yml uses when versioning current project.
 #   - Also what determines if we poetry-update pre-release assets, see below.
-UPDEPS_CASCADE_VERSIONING="${UPDEPS_CASCADE_VERSIONING:-alpha}"
+UPDEPS_CASCADE_VERSIONING="${UPDEPS_CASCADE_VERSIONING:-skip}"
 
 # Calculated value. Caller can specify explicitly (UPDEPS_INCLUDE_PRERELEASE)
 # or we'll figure it out.
