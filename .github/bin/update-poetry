@@ -359,7 +359,7 @@ poetry_update_lock_normal () {
 }
 
 poetry_update_lock_prerelease () {
-  print_prog "poetry update...  # pre-release"
+  print_prog "poetry update: pre-release... "
 
   # Create <dir>/pyproject.toml and <dir>/poetry.lock, each copied
   # from project root and then edited or updated.
@@ -371,6 +371,8 @@ poetry_update_lock_prerelease () {
   #       --extra-index-url=https://pypi.org/simple/ \
   #       <pkg>
   make prepare-poetry-prerelease >> "${POETRY_OUTPUT_DUMP}" 2>&1
+
+  print_prog "✓\n"
 }
 
 # ***
@@ -650,8 +652,8 @@ gh_pr_create_and_auto_merge_when_checks_finish () {
 
   if [ -s "${POETRY_OUTPUT_DUMP}" ]; then
     print_prog
-    print_prog "poetry dump:"
     print_prog "${POETRY_OUTPUT_DUMP} | sed 's/^/  /'"
+    print_prog "poetry dump:\n"
     print_prog
   fi
 
