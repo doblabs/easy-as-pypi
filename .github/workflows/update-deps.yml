@@ -60,6 +60,11 @@ on:
         # below, defaults to inputs.cascade-updatedeps.
         default: ''
 
+      include-prerelease-lock:
+        description: 'Include pre-release lock'
+        type: boolean
+        default: false
+
       # ***
 
       cascade-dispatch:
@@ -215,6 +220,7 @@ jobs:
           # Whether to version, and how, after PR is approved.
           # - Also passed along in the cascade.
           UPDEPS_CASCADE_VERSIONING: ${{ env.CASCADE_VERSIONING }}
+          UPDEPS_INCLUDE_PRERELEASE: ${{ inputs.include-prerelease-lock }}
           # Tweak the commit messages slightly to leave a source crumb.
           UPDEPS_COMMIT_MESSAGE_NORMAL: |
             'Build: Deps: Update poetry.lock [update-deps.yml]'
