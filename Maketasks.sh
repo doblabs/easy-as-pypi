@@ -308,9 +308,13 @@ poetry_install_to_venv () {
   local venv_default="$4"
   local pyproject_dir="${5:-.}"
 
+  command -v deactivate >/dev/null 2>&1 && deactivate  
+
   eval "$($(which pyenv) init -)"
 
   # Ensure make-install uses default Python version.
+  # CXREF: All other venv users call _pyenv_prepare_shell
+  #        instead to use the VENV_PYVER from Makefile.
   pyenv shell --unset
 
   # IGNOR: This fcn. sets VENV_CREATED
@@ -547,6 +551,8 @@ gvim_verify_servername_running () {
 
 _pyenv_prepare_shell () {
   local venv_pyver="$1"
+
+  command -v deactivate >/dev/null 2>&1 && deactivate
 
   eval "$(~/.local/bin/pyenv init -)"
 
