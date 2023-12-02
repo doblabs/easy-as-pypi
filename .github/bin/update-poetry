@@ -228,22 +228,25 @@ update_poetry_update () {
     has_changes=true
   fi
 
+  local NEW_PR_URL=""
+
   if ${has_changes}; then
     push_branch "${branch_name}" "${remote_name}"
 
-    local NEW_PR_URL
+    # Set NEW_PR_URL
     gh_pr_create_and_auto_merge_when_checks_finish
 
     resume_old_branch_and_cleanup "${branch_name}"
-
-    # E.g., https://github.com/doblabs/easy-as-pypi/pull/51
-    echo "$(basename "${NEW_PR_URL}")"
   else
     # Aka, "po-update was a no-op\n"
     print_prog "po-up was a no-op\n"
   fi
 
   command rm "${POETRY_OUTPUT_DUMP}"
+
+  # Print just the PR number for update-deps.yml to use as GITHUB_OUTPUT.
+  # - E.g., Prints "51" from https://github.com/doblabs/easy-as-pypi/pull/51
+  printf "%s" "$(basename "${NEW_PR_URL}")"
 }
 
 # ***
