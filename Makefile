@@ -483,7 +483,7 @@ _warn_unless_virtualenvwrapper:
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
-install-prerelease:
+install-prerelease: _depends_active_venv_unless_ci
 	@. "$(MAKETASKS_SH)" && \
 		install_prerelease \
 			"$(VENV_NAME_PRERELEASE)" \
@@ -493,7 +493,7 @@ install-prerelease:
 			"$(EDITABLE_PJS)"
 .PHONY: install-prerelease
 
-prepare-poetry-prerelease:
+prepare-poetry-prerelease: _depends_active_venv_unless_ci
 	@. "$(MAKETASKS_SH)" && \
 		prepare_poetry_prerelease \
 			"$(PYPROJECT_PRERELEASE_DIR)" \
@@ -529,11 +529,19 @@ pyenv-install-pys:
 
 _depends_active_venv:
 	@if [ -z "${VIRTUAL_ENV}" ]; then \
-		>&2 echo "ERROR: Run from a virtualenv!"; \
+		>&2 echo; \
+		>&2 echo "ERROR: 💣 Run from a virtualenv!"; \
+		>&2 echo; \
 		\
 		exit 1; \
 	fi
 .PHONY: _depends_active_venv
+
+_depends_active_venv_unless_ci:
+	@if ! $${CI:-false}; then \
+		make _depends_active_venv; \
+	fi;
+.PHONY: _depends_active_venv_unless_ci
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
