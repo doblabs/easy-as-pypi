@@ -581,7 +581,13 @@ git_upstream_remote () {
     fi
   fi
 
-  if ! git_upstream_remote_deduce "${updeps_repo_org_proj}"; then
+  # ***
+
+  local upstream_remote
+
+  if ! upstream_remote="$(git_upstream_remote_deduce "${updeps_repo_org_proj}")" \
+    || [ -z "${upstream_remote}" ] \
+  ; then
     # Note that we're ignoring the tracking branch. We want our GH
     # org/proj repo. Which we didn't find.
     >&2 echo "ERROR: Could not determine the upstream GitHub remote"
@@ -591,6 +597,8 @@ git_upstream_remote () {
 
     exit_1
   fi
+
+  printf "%s" "${upstream_remote}"
 }
 
 print_upstream_remote_url () {
