@@ -190,7 +190,8 @@ env:
   #   UPDEPS_LABEL_NAME_UPDATE_(OURS|ALL|SKIP)=\
   #     "ci-update-(ours|all|skip)"
   CASCADE_UPDATEDEPS: ${{
-    inputs.cascade-updatedeps
+    false
+    || inputs.cascade-updatedeps
     || (contains(github.event.pull_request.labels.*.name, 'ci-update-ours')
         && 'ours')
     || (contains(github.event.pull_request.labels.*.name, 'ci-update-all')
@@ -203,7 +204,8 @@ env:
   #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
   #     "ci-version-(alpha|patch|least|skip)"
   CASCADE_VERSIONING: ${{
-    inputs.cascade-versioning
+    false
+    || inputs.cascade-versioning
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-alpha')
         && 'alpha')
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
