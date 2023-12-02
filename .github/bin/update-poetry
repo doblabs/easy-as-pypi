@@ -587,7 +587,7 @@ git_upstream_remote () {
     >&2 echo "ERROR: Could not determine the upstream GitHub remote"
     >&2 echo "- We checked UPDEPS_REPO_ORG_PROJ (“${UPDEPS_REPO_ORG_PROJ}”)"
     >&2 echo "  against these remotes:"
-    >&2 echo git remote -v
+    >&2 git remote -v
 
     exit_1
   fi
