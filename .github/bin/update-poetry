@@ -447,11 +447,10 @@ resume_old_branch_and_cleanup () {
   #   - REFER:
   # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
   if ! ${CI:-false}; then
-    # FIXME: Might need Big D.
     # Ignore stderr message that -q doesn't inhibit:
     #   warning: deleting branch 'foo' that has been merged to
     #            'refs/remotes/origin/foo', but not yet merged to HEAD.
-    git branch -q -d "${branch_name}" 2> /dev/null
+    git branch -q -D "${branch_name}" 2> /dev/null
   fi
 }
 
