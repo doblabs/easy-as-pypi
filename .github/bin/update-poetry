@@ -186,7 +186,7 @@ _updeps_insist_cmd () {
 
   >&2 echo "ERROR: Missing system command ‘${cmdname}’."
 
-  exit 1
+  exit_1
 }
 
 # Program prints a single "true" or "false" to stdout for CI workflow.
@@ -348,7 +348,7 @@ poetry_update_lock_normal () {
       >&2 echo "GAFFE: Impossible path"
 
       # D_b_C: This execution is kaput, by the laws of Design by Contract.
-      exit 1
+      exit_1
     fi
   else
     print_prog "fake... "
@@ -424,6 +424,8 @@ prepare_branch () {
 
   git checkout -q -b "${branch_name}" "${scoped_head}"
 
+  _CHANGED_BRANCH="${branch_name}"
+
   # Prepare for commit if running on CI.
   if ${CI:-false}; then
     git config user.email "${UPDEPS_USER_EMAIL}"
@@ -435,6 +437,8 @@ resume_old_branch_and_cleanup () {
   local branch_name="$1"
 
   git checkout -q -
+
+  _CHANGED_BRANCH=""
 
   # Delete local branch when this script is run from user terminal (not from GHA).
   # - SAVVY: Use 'CI' environ to detect CI environment — this is the first
@@ -525,7 +529,7 @@ push_branch () {
     >&2 echo -e "\n\nERROR: git-push failed:"
     echo "${git_output}" | >&2 sed 's/^/  /'
 
-    exit 1
+    exit_1
   fi
 
   print_prog "✓\n"
@@ -540,7 +544,7 @@ git_upstream_remote () {
   if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
     local repo_url
 
-    repo_url="$(print_upstream_remote_url)" || exit 1
+    repo_url="$(print_upstream_remote_url)" || exit_1
 
     if [ -n "${repo_url}" ]; then
       # Trim, e.g., https://github.com/doblabs/easy-as-pypi → doblabs/easy-as-pypi
@@ -552,7 +556,7 @@ git_upstream_remote () {
       if [ -z "${UPDEPS_REPO_ORG_PROJ}" ]; then
         >&2 echo "ERROR: Could not deduce project repo from URL: ${repo_url}"
 
-        exit 1
+        exit_1
       fi
     else
       >&2 echo "ERROR: Could not deduce remote URL from remotes or pyproject.toml"
@@ -560,7 +564,7 @@ git_upstream_remote () {
       >&2 echo "  from [tool.poetry] or [tool.poetry.urls]"
       >&2 echo "- Check \`git remote get-url origin\`"
 
-      exit 1
+      exit_1
     fi
   fi
 
@@ -572,7 +576,7 @@ git_upstream_remote () {
     >&2 echo "  against these remotes:"
     >&2 echo git remote -v
 
-    exit 1
+    exit_1
   fi
 }
 
@@ -590,7 +594,7 @@ print_upstream_remote_url_from_pyproject_toml () {
     >&2 echo "- Please run from venv with \`tomlq\` installed"
     >&2 echo "- Or set the 'UPDEPS_REPO_ORG_PROJ' environ"
 
-    exit 1
+    exit_1
   fi
 
   # REFER: https://github.com/jqlang/jq/issues/354
@@ -607,7 +611,7 @@ print_upstream_remote_url_from_pyproject_toml () {
     >&2 echo "  from [tool.poetry] or [tool.poetry.urls]"
     >&2 echo "- You can also set 'UPDEPS_REPO_ORG_PROJ' environ directly"
 
-    exit 1
+    exit_1
   fi
 }
 
@@ -841,7 +845,7 @@ assert_git_email_known_ci () {
 
   >&2 echo "ERROR: Please set UPDEPS_USER_EMAIL organization or project variable"
 
-  exit 1
+  exit_1
 }
 
 assert_git_email_known_interactive () {
@@ -850,7 +854,7 @@ assert_git_email_known_interactive () {
 
   >&2 echo "ERROR: Who are you? \`git config user.email\` says you're nobody"
 
-  exit 1
+  exit_1
 }
 
 # ***
@@ -861,7 +865,7 @@ assert_git_status_tidy () {
 
   >&2 echo "ERROR: $(basename "$0") requires a tidy repo"
 
-  exit 1
+  exit_1
 }
 
 # ***
@@ -883,7 +887,7 @@ assert_git_status_changes_le_max () {
 
   >&2 echo "ERROR: Unexpected: More than ${max} file(s) changed by poetry-update?!"
 
-  exit 1
+  exit_1
 }
 
 # ***
@@ -902,7 +906,7 @@ assert_git_status_only_poetry_lock_changed_if_any () {
   >&2 echo "ERROR: Unexpected: poetry.lock is not sole change after poetry-update?!"
   >&2 echo "${git_status}"
 
-  exit 1
+  exit_1
 }
 
 assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any () {
@@ -939,7 +943,7 @@ assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any () {
   >&2 echo "                   has changes after poetry-update?!"
   >&2 echo "${git_status}"
 
-  exit 1
+  exit_1
 }
 
 # ***
@@ -996,12 +1000,47 @@ has_unstaged_changes () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+_NORMAL_EXIT=false
+
+exit_1 () {
+  _NORMAL_EXIT=true
+
+  exit 1
+}
+
+exit_0 () {
+  _NORMAL_EXIT=true
+
+  exit 0
+}
+
+_CHANGED_BRANCH=""
+
+exit_cleanup () {
+  if [ -n "${_CHANGED_BRANCH}" ]; then
+    resume_old_branch_and_cleanup "${_CHANGED_BRANCH}"
+  fi
+
+  if ! ${_NORMAL_EXIT}; then
+    # Dev: Unexpected error path occurred, you might wanna graceify.
+    >&2 echo "ALERT: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
 main () {
   set -e
 
   source_deps
 
+  trap exit_cleanup EXIT
+
   update_poetry_update "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
