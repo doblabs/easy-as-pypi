@@ -475,12 +475,18 @@ poetry_update_commit_changes () {
     git add "poetry.lock"
   fi
 
-  if ${UPDEPS_INCLUDE_PRERELEASE} \
-    && has_changes_pyproject_toml \
-  ; then
-    print_prog "git add pyproject.toml\n"
+  if ${UPDEPS_INCLUDE_PRERELEASE}; then
+    if has_changes_pyproject_toml; then
+      print_prog "git add pyproject.toml\n"
 
-    git add pyproject.toml
+      git add "pyproject.toml"
+    fi
+
+    if has_changes_src; then
+      print_prog "git add src\n"
+
+      git add "src"
+    fi
   fi
 
   print_prog "git commit... "
@@ -995,6 +1001,10 @@ has_changes_poetry_lock () {
 
 has_changes_pyproject_toml () {
   has_unstaged_changes "pyproject.toml"
+}
+
+has_changes_src () {
+  has_unstaged_changes "src"
 }
 
 # Note we use `git status --short`, not `git status --porcelain=v1`,
