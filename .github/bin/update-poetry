@@ -473,12 +473,6 @@ poetry_update_commit_changes () {
 
   if ${UPDEPS_INCLUDE_PRERELEASE}; then
     git_add_if_changed "pyproject.toml"
-    # 
-    git_add_if_changed "LICENSE"
-    git_add_if_changed "README.md"
-    git_add_if_changed "README.rst"
-    git_add_if_changed "src"
-    git_add_if_changed "tests"
   fi
 
   print_prog "git commit... "

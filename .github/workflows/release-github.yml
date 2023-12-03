@@ -168,9 +168,17 @@ jobs:
             exit 1
           fi
 
+      # Note that `poetry -C "${PYPROJECT_DIR}" build` won't work if it
+      # references anything from root, so clobber root's lock and toml.
+      - name: Prepare Pre-release Poetry assets — pyproject.toml and poetry.lock
+        if: env.PRERELEASE == '--prerelease'
+        run: |
+          command cp -f "${PYPROJECT_DIR}/poetry.lock" "poetry.lock"
+          command cp -f "${PYPROJECT_DIR}/pyproject.toml" "pyproject.toml"
+
       - name: Poetry build
         run: |
-          poetry -C "${PYPROJECT_DIR}" build
+          poetry build
 
       - name: Probe filename
         run: |
