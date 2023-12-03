@@ -314,21 +314,6 @@ ensure_symlink_if_exists () {
   fi
 }
 
-ensure_pyproject_dir_symlinks () {
-  local pyproject_dir="$1"
-  local source_dir="$2"
-
-  (
-    cd "${pyproject_dir}"
-
-    ensure_symlink_if_exists "../LICENSE" "LICENSE"
-    ensure_symlink_if_exists "../README.md" "README.md"
-    ensure_symlink_if_exists "../README.rst" "README.rst"
-    ensure_symlink_if_exists "../${source_dir}" "${source_dir}"
-    ensure_symlink_if_exists "../tests" "tests"
-  )
-}
-
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 install_release () {
@@ -429,10 +414,6 @@ prepare_poetry_prerelease () {
 
   # Clobber <dir>/poetry.lock
   command cp "poetry.lock" "${PYPROJECT_PRERELEASE_DIR}/poetry.lock"
-
-  # Ensure <dir>/src exists, as well as poetry-build assets (see
-  # [tool.poetry] 'include' list, including LICENSE, README.rst, tests/).
-  ensure_pyproject_dir_symlinks "${PYPROJECT_PRERELEASE_DIR}" "${SOURCE_DIR}"
 
   # Update poetry.lock to use "our" deps' versions from test.PyPI.
   # - Here's how "priority" from [[tool.poetry.source]] works:
