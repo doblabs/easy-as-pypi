@@ -33,10 +33,8 @@ UPDEPS_CASCADE_VERSIONING="${UPDEPS_CASCADE_VERSIONING:-skip}"
 # or we'll figure it out.
 UPDEPS_INCLUDE_PRERELEASE="$(
   (${UPDEPS_INCLUDE_PRERELEASE:-false} \
-   || (! ${UPDEPS_CASCADE_INHIBIT} \
-       && (false \
-           || [ "${UPDEPS_CASCADE_VERSIONING}" = "least" ] \
-           || [ "${UPDEPS_CASCADE_VERSIONING}" = "alpha" ]))) \
+   || [ "${UPDEPS_CASCADE_VERSIONING}" = "alpha" ] \
+   || [ "${UPDEPS_CASCADE_VERSIONING}" = "least" ]) \
   && echo true \
   || echo false
 )"
