@@ -324,7 +324,7 @@ clean-test:
 build: _depends_active_venv clean-build
 	poetry build
 	ls -l dist
-	@echo 'HINT: Run `make dist-list` to bdist and sdist contents.'
+	@echo 'HINT: Run `make dist-list` to show bdist and sdist contents.'
 .PHONY: build
 
 dist: build
@@ -501,6 +501,30 @@ prepare-poetry-prerelease: _depends_active_venv_unless_ci
 			"$(EDITABLE_PJS)" \
 			"$(SOURCE_DIR)"
 .PHONY: prepare-poetry-prerelease
+
+build-prerelease: _depends_active_venv clean-build
+	@if [ ! -f "$(PYPROJECT_PRERELEASE_DIR)/poetry.lock" ] \
+		|| [ ! -f "$(PYPROJECT_PRERELEASE_DIR)/pyproject.toml" ] \
+	; then \
+		>&2 echo "ERROR: Please run \`make prepare-poetry-prerelease\`"; \
+		\
+		exit 1; \
+	fi
+	@command cp -f "$(PYPROJECT_PRERELEASE_DIR)/poetry.lock" "poetry.lock"
+	@command cp -f "$(PYPROJECT_PRERELEASE_DIR)/pyproject.toml" "pyproject.toml"
+	@echo "poetry build"
+	@success=false; \
+	if poetry build; then \
+		success=true; \
+		ls -l dist; \
+		echo 'HINT: Run `make dist-list` to show bdist and sdist contents.'; \
+	fi; \
+	git checkout -- "poetry.lock"; \
+	git checkout -- "pyproject.toml"; \
+	if ! $${success}; then \
+		exit 1; \
+	fi
+PHONY: build-prerelease
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
