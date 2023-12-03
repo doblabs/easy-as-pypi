@@ -469,24 +469,11 @@ resume_old_branch_and_cleanup () {
 poetry_update_commit_changes () {
   local commit_message="$1"
 
-  if has_changes_poetry_lock; then
-    print_prog "git add poetry.lock\n"
-
-    git add "poetry.lock"
-  fi
+  git_add_if_changed "poetry.lock"
 
   if ${UPDEPS_INCLUDE_PRERELEASE}; then
-    if has_changes_pyproject_toml; then
-      print_prog "git add pyproject.toml\n"
-
-      git add "pyproject.toml"
-    fi
-
-    if has_changes_src; then
-      print_prog "git add src\n"
-
-      git add "src"
-    fi
+    git_add_if_changed "pyproject.toml"
+    git_add_if_changed "src"
   fi
 
   print_prog "git commit... "
@@ -995,16 +982,14 @@ assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any () {
 
 # ***
 
-has_changes_poetry_lock () {
-  has_unstaged_changes "poetry.lock"
-}
+git_add_if_changed () {
+  local filename="$1"
 
-has_changes_pyproject_toml () {
-  has_unstaged_changes "pyproject.toml"
-}
+  if has_unstaged_changes "${filename}"; then
+    print_prog "git add ${filename}\n"
 
-has_changes_src () {
-  has_unstaged_changes "src"
+    git add "${filename}"
+  fi
 }
 
 # Note we use `git status --short`, not `git status --porcelain=v1`,
