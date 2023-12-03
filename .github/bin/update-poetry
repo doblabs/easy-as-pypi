@@ -287,7 +287,7 @@ update_and_commit_lock_prerelease () {
 
   poetry_update_lock_prerelease "${pyproject_dir}"
 
-  assert_git_status_0_1_or_2_changes
+  assert_git_status_3_or_fewer_changes
 
   assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any \
     "${pyproject_dir}"
@@ -903,8 +903,8 @@ assert_git_status_0_or_1_changes () {
   assert_git_status_changes_le_max 1
 }
 
-assert_git_status_0_1_or_2_changes () {
-  assert_git_status_changes_le_max 2
+assert_git_status_3_or_fewer_changes () {
+  assert_git_status_changes_le_max 3
 }
 
 assert_git_status_changes_le_max () {
@@ -944,31 +944,44 @@ assert_git_status_only_prerelease_pyproject_and_or_lock_changed_if_any () {
   ! test -d "${pyproject_dir}" \
     && return 0 || true
 
+  # ***
+
   local git_status
   git_status="$(cd "${pyproject_dir}" && git_status_short)"
 
-  test -z "${git_status}" \
-    && return 0 || true
-
-  local expect_if_both_changed="\
-( M|\?\?) poetry.lock
-( M|\?\?) pyproject.toml"
-
-  local expect_if_all_uncommitted="?? ./"
-
-  if false \
-    || [[ "${git_status}" =~ ( M|\?\?)" poetry.lock" ]] \
-    || [[ "${git_status}" =~ ( M|\?\?)" pyproject.toml" ]] \
-    || [[ "${git_status}" =~ ${expect_if_both_changed} ]] \
-    || [ "${git_status}" = "${expect_if_all_uncommitted}" ] \
-  ; then
+  if [ -z "${git_status}" ]; then
 
     return 0
   fi
 
+  # ***
+
+  local expect_if_all_uncommitted="?? ./"
+  if [ "${git_status}" = "${expect_if_all_uncommitted}" ]; then
+
+    return 0
+  fi
+
+  # ***
+
+  local stripped_status="$(
+    echo "${git_status}" \
+      | sed \
+        -e '/^\( M\|??\) poetry.lock$/d' \
+        -e '/^\( M\|??\) pyproject.toml$/d' \
+        -e '/^\( M\|??\) src$/d' \
+  )"
+
+  if [ -z "${stripped_status}" ]; then
+
+    return 0
+  fi
+
+  # ***
+
   # Should be unreachable path.
-  >&2 echo "ERROR: Unexpected: Something other than pyproject.toml or poetry.lock"
-  >&2 echo "                   has changes after poetry-update?!"
+  >&2 echo "ERROR: Unexpected: Something other than pyproject.toml, poetry.lock,"
+  >&2 echo "                   or src/ has changes after poetry-update?!"
   >&2 echo "${git_status}"
 
   exit_1
