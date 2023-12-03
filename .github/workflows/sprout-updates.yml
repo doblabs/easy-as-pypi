@@ -127,15 +127,15 @@ jobs:
             gh workflow run \"${workflow_name}\" \\
               -f \"which-deps=${CASCADE_UPDATEDEPS}\" \\
               -f \"include-prerelease-lock=\" \\
+              -f \"bump-part=${CASCADE_VERSIONING}\" \\
               -f \"cascade-dispatch=true\" \\
-              -f \"cascade-versioning=${CASCADE_VERSIONING}\" \\
               -f \"from-upstream=${from_upstream}\" \\
             "
           gh workflow run "${workflow_name}" \
             -f "which-deps=${CASCADE_UPDATEDEPS}" \
             -f "include-prerelease-lock=" \
+            -f "bump-part=${CASCADE_VERSIONING}" \
             -f "cascade-dispatch=true" \
-            -f "cascade-versioning=${CASCADE_VERSIONING}" \
             -f "from-upstream=${from_upstream}" \
         env:
           GH_TOKEN: ${{ github.token }}

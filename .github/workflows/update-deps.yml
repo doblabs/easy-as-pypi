@@ -65,6 +65,16 @@ on:
         type: boolean
         default: false
 
+      bump-part:
+        description: 'Increment version'
+        type: choice
+        options:
+          - 'alpha'
+          - 'patch'
+          - 'least'
+          - 'skip'
+        default: 'skip'
+
       # ***
 
       cascade-dispatch:
@@ -84,15 +94,13 @@ on:
       #      - 'skip'
       #    default: 'skip'
 
-      cascade-versioning:
-        description: 'Cascade version bump'
-        type: choice
-        options:
-          - 'alpha'
-          - 'patch'
-          - 'least'
-          - 'skip'
-        default: 'skip'
+      # ABOVE: We list cascade-versioning above (as bump-part), so user
+      # (hopefully) understands they can bump version without starting
+      # cascade — and also they'll hopefully understand the the same
+      # bump-version value is used if they *do* decide to start the
+      # release cascade.
+
+      # ***
 
       # Just for the UX of it.
       from-upstream:
@@ -122,7 +130,7 @@ env:
     inputs.which-deps
     || 'skip' }}
   CASCADE_VERSIONING: ${{
-    inputs.cascade-versioning
+    inputs.bump-part
     || 'skip' }}
 
 jobs:
@@ -256,8 +264,8 @@ jobs:
           #
           echo "inputs.which-deps: ${{ inputs.which-deps }}"
           echo "inputs.include-prerelease-lock: ${{ inputs.include-prerelease-lock }}"
+          echo "inputs.bump-part: ${{ inputs.bump-part }}"
           echo "inputs.cascade-dispatch: ${{ inputs.cascade-dispatch }}"
-          echo "inputs.cascade-versioning: ${{ inputs.cascade-versioning }}"
           echo "inputs.from-upstream: ${{ inputs.from-upstream }}"
           # When caller specifies false, the next three lines OUTPUT:
           #   'false', 'false', 'foo'
