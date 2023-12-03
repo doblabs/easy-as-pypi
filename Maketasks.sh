@@ -272,7 +272,6 @@ make_editable () {
   # ***
 
   # Add ../ to pip-editable package paths, and to the readme path.
-  # USYNC: Same sed commands shared: make_editable, make_pyproject_prerelease
   sed -E \
     -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
     -e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
@@ -294,13 +293,40 @@ ensure_pyproject_dir_src_symlink () {
   local pyproject_dir="$1"
   local source_dir="$2"
 
-  local editable_link="${pyproject_dir}/${source_dir}"
+  (
+    cd "${pyproject_dir}"
 
-  if [ -h "${editable_link}" ]; then
-    command rm "${editable_link}"
+    # E.g., src -> ../src
+    ensure_symlink_if_exists "../${source_dir}" "${source_dir}"
+  )
+}
+
+ensure_symlink_if_exists () {
+  local ln_source="$1"
+  local ln_target="$2"
+
+  if [ -h "${ln_target}" ]; then
+    command rm "${ln_target}"
   fi
 
-  command ln -s "../${source_dir}" "${editable_link}"
+  if [ -e "${ln_source}" ]; then
+    command ln -s "${ln_source}" "${ln_target}"
+  fi
+}
+
+ensure_pyproject_dir_symlinks () {
+  local pyproject_dir="$1"
+  local source_dir="$2"
+
+  (
+    cd "${pyproject_dir}"
+
+    ensure_symlink_if_exists "../LICENSE" "LICENSE"
+    ensure_symlink_if_exists "../README.md" "README.md"
+    ensure_symlink_if_exists "../README.rst" "README.rst"
+    ensure_symlink_if_exists "../${source_dir}" "${source_dir}"
+    ensure_symlink_if_exists "../tests" "tests"
+  )
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -404,8 +430,9 @@ prepare_poetry_prerelease () {
   # Clobber <dir>/poetry.lock
   command cp "poetry.lock" "${PYPROJECT_PRERELEASE_DIR}/poetry.lock"
 
-  # Ensure <dir>/src exists
-  ensure_pyproject_dir_src_symlink "${PYPROJECT_PRERELEASE_DIR}" "${SOURCE_DIR}"
+  # Ensure <dir>/src exists, as well as poetry-build assets (see
+  # [tool.poetry] 'include' list, including LICENSE, README.rst, tests/).
+  ensure_pyproject_dir_symlinks "${PYPROJECT_PRERELEASE_DIR}" "${SOURCE_DIR}"
 
   # Update poetry.lock to use "our" deps' versions from test.PyPI.
   # - Here's how "priority" from [[tool.poetry.source]] works:
@@ -446,18 +473,25 @@ make_pyproject_prerelease () {
   #   easy-as-pypi-appdirs = { version = "^1.1.1", source = "testpypi" }
 
   # Add ../ to pip-editable package paths, and to the readme path.
-  # USYNC: Same sed commands shared: make_editable, make_pyproject_prerelease
-  sed -E \
-    -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
-    -e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
-    -e 's#^(readme = ")#\1../#' \
-    pyproject.toml \
-  | awk ' \
+  # - Note that make_editable prefixes some paths ../ such as pip-editable
+  #   package paths, but a published build won't have any of these:
+  #     sed -E \
+  #       -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
+  #       -e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
+  #   And we cannot reference the readme using a ../parent path, like this:
+  #       -e 's#^(readme = ")#\1../#' \
+  #   Or poetry-build will fail:
+  #     '/path/to/easy-as-pypi/README.rst' is not in the subpath of
+  #     '/path/to/easy-as-pypi/.pyproject-prerelease' OR one path is
+  #     relative and the other is absolute.
+  #   because it doesn't know where to put such a path in the 'sdist'.
+  #   - REFER: https://github.com/python-poetry/poetry/issues/5621
+  awk ' \
     match($0, /^('${concat_pjs}')\s*=\s*"([<>=^]{1,2}\s*[0-9]+[^"]*)"/, matches) { \
       print matches[1] " = { version = \"" matches[2] "\", source = \"testpypi\" }"; \
       next; \
     } 1 \
-  ' - >> "${PYPROJECT_PRERELEASE_DIR}/pyproject.toml"
+  ' "pyproject.toml" >> "${PYPROJECT_PRERELEASE_DIR}/pyproject.toml"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
