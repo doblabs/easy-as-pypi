@@ -469,18 +469,18 @@ resume_old_branch_and_cleanup () {
 poetry_update_commit_changes () {
   local commit_message="$1"
 
+  if has_changes_poetry_lock; then
+    print_prog "git add poetry.lock\n"
+
+    git add "poetry.lock"
+  fi
+
   if ${UPDEPS_INCLUDE_PRERELEASE} \
     && has_changes_pyproject_toml \
   ; then
     print_prog "git add pyproject.toml\n"
 
     git add pyproject.toml
-  fi
-
-  if has_changes_poetry_lock; then
-    print_prog "git add poetry.lock\n"
-
-    git add poetry.lock
   fi
 
   print_prog "git commit... "
