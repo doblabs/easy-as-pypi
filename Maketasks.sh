@@ -61,6 +61,13 @@ make_develop () {
   _echo "poetry -C ${EDITABLE_DIR} install ${install_with}"
 
   poetry -C ${EDITABLE_DIR} install ${install_with}
+
+  # ***
+
+  # Project: https://github.com/landonb/git-bump-version-tag
+  #
+  # Easily apply a semantic version tag.
+  git config alias.bump "! bin/git-bump-version-tag"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #

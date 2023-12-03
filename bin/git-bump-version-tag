@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# CXREF: https://github.com/landonb/git-bump-version-tag
+#
+#   Easily apply a semantic version tag.
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# *** ENVIRONs
+
+# Generally user will not set these deliberately, but they could.
+# - A plain `git bump` will *only* bump version by default,
+#   and won't cascade.
+# - The `git update` command, on the other hand, will call this
+#   script with these environs set appropriately.
+VALUE_CI_TAG_INHIBIT_CASCADE="${VALUE_CI_TAG_INHIBIT_CASCADE:-true}"
+VALUE_CI_TAG_CASCADE_UPDATEDEPS="${VALUE_CI_TAG_CASCADE_UPDATEDEPS:-skip}"
+VALUE_CI_TAG_CASCADE_VERSIONING="${VALUE_CI_TAG_CASCADE_VERSIONING:-skip}"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+source_deps () {
+  _bumpp_insist_cmd 'git-bump-version-tag'
+
+  # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/wrangle-tags
+  # - For: EAPP_CI_TAG_*
+  . "$(dirname "$(realpath "$0")")/../.github/bin/wrangle-tags"
+}
+
+_bumpp_insist_cmd () {
+  local cmdname="$1"
+
+  command -v "${cmdname}" > /dev/null && return 0
+
+  >&2 echo "ERROR: Missing system command ‘${cmdname}’"
+
+  exit_1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# The 3 HEAD tags:
+#
+#   EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
+#   EAPP_CI_TAG_CASCADE_UPDATEDEPS="ci-cascade-updatedeps"
+#   EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
+
+git_bump_version_tag () {
+  push_ci_tags_first () {
+    local version_tag="$1"
+    local tag_commit="$2"
+    local remote_name="$3"
+
+    echo "Pushing CI tags" \
+      "(${EAPP_CI_TAG_INHIBIT_CASCADE}," \
+      "${EAPP_CI_TAG_CASCADE_UPDATEDEPS}," \
+      "${EAPP_CI_TAG_CASCADE_VERSIONING})"
+
+    echo_or_eval git tag -f -a "${EAPP_CI_TAG_INHIBIT_CASCADE}" \
+      -m "${VALUE_CI_TAG_INHIBIT_CASCADE:-true}" "${tag_commit}"
+
+    echo_or_eval git tag -f -a "${EAPP_CI_TAG_CASCADE_UPDATEDEPS}" \
+      -m "${VALUE_CI_TAG_CASCADE_UPDATEDEPS:-skip}" "${tag_commit}"
+
+    echo_or_eval git tag -f -a "${EAPP_CI_TAG_CASCADE_VERSIONING}" \
+      -m "${VALUE_CI_TAG_CASCADE_VERSIONING:-skip}" "${tag_commit}"
+
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_INHIBIT_CASCADE}"
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_CASCADE_UPDATEDEPS}"
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_CASCADE_VERSIONING}"
+
+    echo "✓ Pushed CI tags"
+  }
+
+  export EAPP_CI_TAG_INHIBIT_CASCADE
+  export EAPP_CI_TAG_CASCADE_UPDATEDEPS
+  export EAPP_CI_TAG_CASCADE_VERSIONING
+
+  export -f push_ci_tags_first
+
+  BUMP_PRE_PUSH_HOOK="push_ci_tags_first" \
+    git-bump-version-tag "$@"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+_NORMAL_EXIT=false
+
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
+
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
+
+exit_cleanup () {
+  if ! ${_NORMAL_EXIT}; then
+    >&2 echo "GAFFE: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
+main () {
+  set -e
+
+  source_deps
+
+  git_bump_version_tag "$@"
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  # Being executed, so execute.
+  main "$@"
+fi
+
+unset -f main
+unset -f source_deps
+unset -f _bumpp_insist_cmd
+

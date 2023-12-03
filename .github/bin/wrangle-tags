@@ -326,7 +326,7 @@ set_tag_locals_inhibit_cascade () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_inhibit_cascade"
     tag_scope="HEAD"
-    default_value="false"
+    default_value="true"
     new_tag_value="${EAPP_INHIBIT_CASCADE}"
     delete_if=${EAPP_DELETE_INHIBIT_CASCADE:-false}
   fi
@@ -350,7 +350,7 @@ set_tag_locals_cascade_updatedeps () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_updatedeps"
     tag_scope="HEAD"
-    default_value="all"
+    default_value="skip"
     new_tag_value="${EAPP_CASCADE_UPDATEDEPS}"
     delete_if=${EAPP_DELETE_CASCADE_UPDATEDEPS:-false}
   fi
@@ -371,7 +371,7 @@ set_tag_locals_cascade_versioning () {
     # choose from a dropdown to send workflow_event to initiate the cascade.
     # - So this tag value should always be set.
     # But we'll use 'alpha' to match update-merged.yml.
-    default_value="alpha"
+    default_value="skip"
     new_tag_value="${EAPP_CASCADE_VERSIONING}"
     delete_if=${EAPP_DELETE_CASCADE_VERSIONING:-false}
   fi
