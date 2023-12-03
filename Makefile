@@ -490,14 +490,16 @@ install-prerelease: _depends_active_venv_unless_ci
 			"$(VENV_ARGS)" \
 			"$(VENV_NAME)" \
 			"$(PYPROJECT_PRERELEASE_DIR)" \
-			"$(EDITABLE_PJS)"
+			"$(EDITABLE_PJS)" \
+			"$(SOURCE_DIR)"
 .PHONY: install-prerelease
 
 prepare-poetry-prerelease: _depends_active_venv_unless_ci
 	@. "$(MAKETASKS_SH)" && \
 		prepare_poetry_prerelease \
 			"$(PYPROJECT_PRERELEASE_DIR)" \
-			"$(EDITABLE_PJS)"
+			"$(EDITABLE_PJS)" \
+			"$(SOURCE_DIR)"
 .PHONY: prepare-poetry-prerelease
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
