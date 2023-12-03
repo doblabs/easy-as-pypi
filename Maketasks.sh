@@ -271,6 +271,8 @@ make_editable () {
 
   # ***
 
+  # Add ../ to pip-editable package paths, and to the readme path.
+  # USYNC: Same sed commands shared: make_editable, make_pyproject_prerelease
   sed -E \
     -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
     -e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
@@ -443,12 +445,19 @@ make_pyproject_prerelease () {
   # to this:
   #   easy-as-pypi-appdirs = { version = "^1.1.1", source = "testpypi" }
 
-  awk ' \
+  # Add ../ to pip-editable package paths, and to the readme path.
+  # USYNC: Same sed commands shared: make_editable, make_pyproject_prerelease
+  sed -E \
+    -e 's#^(packages = \[\{include = ")([^"]*"}])#\1../\2#' \
+    -e 's#^(packages = \[\{include = "[^"]*", from = ")#\1../#' \
+    -e 's#^(readme = ")#\1../#' \
+    pyproject.toml \
+  | awk ' \
     match($0, /^('${concat_pjs}')\s*=\s*"([<>=^]{1,2}\s*[0-9]+[^"]*)"/, matches) { \
       print matches[1] " = { version = \"" matches[2] "\", source = \"testpypi\" }"; \
       next; \
     } 1 \
-  ' "pyproject.toml" >> "${PYPROJECT_PRERELEASE_DIR}/pyproject.toml"
+  ' - >> "${PYPROJECT_PRERELEASE_DIR}/pyproject.toml"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
