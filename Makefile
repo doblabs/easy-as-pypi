@@ -323,7 +323,8 @@ clean-test:
 
 build: _depends_active_venv clean-build
 	poetry build
-	ls -l dist
+	@echo "ls dist/"
+	@command ls -lGAF "dist/" | tail +2 | sed 's/^/  /'
 	@echo 'HINT: Run `make dist-list` to show bdist and sdist contents.'
 .PHONY: build
 
@@ -517,7 +518,8 @@ build-prerelease: _depends_active_venv clean-build
 	if poetry build; then \
 		success=true; \
 		touch "dist/.pre-release-build"; \
-		ls -l "dist"; \
+		echo "ls dist/"; \
+		command ls -lGAF "dist/" | tail +2 | sed 's/^/  /'; \
 		echo 'HINT: Run `make dist-list` to show bdist and sdist contents.'; \
 	fi; \
 	git checkout -- "poetry.lock"; \
