@@ -9,6 +9,8 @@
 
 name: Attach Cov comment — External PR
 
+run-name: 🖇️ Attach Cov comment — External PR
+
 on:
   workflow_run:
     # USYNC: coverage-comment.yml name ↔ coverage-comment-external.yml on-workflow_run.
