@@ -285,9 +285,20 @@ make_editable () {
 
   # ***
 
-  local editable_link="${EDITABLE_DIR}/${SOURCE_DIR}"
-  [ -h "${editable_link}" ] && command rm "${editable_link}"
-  command ln -s "../${SOURCE_DIR}" "${editable_link}"
+  ensure_pyproject_dir_src_symlink "${EDITABLE_DIR}" "${SOURCE_DIR}"
+}
+
+ensure_pyproject_dir_src_symlink () {
+  local pyproject_dir="$1"
+  local source_dir="$2"
+
+  local editable_link="${pyproject_dir}/${source_dir}"
+
+  if [ -h "${editable_link}" ]; then
+    command rm "${editable_link}"
+  fi
+
+  command ln -s "../${source_dir}" "${editable_link}"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -350,8 +361,10 @@ install_prerelease () {
   local VENV_NAME="$3"
   local PYPROJECT_PRERELEASE_DIR="$4"
   local EDITABLE_PJS="$5"
+  local SOURCE_DIR="$6"
 
-  prepare_poetry_prerelease "${PYPROJECT_PRERELEASE_DIR}" "${EDITABLE_PJS}"
+  prepare_poetry_prerelease "${PYPROJECT_PRERELEASE_DIR}" "${EDITABLE_PJS}" \
+    "${SOURCE_DIR}"
 
   local venv_name="${VENV_NAME_PRERELEASE}"
   # Prefer local venv, especially because venv space adds up, and users
@@ -368,6 +381,7 @@ install_prerelease () {
 prepare_poetry_prerelease () {
   local PYPROJECT_PRERELEASE_DIR="$1"
   local EDITABLE_PJS="$2"
+  local SOURCE_DIR="$3"
 
   # This fcn clobbery (of <dir>/pyproject.toml and <dir>/poetry.lock).
 
@@ -387,6 +401,9 @@ prepare_poetry_prerelease () {
 
   # Clobber <dir>/poetry.lock
   command cp "poetry.lock" "${PYPROJECT_PRERELEASE_DIR}/poetry.lock"
+
+  # Ensure <dir>/src exists
+  ensure_pyproject_dir_src_symlink "${PYPROJECT_PRERELEASE_DIR}" "${SOURCE_DIR}"
 
   # Update poetry.lock to use "our" deps' versions from test.PyPI.
   # - Here's how "priority" from [[tool.poetry.source]] works:
