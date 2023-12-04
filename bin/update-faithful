@@ -19,6 +19,7 @@ source_deps () {
 
   # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
   #   https://github.com/thegittinsgood/git-update-faithful#⛲
+  # - Includes: logger.sh, git-nubs.sh, common_put_wise.sh.
   . "$(dirname "$(realpath "$0")")/../deps/git-update-faithful/lib/update-faithful.sh"
 
   # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/update-poetry
