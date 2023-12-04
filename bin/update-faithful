@@ -255,8 +255,6 @@ update_deps_easy_as_pypi () {
 
   local sourcerer="https://github.com/doblabs/easy-as-pypi/blob/release/bin/update-faithful"
 
-  local commit_subject=""
-
   # *** 1st update-faithful session
 
   # Sets UPDEPS_CANON_BASE_ABSOLUTE environ so it's available to each
@@ -275,25 +273,13 @@ update_deps_easy_as_pypi () {
   # *** 1st update-faithful session (continued)
 
   if [ -f "${UPFUL_PYPROJECT_PROJECT_TMPL}" ]; then
-    update_faithful_files_only_pyproject_toml
-
-    skip_venv_manage=true
-
-    commit_subject="Build: CI: Generate pyproject.toml"
-
-    update-faithful-finish "${sourcerer}" "${skip_venv_manage}" "${commit_subject}"
-
-    # *** 2nd update-faithful session
-
-    update-faithful-begin "${canon_base_absolute}" "${skip_venv_manage}"
+    render_pyproject_toml_and_update_poetry_lock "${sourcerer}" "${canon_base_absolute}"
   fi
 
   update_faithful_files_excluding_pyproject_toml
 
-  skip_venv_manage=false
-
   # The commit title defaults: "Deps: Update faithfuls <proj>".
-  commit_subject=""
+  local commit_subject=""
 
   update-faithful-finish "${sourcerer}" "${skip_venv_manage}" "${commit_subject}"
 
@@ -302,6 +288,27 @@ update_deps_easy_as_pypi () {
   if ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE}; then
     command rm "${UPDEPS_TMPL_SRC_DATA}"
   fi
+}
+
+render_pyproject_toml_and_update_poetry_lock () {
+  local sourcerer="$1"
+  local canon_base_absolute="$2"
+
+  local do_skip_venv_manage=true
+
+  local commit_subject=""
+
+  # *** (Continue) 1st update-faithful session
+
+  update_faithful_files_only_pyproject_toml
+
+  commit_subject="Build: CI: Generate pyproject.toml"
+
+  update-faithful-finish "${sourcerer}" "${do_skip_venv_manage}" "${commit_subject}"
+
+  # *** (Start) 2nd update-faithful session
+
+  update-faithful-begin "${canon_base_absolute}" "${do_skip_venv_manage}"
 }
 
 # Render saves scoped copies of ".pyproject.tmpl" and
