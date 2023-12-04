@@ -25,6 +25,10 @@ source_deps () {
   # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/update-poetry
   # - For: print_upstream_remote_url
   . "$(dirname "$(realpath "$0")")/../.github/bin/update-poetry"
+
+  # CXREF: ~/.kit/py/easy-as-pypi/Maketasks.sh
+  # - For: _install_poetry_and_plugins
+  . "$(dirname "$(realpath "$0")")/../Maketasks.sh"
 }
 
 insist_cmd () {
@@ -303,9 +307,24 @@ render_pyproject_toml_and_update_poetry_lock () {
 
   update_faithful_files_only_pyproject_toml
 
+  local nothing_staged=true
+  git_nothing_staged || nothing_staged=false
+
   commit_subject="Build: CI: Generate pyproject.toml"
 
   update-faithful-finish "${sourcerer}" "${do_skip_venv_manage}" "${commit_subject}"
+
+  # *** Intermediate poetry-update session
+
+  if ! ${nothing_staged}; then
+    update-faithful-begin "${canon_base_absolute}" "${do_skip_venv_manage}"
+
+    update_poetry_lock_no_update "${canon_base_absolute}"
+
+    commit_subject="Build: CI: Update poetry.lock"
+
+    update-faithful-finish "${sourcerer}" "${do_skip_venv_manage}" "${commit_subject}"
+  fi
 
   # *** (Start) 2nd update-faithful session
 
@@ -320,6 +339,66 @@ update_faithful_files_only_pyproject_toml () {
   if [ -f "${UPFUL_PYPROJECT_PROJECT_TMPL}" ]; then
     render-faithful-file "pyproject.toml" "${UPFUL_PYPROJECT_PROJECT_TMPL}"
   fi
+}
+
+# Not super happy this is in this module, but I want the commit to follow
+# the pyproject.toml commit. So here we are.
+update_poetry_lock_no_update () {
+  local canon_base_absolute="$1"
+
+  if ! ${CI:-false}; then
+    local python_base="$(python -c "import sys; sys.stdout.write(sys.prefix)")"
+    local venv_poetry="${python_base}/bin/poetry"
+
+    if [ "$(command -v poetry)" != "${venv_poetry}" ]; then
+      local verbose=false
+      local extra_quiet=true
+
+      # From Maketasks.sh.
+      printf "%s" "Installing Poetry to temporary venv..."
+
+      _install_poetry_and_plugins "${verbose}" "${extra_quiet}"
+
+      printf "\r"
+      info "Intalled Poetry to venv"
+      debug "  └→ HINT: Avoid this wait with your own venv, and:"
+      debug "           pip install poetry"
+      debug "           poetry self add \"poetry-dynamic-versioning[plugin]\""
+    fi
+  fi
+
+  local poetry_output
+
+  printf "%s" "Running poetry lock --no-update..."
+
+  if ! poetry_output="$(poetry lock --no-update)"; then
+    echo
+
+    >&2 error "ERROR: poetry lock failed!"
+    >&2 echo "${poetry_output}"
+
+    # DUNNO: There might be reason for graceful exit, but unsure of one yet.
+    exit 1
+  fi
+
+  printf "\r"
+  info "Updated poetry lock"
+
+  # We could `git add poetry.lock` ourselves, but let's use faithful-follower
+  # for the progress message, and the common commit message subject body.
+  local local_file="poetry.lock"
+
+  local canon_head
+  canon_head="$(print_scoped_head "${canon_base_absolute}/ignored")"
+
+  local canon_file_absolute="${canon_base_absolute}/${local_file}"
+
+  local what_happn="innocent"
+  if [ -n "$(git status --porcelain=v1 -- "${local_file}")" ]; then
+    what_happn="resynced"
+  fi
+
+  stage_follower "${local_file}" "${canon_head}" "${canon_file_absolute}" "${what_happn}"
 }
 
 update_faithful_files_excluding_pyproject_toml () {

@@ -658,18 +658,22 @@ _venv_create_and_metaize () {
 
 _install_poetry_and_plugins () {
   local verbose="${1:-false}"
+  local extra_quiet="${2:-false}"
+
+  local quiet="-q"
+  ${extra_quiet} || quiet=""
 
   _echo
   _echo "pip install -U pip setuptools"
-  pip install -U pip setuptools
+  pip install ${quiet} -U pip setuptools
 
   _echo
   _echo "pip install poetry"
-  pip install poetry
+  pip install ${quiet} poetry
 
   _echo
   _echo "poetry self add 'poetry-dynamic-versioning[plugin]'"
-  poetry self add "poetry-dynamic-versioning[plugin]"
+  poetry self add ${quiet} "poetry-dynamic-versioning[plugin]"
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
