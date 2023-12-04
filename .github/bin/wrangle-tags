@@ -396,10 +396,30 @@ trace_full () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+_NORMAL_EXIT=false
+
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
+
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
+
+exit_cleanup () {
+  if ! ${_NORMAL_EXIT}; then
+    >&2 echo "GAFFE: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
 main () {
   set -e
 
+  trap exit_cleanup EXIT
+
   wrangle_tags "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then

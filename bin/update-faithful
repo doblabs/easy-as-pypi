@@ -543,10 +543,32 @@ update_faithful_files_excluding_pyproject_toml () {
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
+_NORMAL_EXIT=false
+
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
+
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
+
+exit_cleanup () {
+  if ! ${_NORMAL_EXIT}; then
+    >&2 echo "GAFFE: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
 main () {
+  set -e
+
+  trap exit_cleanup EXIT
+
   source_deps
 
   update_deps_easy_as_pypi "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
 }
 
 # Run the command iff being executed.

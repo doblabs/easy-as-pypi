@@ -1037,17 +1037,9 @@ has_unstaged_changes () {
 
 _NORMAL_EXIT=false
 
-exit_1 () {
-  _NORMAL_EXIT=true
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
 
-  exit 1
-}
-
-exit_0 () {
-  _NORMAL_EXIT=true
-
-  exit 0
-}
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
 
 _CHANGED_BRANCH=""
 
@@ -1068,9 +1060,9 @@ exit_cleanup () {
 main () {
   set -e
 
-  source_deps
-
   trap exit_cleanup EXIT
+
+  source_deps
 
   update_poetry_update "$@"
 
