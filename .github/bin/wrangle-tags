@@ -309,12 +309,17 @@ is_this_tag_object_specified () {
   trace_full "which_tag: ${which_tag}"
   trace_full "tag_name: ${tag_name}"
 
-  # Sometimes, initially, workflows call with which_tag unset,
-  # and we procure a list of all tag names.
+  # This is a little hacky, but it lets us use 'local' vars like an object:
+  #
+  # On the first call to set_tag_locals, the script compiles the list
+  # of all tag names (which are defined below in the separate fcns).
   [ -n "${which_tag}" ] || tag_names+=("${tag_name}")
 
-  # Other times, workflows specify the tag name, and we'll use
-  # `local` vars. to return values for that tag.
+  # On the second call to set_tag_locals, the script wants us to set
+  # the local vars. for a specific tag.
+  #
+  # In this manner we use 'local' vars. in lieu of object, or even
+  # decent associative array support in (Ba)sh.
   [ -n "${which_tag}" ] && [ "${which_tag}" = "${tag_name}" ]
 }
 
