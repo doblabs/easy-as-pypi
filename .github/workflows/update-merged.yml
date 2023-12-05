@@ -253,7 +253,7 @@ jobs:
           HEAD_REF: ${{ github.head_ref }}
 
       # The verify-merged-pr steps are designed to exit nonzero to fail,
-      # and then the next, bump job will check verify-merged-pr.result.
+      # and then a later job will check verify-merged-pr.result.
 
   # ***
 
