@@ -117,6 +117,18 @@ jobs:
           echo "test \"${GITHUB_SHA}\" = \"$(git rev-parse HEAD)\""
           [ "${GITHUB_SHA}" = "$(git rev-parse HEAD)" ] || exit 1
 
+      # Similar to last check, this might be overkill, but check the version
+      # exists on the HEAD commit, too.
+      - name: Verify branch HEAD is what was versioned
+        run: |
+          head_tag_match="$(git tag --list --points-at HEAD "${VERSION_TAG}")"
+          echo "test \"${head_tag_match}\" = \"$(VERSION_TAG)\""
+          ([ -n "${head_tag_match}" ] \
+           && [ "${head_tag_match}" = "${VERSION_TAG}" ] \
+          ) || exit 1
+        env:
+          VERSION_TAG: ${{ inputs.version_tag }}
+
       # ***
 
       - name: Fail if already released
