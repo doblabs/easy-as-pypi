@@ -270,6 +270,9 @@ branch_tag_found () {
   local branch_tag_match=""
   local merged_tag_match=""
 
+  [ -n "${tag_name}" ] \
+    || return 1
+
   if ${try_it_the_hard_way}; then
     # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
     # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
