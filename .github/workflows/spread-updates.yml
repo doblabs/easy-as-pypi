@@ -195,3 +195,5 @@ jobs:
       delete-inhibit-forever: false
       delete-cascade-updatedeps: true
       delete-cascade-versioning: true
+      delete-inhibit-alpha: false
+      delete-inhibit-patch: false
