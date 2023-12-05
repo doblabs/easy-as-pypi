@@ -303,6 +303,7 @@ jobs:
 
     # Note we only set CI tags here, and we don't reference the outputs later.
     with:
+      prerelease: ${{ needs.env-outputs.outputs.cascade-versioning == 'alpha' }}
       # Manage "ci-inhibit-cascade"
       inhibit-cascade: ${{
         contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
@@ -327,6 +328,11 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
         with:
+          # If pre-release, use alternative branch if defined.
+          ref: ${{
+            needs.env-outputs.outputs.cascade-versioning == 'alpha'
+            && vars.PRERELEASE_BRANCH
+            || github.event.repository.default_branch }}
           # Fetch all history, so rev-parse HEAD is real HEAD,
           # and we get tag history, so git-bump can read version.
           fetch-depth: 0

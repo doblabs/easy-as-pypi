@@ -26,6 +26,9 @@ on:
       VERSION:
         required: true
         type: string
+      PRERELEASE:
+        required: true
+        type: boolean
 
 # ***
 
@@ -107,6 +110,14 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # If pre-release, use alternative branch if defined.
+          # (Not that pyproject.toml likely to differ btw. the
+          #  two, but could, so better honor ourselves.)
+          ref: ${{
+            inputs.PRERELEASE == 'true'
+            && vars.PRERELEASE_BRANCH
+            || github.event.repository.default_branch }}
 
       - name: Check Tag
         id: check-is-app
@@ -209,3 +220,6 @@ jobs:
       && (needs.pipx-smoke-test.result == 'success'
           || needs.pipx-smoke-test.result == 'skipped'
       ) }}
+
+    with:
+      prerelease: ${{ inputs.PRERELEASE }}

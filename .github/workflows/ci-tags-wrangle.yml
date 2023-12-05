@@ -13,6 +13,14 @@ on:
     # - So if inputs left unsaid, means caller just wants current state.
 
     inputs:
+      # Determines which branch to use, default or pre-release.
+      # - 'HEAD'- and 'project'-scoped tags are branch-specific.
+      prerelease:
+        type: boolean
+        required: true
+
+      # ***
+
       # If tagged on HEAD, don't do current cascade.
       inhibit-cascade:
         type: string
@@ -139,7 +147,11 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          # If pre-release, use alternative branch if defined.
+          ref: ${{
+            inputs.prerelease
+            && vars.PRERELEASE_BRANCH
+            || github.event.repository.default_branch }}
           # We can `fetch-depth: 0` or `fetch-tags: 'true'` for all tags.
           # - We don't need history, just tags.
           # - The docs don't say why it matters. It's left to the reader
