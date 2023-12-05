@@ -459,6 +459,10 @@ jobs:
   #       same workflow. (I tried `pip cache remove ${PACKAGE_NAME}`,
   #       which removes nothing, because no wheels files downloaded,
   #       not surprising, but worth a shot.)
+  #
+  #     - REFER: This feels similar to `poetry cache clear PyPI --all`,
+  #       when `poetry update` doesn't see a new release, but Poetry
+  #       is not involved here.
 
   # - DUNNO/2023-10-08: I ran this workflow manually, and pipx-install
   #   installed the version. But then in the new workflow, pipx-install
