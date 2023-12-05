@@ -279,25 +279,16 @@ branch_tag_found () {
     # - Note this must uses not-fully-qualified branch name (e.g., 'main')
     #   because refs/heads/<branch> does not work with git-branch (so not
     #   `git rev-parse --symbolic-full-name HEAD`).
-    if branch_tag_match="$(
+    branch_tag_match="$(
       git branch --list --contains "refs/tags/${tag_name}" "${branch_name}" \
         2> /dev/null
-    )"; then
-
-      if [ -n "${branch_tag_match}" ]; then
-        tag_exists=true
-      fi
-    fi
+    )" || true
   fi
 
   if ${try_it_the_easy_way}; then
     # Apparently I didn't read man git-log close enough when I wrote
     # this code the hard way.
     merged_tag_match="$(git tag --list --merged HEAD "${tag_name}")"
-
-    if [ -n "${merged_tag_match}" ]; then
-      tag_exists=true
-    fi
   fi
 
   # Check that you didn't wreck yourself.
@@ -314,7 +305,7 @@ branch_tag_found () {
     exit 1
   fi
 
-  ${tag_exists}
+  [ -n "${branch_tag_match}" ] || [ -n "${merged_tag_match}" ]
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
