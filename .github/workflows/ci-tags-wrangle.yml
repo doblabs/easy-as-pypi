@@ -145,7 +145,7 @@ jobs:
           # - The docs don't say why it matters. It's left to the reader
           #   to assume that fetching history and/or tags is more resource
           #   intensive and/or degrades job performance. *Just saying.*
-          fetch-depth: 1
+          #  fetch-depth: 1  # 1 is the default
           fetch-tags: true
 
       # ***
