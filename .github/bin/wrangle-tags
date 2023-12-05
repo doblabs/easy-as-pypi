@@ -178,6 +178,8 @@ wrangle_tag () {
 
   # ***
 
+  local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
+
   local tag_exists=false
 
   if [ "${tag_scope}" = "HEAD" ]; then
@@ -192,8 +194,6 @@ wrangle_tag () {
     # A "branch" tag is valid if it's on any commit in the branch.
     # - This code path followed by only the 'ci-inhibit-forever'
     #   tag (for now, says 2023-11-22).
-
-    local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
 
     # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
     # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
