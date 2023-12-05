@@ -356,11 +356,23 @@ jobs:
 
   # ***
 
+  wrangle-ci-tags:
+    name: Wrangle (read) CI tags
+    uses: ./.github/workflows/ci-tags-wrangle.yml
+    needs: [prepare-publish]
+    if: ${{ ! cancelled()
+      && needs.prepare-publish.result == 'success'
+      && needs.prepare-publish.outputs.IS_RELEASED == '' }}
+    with:
+      prerelease: ${{ needs.prepare-publish.outputs.PRERELEASE == 'true' }}
+
+  # ***
+
   poetry-publish:
 
     runs-on: ubuntu-latest
 
-    needs: prepare-publish
+    needs: [prepare-publish, wrangle-ci-tags]
 
     # Easiest approach would be to skip if IS_RELEASED, e.g.,
     #   if: needs.prepare-publish.outputs.IS_RELEASED == '' && ...
@@ -371,6 +383,7 @@ jobs:
     if: ${{ ! cancelled()
       && needs.prepare-publish.result == 'success'
       && needs.prepare-publish.outputs.IS_RELEASED == ''
+      && needs.wrangle-ci-tags.outputs.old-inhibit-release-pypi == 'false' }}
 
     # CXREF: PyPI recommends using an environment ('release')
     #        to keep non-admin organization members from publishing.
@@ -539,6 +552,10 @@ jobs:
 
     if: ${{ ! cancelled()
       && !contains(needs.*.result, 'failure')
+      && (needs.poetry-publish.result == 'success'
+          || (needs.poetry-publish.result == 'skipped'
+              && needs.prepare-publish.outputs.IS_RELEASED == 'true'
+             )) }}
 
     steps:
       - name: Checkout repository

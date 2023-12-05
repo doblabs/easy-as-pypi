@@ -141,6 +141,26 @@ jobs:
 
       # ***
 
+      # IGNOR: The CI tags that inhibit release-pypi
+      #        do not inhibit GH releases, specifically
+      #         ci-inhibit-alpha and ci-inhibit-patch
+      #        Because GH always present, no reason or
+      #        good use case not to always release there.
+      #
+      # - That said, here's how you might check CI tags
+      #   here, captured as a comment because I wonder if
+      #   one day soon we'll want a CI tag for this w/flow.
+      #
+      #   - name: Wrangle (read) CI tags
+      #     id: wrangle-ci-tags
+      #     uses: ./.github/workflows/ci-tags-wrangle.yml
+      #     with:
+      #       prerelease: ${{ steps.check-if-prerelease.outputs.is_prerelease == 'true' }}
+      #   # To access output, e.g.,
+      #   #  steps.wrangle-ci-tags.outputs.old-inhibit-release-pypi == 'false'
+
+      # ***
+
       - name: Install poetry
         run: pipx install poetry
 
