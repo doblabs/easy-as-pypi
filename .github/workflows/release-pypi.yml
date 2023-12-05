@@ -502,7 +502,7 @@ jobs:
       && !contains(needs.*.result, 'cancelled') }}
 
     steps:
-      - name: Checkout repository (not workflow_dispatch)
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       # # REFER: https://cli.github.com/manual/gh_workflow_run
