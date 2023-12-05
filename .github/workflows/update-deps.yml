@@ -60,7 +60,7 @@ on:
         # below, defaults to inputs.cascade-updatedeps.
         default: ''
 
-      # Note if bump-part is "alpha" or "least" *and* cascade-dispatch is
+      # Note if bump-part is "alpha" *and* cascade-dispatch is
       # true, then include-prerelease-lock is implicitly true.
       include-prerelease-lock:
         description: 'Include pre-release lock'
@@ -73,7 +73,6 @@ on:
         options:
           - 'alpha'
           - 'patch'
-          - 'least'
           - 'skip'
         default: 'skip'
 

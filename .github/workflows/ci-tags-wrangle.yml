@@ -46,7 +46,7 @@ on:
       # If tagged on HEAD, determines versioning increment this cascade.
       # - Use "skip" to not version, and also to not release any projects.
       cascade-versioning:
-        # Opts: 'alpha', 'patch', 'least', or 'skip';
+        # Opts: 'alpha', 'patch', or 'skip';
         #       or 'false' to remove the tag,
         #       or '' to merely read the tag.
         type: string

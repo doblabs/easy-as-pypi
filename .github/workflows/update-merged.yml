@@ -74,7 +74,6 @@ on:
         options:
           - 'alpha'
           - 'patch'
-          - 'least'
           # ISOFF: If the user is using this workflow's workflow_dispatch,
           #        there's no reason to skip versioning.
           #        - If user doesn't want to version this project but also
@@ -121,7 +120,6 @@ on:
       #    options:
       #      - 'alpha'
       #      - 'patch'
-      #      - 'least'
       #      - 'skip'
       #    default: 'skip'
 
@@ -201,8 +199,8 @@ env:
     || 'skip' }}
 
   # USYNC: .github/bin/update-poetry defines these strings:
-  #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|LEAST|SKIP)=\
-  #     "ci-version-(alpha|patch|least|skip)"
+  #   UPDEPS_LABEL_NAME_VERSION_(ALPHA|PATCH|SKIP)=\
+  #     "ci-version-(alpha|patch|skip)"
   CASCADE_VERSIONING: ${{
     false
     || inputs.bump-part
@@ -211,8 +209,6 @@ env:
         && 'alpha')
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-patch')
         && 'patch')
-    || (contains(github.event.pull_request.labels.*.name, 'ci-version-least')
-        && 'least')
     || (contains(github.event.pull_request.labels.*.name, 'ci-version-skip')
         && 'skip')
     || 'alpha' }}
@@ -415,6 +411,7 @@ jobs:
           cd ./versionee/
           # By default, runs:
           #  git bump-version-tag least
+          # But we'll run `git bump alpha|patch`
           echo "git bump-version-tag \"${BUMP_PART}\""
           git bump-version-tag "${BUMP_PART}"
 

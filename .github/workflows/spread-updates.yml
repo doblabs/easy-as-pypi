@@ -65,7 +65,6 @@ on:
         options:
           - 'alpha'
           - 'patch'
-          - 'least'
           - 'skip'
         default: 'skip'
 

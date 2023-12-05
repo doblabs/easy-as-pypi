@@ -18,15 +18,8 @@
 # - SAVVY: If both inputs are 'skip', workflows will run from
 #   one project to another, but nothing really happens.
 #
-# - SAVVY: If user choose 'alpha' or 'least' cascade-deps option, workflow
-#   will publish to test.PyPI (and smoke-test will pip-install from there).
-#   - For 'alpha', this is obvious: The EAPP workflow advertises that
-#     if only publishes pre-release versions to test.PyPI.
-#   - For 'least', this is less obvious: If one package is already
-#     pre-release, 'least' will publish another pre-release version.
-#     Thus, we can only assure that downstream packages always get the
-#     latest upstream versions, whether pre-release or normal, if all
-#     projects along the cascade stick to using test.PyPI.
+# - SAVVY: If user choose 'alpha' cascade-deps option, workflow will
+#   publish to test.PyPI (and smoke-test will pip-install from there).
 #
 # - SAVVY: If user just wants to update third-party deps, they can set
 #   cascade-version to 'skip' (and cascade-updatedeps to not 'skip').
@@ -73,7 +66,6 @@ on:
         options:
           - 'alpha'
           - 'patch'
-          - 'least'
           - 'skip'
         # LATER/2023-11-30: Revert to 'alpha', after testing
         #  default: 'alpha'
