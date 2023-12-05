@@ -193,12 +193,13 @@ wrangle_tag () {
     # - This code path followed by only the 'ci-inhibit-forever'
     #   tag (for now, says 2023-11-22).
 
-    # Use not-fully-qualified branch name because refs/heads/<branch> doesn't
-    # work with git-branch (so not `git rev-parse --symbolic-full-name HEAD`).
     local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
 
     # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
     # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
+    # - Note this must uses not-fully-qualified branch name (e.g., 'main')
+    #   because refs/heads/<branch> does not work with git-branch (so not
+    #   `git rev-parse --symbolic-full-name HEAD`).
     local branch_tag_match
     if branch_tag_match="$(
       git branch --list --contains "refs/tags/${tag_name}" "${branch_name}" \
