@@ -201,12 +201,12 @@ jobs:
           [ -z "${extra_index_arg}" ] \
             && pipx_pip_args="" \
             || pipx_pip_args="--pip-args=${extra_index_arg}"
-          #
+
           ! ${PRERELEASE} \
             && index_url_pip="" \
             || index_url_pip="--index-url ${test_pypi_url} ${extra_index_arg}"
           echo "INDEX_PIP=${index_url_pip}" >> "${GITHUB_ENV}"
-          #
+
           ! ${PRERELEASE} \
             && index_url_pipx="" \
             || index_url_pipx="--index-url ${test_pypi_url} ${pipx_pip_args}"
