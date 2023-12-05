@@ -264,20 +264,51 @@ branch_tag_found () {
 
   local tag_exists=false
 
-  # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
-  # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
-  # - Note this must uses not-fully-qualified branch name (e.g., 'main')
-  #   because refs/heads/<branch> does not work with git-branch (so not
-  #   `git rev-parse --symbolic-full-name HEAD`).
-  local branch_tag_match
-  if branch_tag_match="$(
-    git branch --list --contains "refs/tags/${tag_name}" "${branch_name}" \
-      2> /dev/null
-  )"; then
+  local try_it_the_hard_way=true
+  local try_it_the_easy_way=true  # Or so I'm led to believe
 
-    if [ -n "${branch_tag_match}" ]; then
+  local branch_tag_match=""
+  local merged_tag_match=""
+
+  if ${try_it_the_hard_way}; then
+    # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
+    # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
+    # - Note this must uses not-fully-qualified branch name (e.g., 'main')
+    #   because refs/heads/<branch> does not work with git-branch (so not
+    #   `git rev-parse --symbolic-full-name HEAD`).
+    if branch_tag_match="$(
+      git branch --list --contains "refs/tags/${tag_name}" "${branch_name}" \
+        2> /dev/null
+    )"; then
+
+      if [ -n "${branch_tag_match}" ]; then
+        tag_exists=true
+      fi
+    fi
+  fi
+
+  if ${try_it_the_easy_way}; then
+    # Apparently I didn't read man git-log close enough when I wrote
+    # this code the hard way.
+    merged_tag_match="$(git tag --list --merged HEAD "${tag_name}")"
+
+    if [ -n "${merged_tag_match}" ]; then
       tag_exists=true
     fi
+  fi
+
+  # Check that you didn't wreck yourself.
+  if true \
+    && ${try_it_the_hard_way} \
+    && ${try_it_the_easy_way} \
+    && [ "${branch_tag_match}" != "${merged_tag_match}" ] \
+  ; then
+    >&2 echo "GAFFE: branch tag sniffers disagree:"
+    >&2 echo "- branch_tag_match: ${branch_tag_match}"
+    >&2 echo "- merged_tag_match: ${merged_tag_match}"
+    >&2 echo "For tag “${tag_nama}” on branch “${branch_name}”"
+
+    exit 1
   fi
 
   ${tag_exists}
