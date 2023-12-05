@@ -385,7 +385,31 @@ jobs:
           UPDEPS_USER_NAME: ${{ vars.UPDEPS_USER_NAME }}
           UPDEPS_USER_NAME_VERSION: ${{ vars.UPDEPS_USER_NAME_VERSION }}
 
-      - name: Bump it...
+      # If not is_bumpable, simply means the current commit
+      # is already version-tagged with a similar type (e.g.,
+      # if bump-part is 'alpha', the current commit already
+      # has a pre-release version tag; or, if bump-part is
+      # 'patch' and !is_bumpable, current commit already has
+      # a normal version tag on it).
+      # - Because we cannot add an additional version tag of
+      #   the same type to the same commit (git-bump forbids
+      #   it), we'll consider the current commit already
+      #   versioned how we want, and we'll continue the
+      #   cascade immediately.
+      - name: But do we have to...?
+        id: git-bump-check
+        run: |
+          export PATH="$(pwd)/versioner/bin:${PATH}"
+          cd ./versionee/
+          is_bumpable=true
+          printf "%s" "git bump-version-tag --check \"${BUMP_PART}\"... "
+          git bump-version-tag --check "${BUMP_PART}" \
+            || is_bumpable=false
+          echo "${is_bumpable}"
+          echo "is_bumpable=${is_bumpable}" >> $GITHUB_OUTPUT
+
+      - name: Bump it
+        if: steps.git-bump-check.outputs.is_bumpable == 'true'
         run: |
           export PATH="$(pwd)/versioner/bin:${PATH}"
           cd ./versionee/
@@ -401,6 +425,9 @@ jobs:
       BUMP_PART: ${{ inputs.bump-part
         || needs.env-outputs.outputs.cascade-versioning }}
 
+    outputs:
+      is_bumpable: ${{ steps.git-bump-check.outputs.is_bumpable }}
+
   # ***
 
   # If no new version/release, continue cascade; otherwise checks-versioned.yml
@@ -411,7 +438,7 @@ jobs:
     uses: ./.github/workflows/spread-updates.yml
     secrets: inherit
 
-    needs: [env-outputs, verify-merged-pr]
+    needs: [env-outputs, verify-merged-pr, bump-version-maybe]
 
     # Sorta the opposite of wrangle-ci-tags's 'if' condition.
     # SAVVY: Note this won't casade if git-bump ran but didn't change the version.
@@ -425,7 +452,10 @@ jobs:
           || (github.event_name != 'pull_request'
               && inputs.cascade-dispatch
               && (inputs.bump-part == 'skip'
-                  || inputs.cascade-versioning == 'skip'))) }}
+                  || inputs.cascade-versioning == 'skip')))
+      && (needs.bump-version-maybe.result == 'skipped'
+          || (needs.bump-version-maybe.result == 'success'
+              && needs.bump-version-maybe.outputs.is_bumpable == 'false')) }}
 
     with:
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
