@@ -368,7 +368,8 @@ jobs:
     # this job. So we'll skip the individual steps, and not the job.
     # - Unfortunately, pypa/gh-action-pypi-publish@release/v1 still builds
     #   its image, even when its step(s) skipped, which takes a few moments.
-    if: needs.prepare-publish.result == 'success'
+    if: ${{ ! cancelled()
+      && needs.prepare-publish.result == 'success'
       && needs.prepare-publish.outputs.IS_RELEASED == ''
 
     # CXREF: PyPI recommends using an environment ('release')
@@ -478,7 +479,7 @@ jobs:
 
     needs: [prepare-publish, poetry-publish]
 
-    # Note the 'if' is skipped if any needs were skipped, unless always.
+    # Note 'if' skipped if any needs skipped, unless always() or cancelled().
     if: ${{ ! cancelled()
       && needs.prepare-publish.result == 'success'
       && (needs.poetry-publish.result == 'success'
@@ -536,10 +537,8 @@ jobs:
 
     needs: [prepare-publish, poetry-publish, sleep-before-smoking]
 
-    # Run if all needs 'success' or 'skipped'.
     if: ${{ ! cancelled()
       && !contains(needs.*.result, 'failure')
-      && !contains(needs.*.result, 'cancelled') }}
 
     steps:
       - name: Checkout repository
