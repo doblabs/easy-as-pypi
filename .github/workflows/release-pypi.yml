@@ -122,13 +122,34 @@ jobs:
               | grep -E -e "${VERSPARTS}" \
           )"
 
-          if $(echo "${version_tags}" | wc -l) -gt 1; then
-            >&2 echo "ERROR: Multiple version tags already"
+          # If multiple versions tagged, choose the largest.
+          # - Note this is quite unnecessary, as this use case (a user
+          #   deliberately initiating release-pypi from the GitHub Actions
+          #   website, or via `gh workflow run`, notwithstanding there
+          #   being multiple versions on the latest commit) is both rare
+          #   and not at all critical. The majority, if not all, PyPI
+          #   releases will be due to the 'release' event, not workflow-D.
+          # Note that `sort -V|--version-sort` sorts pre-release before
+          # their normal counterparts, so it's sorta useless, and we'll
+          # just grab the "largest" 2 versions and then do a simple pre-
+          # release vs. normal comparison, knowing that, if the user is
+          # playing by the rules, there will only be at most 2 versions
+          # tagged.
+          if $(echo "${version_tags}" | wc -l) -lt 2; then
+            VERSION_TAG="${version_tags}"
+          else
+            possible_versions="$(echo "${version_tags}" | sort -V -r | head -2)"
+            possible_largest="$(echo "${possible_versions}" | head -1)"
+            other_possibility="$(echo "${possible_versions}" | tail -1)"
 
-            exit 1
+            if [[ "${possible_largest}" =~ "${other_possibility}"* ]]; then
+              # Means ${possible_largest} is a pre-release of ${other_possibility},
+              # e.g., [[ 1.2.4-alpha.1 =~ 1.2.4* ]]
+              possible_largest="${other_possibility}"
+            fi
+
+            VERSION_TAG="${possible_largest}"
           fi
-
-          VERSION_TAG="${version_tags}"
 
           echo "VERSION_TAG=${VERSION_TAG} [${version_tags}]"
 
