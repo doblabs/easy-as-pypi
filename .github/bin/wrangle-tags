@@ -93,7 +93,8 @@ wrangle_tags () {
 
   trace_full
 
-  trace_lite "┌─ CI Wrangler: tag-name: ────┬─🥚─┬─ new-val: ─┬─ output-name and val: ────────────┐"
+  # USYNC: CI_tags_table_column_widths
+  trace_lite "┌─ CI Wrangler: tag-name: ───────────┬─🥚─┬─ new-val: ─┬─ output-name and val: ────────────┐"
 
   for which_tag in "${tag_names[@]}"; do
     trace_full "which tag: ${which_tag}"
@@ -120,7 +121,8 @@ wrangle_tags () {
     trace_full
   done
 
-  local footer_rhs="─────────────────────────────┴────┴────────────┴───────────────────────────────────┘"
+  # USYNC: CI_tags_table_column_widths
+  local footer_rhs="────────────────────────────────────┴────┴────────────┴───────────────────────────────────┘"
 
   local piping="└"
   if [ -n "${GIT_PUSH_OUTPUT_DUMP}" ] || [ -n "${GITHUB_OUTPUT}" ]; then
@@ -153,7 +155,7 @@ wrangle_tags () {
 # ***
 
 wrangle_tag () {
-  local tag_name="$1"
+  local tag_name_base="$1"
   local out_name="$2"
   local tag_scope="$3"
   local default_value="$4"
@@ -162,7 +164,7 @@ wrangle_tag () {
   local skip_if="$7"
 
   trace_full "manage-ci-tag @ $(git rev-parse HEAD)"
-  trace_full "- tag_name: ${tag_name}"
+  trace_full "- tag_name_base: ${tag_name_base}"
   trace_full "- out_name: ${out_name}"
   trace_full "- tag_scope: ${tag_scope}"
   trace_full "- default_value: ${default_value}"
@@ -179,6 +181,11 @@ wrangle_tag () {
   # ***
 
   local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
+
+  local tag_name
+  tag_name="$(format_tag_name "${tag_name_base}" "${tag_scope}" "${branch_name}")"
+
+  # ***
 
   local tag_exists=false
 
@@ -236,8 +243,9 @@ wrangle_tag () {
 
   trace_full "${out_name}: ${old_tag_value}"
 
+  # USYNC: CI_tags_table_column_widths
   trace_lite \
-    "├── $(printf '%-25s' "${tag_name}")" \
+    "├── $(printf '%-32s' "${tag_name}")" \
     "│  $(${tag_exists} && echo ✓ || echo ✗)" \
     "│ $(printf '%+10s' "${new_tag_value}")" \
     "│ $(printf '%-27s' "${out_name}:") $(printf '%-5s' "${old_tag_value}") │"
@@ -246,6 +254,39 @@ wrangle_tag () {
     # Aka `if ${CI:-false}; then`.
     echo "${out_name}=${old_tag_value}" >> "${GITHUB_OUTPUT}"
   fi
+}
+
+# ***
+
+# Mung the tag_name depending on tag_scope.
+
+format_tag_name () {
+  local tag_name_base="$1"
+  local tag_scope="$2"
+  local branch_name="$3"
+
+  # - First, strip the 'ci-' prefix from the tag name.
+  local tag_name_raw="$(echo "${tag_name_base}" | sed 's/^ci-//')"
+
+  # - Next form the proper tag name for the given scope.
+  local tag_name="${tag_name_base}"
+
+  if false \
+    || [ "${tag_scope}" = "HEAD" ] \
+    || [ "${tag_scope}" = "branch" ] \
+  ; then
+    # Convert, 'ci-{postfix}' → 'ci-{branch_name}-{postfix}'
+    tag_name="ci-${branch_name}-${tag_name_raw}"
+  else
+    >&2 echo "GAFFE: Unknown tag_scope: ${tag_scope}"
+
+    exit 1
+  fi
+
+  trace_full "- branch_name: ${branch_name}"
+  trace_full "- tag_name: ${tag_name}"
+
+  printf "%s" "${tag_name}"
 }
 
 # ***
@@ -374,7 +415,7 @@ is_this_tag_object_specified () {
 # ***
 
 set_tag_locals_inhibit_cascade () {
-  # E.g., "ci-inhibit-cascade"
+  # E.g., "ci-{branch}-inhibit-cascade"
   tag_name="${EAPP_CI_TAG_INHIBIT_CASCADE}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_inhibit_cascade"
@@ -386,7 +427,7 @@ set_tag_locals_inhibit_cascade () {
 }
 
 set_tag_locals_inhibit_forever () {
-  # E.g., "ci-inhibit-forever"
+  # E.g., "ci-{branch}-inhibit-forever"
   tag_name="${EAPP_CI_TAG_INHIBIT_FOREVER}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_inhibit_forever"
@@ -398,7 +439,7 @@ set_tag_locals_inhibit_forever () {
 }
 
 set_tag_locals_cascade_updatedeps () {
-  # E.g., "ci-cascade-updatedeps"
+  # E.g., "ci-{branch}-cascade-updatedeps"
   tag_name="${EAPP_CI_TAG_CASCADE_UPDATEDEPS}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_updatedeps"
@@ -415,7 +456,7 @@ set_tag_locals_cascade_updatedeps () {
 #   the tag (and not create or delete it),
 #   or 'false' to remove the tag.
 set_tag_locals_cascade_versioning () {
-  # E.g., "ci-cascade-versioning"
+  # E.g., "ci-{branch}-cascade-versioning"
   tag_name="${EAPP_CI_TAG_CASCADE_VERSIONING}"
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_versioning"
