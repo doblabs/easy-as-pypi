@@ -333,8 +333,12 @@ jobs:
             needs.env-outputs.outputs.cascade-versioning == 'alpha'
             && vars.PRERELEASE_BRANCH
             || github.event.repository.default_branch }}
-          # Fetch all history, so rev-parse HEAD is real HEAD,
-          # and we get tag history, so git-bump can read version.
+          # Fetch all history, so git-bump can determine largest version.
+          # - Note that fetch-tags on its own only fetches "branch" tags,
+          #   or tags accessible from HEAD (git tag -l --merged HEAD):
+          #     fetch-tags: true
+          #     fetch-depth: 1
+          # Fetch *all* tags, so git-bump can access them.
           fetch-depth: 0
           # Use user token, not default github.token, so git-push tag
           # triggers release workflow.
