@@ -88,12 +88,22 @@ on:
       old-cascade-versioning:
         description: "The previous/maybe current ci-cascade-versioning value"
         value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-versioning }}
-      old-inhibit-alpha:
-        description: "The previous/maybe current ci-inhibit-alpha value"
-        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-alpha }}
-      old-inhibit-patch:
-        description: "The previous/maybe current ci-inhibit-patch value"
-        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-patch }}
+      # The alpha and patch inhibitors are prerelease-related,
+      # so the raw values are not interesting to callers:
+      #   old-inhibit-alpha:
+      #     description: "The previous/maybe current ci-inhibit-alpha value"
+      #     value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-alpha }}
+      #   old-inhibit-patch:
+      #     description: "The previous/maybe current ci-inhibit-patch value"
+      #     value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-patch }}
+      # - But the calculated value for the current branch is interesting:
+      old-inhibit-release-pypi:
+        description: "Either old-inhibit-alpha or old-inhibit-patch per prerelease"
+        value: ${{ false
+          || (inputs.prerelease
+              && jobs.wrangle-ci-tags.outputs.old-inhibit-alpha == 'false')
+          || (!inputs.prerelease
+              && jobs.wrangle-ci-tags.outputs.old-inhibit-patch == 'false') }}
 
 # ***
 
