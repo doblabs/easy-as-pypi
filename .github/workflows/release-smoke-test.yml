@@ -51,9 +51,6 @@ jobs:
       VERSION: ${{ inputs.VERSION }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@v4
@@ -141,9 +138,6 @@ jobs:
       VERSION: ${{ inputs.VERSION }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@v4
