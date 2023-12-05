@@ -107,8 +107,12 @@ jobs:
           # Fetch all history, so rev-parse HEAD is real HEAD.
           fetch-depth: 0
 
-      # Compare default branch HEAD and workflow event GITHUB_SHA.
-      - name: Verify default branch HEAD is what was tagged
+      # Fail workflow unless workflow event GITHUB_SHA matches branch HEAD.
+      # - Note that, sure, the user might have pushed more commits to HEAD
+      #   since they version-tagged. So maybe that's a legit use case, and
+      #   this check is overkill. And maybe someday we'll disable this check.
+      #   - But until that day when this check actually annoys you, leave it.
+      - name: Verify branch HEAD is what was tagged
         run: |
           [ "$GITHUB_SHA" = "$(git rev-parse HEAD)" ] || exit 1
 
