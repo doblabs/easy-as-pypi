@@ -195,13 +195,13 @@ wrangle_tag () {
 
     # Use not-fully-qualified branch name because refs/heads/<branch> doesn't
     # work with git-branch (so not `git rev-parse --symbolic-full-name HEAD`).
-    local default_branch="$(git rev-parse --abbrev-ref=loose HEAD)"
+    local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
 
-    # - The name pattern — ${default_branch} — is ^strict$ w/out wildcards.
+    # - The name pattern — ${branch_name} — is ^strict$ w/out wildcards.
     # - If tag absent, dies: 'error: malformed object name refs/tags/foo'.
     local branch_tag_match
     if branch_tag_match="$(
-      git branch --list --contains "refs/tags/${tag_name}" "${default_branch}" \
+      git branch --list --contains "refs/tags/${tag_name}" "${branch_name}" \
         2> /dev/null
     )"; then
 
