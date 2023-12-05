@@ -442,21 +442,24 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           repository-url: https://test.pypi.org/legacy/
-        # Always publish to test.PyPI, so that "our" downstream deps always
-        # get the latest package version when they use the test.PyPI source
-        # (which is what happens on a pre-release cascade).
+        # Only publish pre-release packages to test.PyPI.
         #
-        # - Note that smoke-test only checks the release indicated by
-        #   env.PRERELEASE, because that's the only source that matters.
-        #
-        #   - E.g., we release normals to both test.PyPI and to PyPI, but
-        #     smoke-test only blocks repository_dispatch until the PyPI
-        #     package is alive, because that's all that downstreams need.
-        #
-        #     Likewise, because we release alphas only to test.PyPI,
-        #     smoke-test only blocks repository_dispatch until the
-        #     test.PyPI package is alive.
-        if: true
+        # - It's not prudent to publish normal packages to test.PyPI,
+        #   because the normal package was made from a normal build,
+        #   and the normal build only includes normal sources.
+        #   - That is, the `poetry build` was run on the main branch,
+        #     and its pyproject.toml uses deps from normal PyPI.
+        #     - And if we post such a project to test.PyPI, whose deps
+        #       might ref older versions than the current alpha deps,
+        #       I'd assume there'd be chayos. Maybe package versions
+        #       downgrading, or Poetry failing because deps conflicts,
+        #       I guess I'm not sure, but it smells like danger.
+        #   - And note that pip uses the first package index it finds
+        #     that has the source. I.e., pip *does not* search multiple
+        #     indices and pick the largest-version source.
+        # - So for either type or release cascade, whether 'alpha'
+        #   or 'patch', we always publish to the same package index.
+        if: env.PRERELEASE == 'true'
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
