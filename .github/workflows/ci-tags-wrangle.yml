@@ -55,6 +55,22 @@ on:
         type: boolean
         default: false
 
+      # *** User-managed tags
+
+      inhibit-alpha:
+        type: string
+        required: false
+      delete-inhibit-alpha:
+        type: boolean
+        default: false
+
+      inhibit-patch:
+        type: string
+        required: false
+      delete-inhibit-patch:
+        type: boolean
+        default: false
+
     # Maps workflow outputs to job outputs.
     # - SAVVY: Returns old/current values, before applying new values.
     #   - If caller is not setting new values, returns current values.
@@ -72,6 +88,12 @@ on:
       old-cascade-versioning:
         description: "The previous/maybe current ci-cascade-versioning value"
         value: ${{ jobs.wrangle-ci-tags.outputs.old-cascade-versioning }}
+      old-inhibit-alpha:
+        description: "The previous/maybe current ci-inhibit-alpha value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-alpha }}
+      old-inhibit-patch:
+        description: "The previous/maybe current ci-inhibit-patch value"
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-patch }}
 
 # ***
 
@@ -95,6 +117,12 @@ jobs:
       }}"
       old-cascade-versioning: "${{
         steps.wrangle-ci-tags.outputs.old_cascade_versioning
+      }}"
+      old-inhibit-alpha: "${{
+        steps.wrangle-ci-tags.outputs.old_inhibit_alpha
+      }}"
+      old-inhibit-patch: "${{
+        steps.wrangle-ci-tags.outputs.old_inhibit_patch
       }}"
 
     steps:
@@ -149,6 +177,10 @@ jobs:
           EAPP_DELETE_CASCADE_UPDATEDEPS: ${{ inputs.delete-cascade-updatedeps }}
           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
           EAPP_DELETE_CASCADE_VERSIONING: ${{ inputs.delete-cascade-versioning }}
+          EAPP_INHIBIT_ALPHA: ${{ inputs.inhibit-alpha }}
+          EAPP_DELETE_INHIBIT_ALPHA: ${{ inputs.delete-inhibit-alpha }}
+          EAPP_INHIBIT_PATCH: ${{ inputs.inhibit-patch }}
+          EAPP_DELETE_INHIBIT_PATCH: ${{ inputs.delete-inhibit-patch }}
 
       # ***
 
@@ -165,4 +197,10 @@ jobs:
           }}"
           echo "old-cascade-versioning: ${{
             steps.wrangle-ci-tags.outputs.old_cascade_versioning
+          }}"
+          echo "old-inhibit-alpha: ${{
+            steps.wrangle-ci-tags.outputs.old_inhibit_alpha
+          }}"
+          echo "old-inhibit-patch: ${{
+            steps.wrangle-ci-tags.outputs.old_inhibit_patch
           }}"

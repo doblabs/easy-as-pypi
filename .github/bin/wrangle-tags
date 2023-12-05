@@ -57,6 +57,8 @@ EAPP_CI_TAG_INHIBIT_CASCADE="ci-inhibit-cascade"
 EAPP_CI_TAG_INHIBIT_FOREVER="ci-inhibit-forever"
 EAPP_CI_TAG_CASCADE_UPDATEDEPS="ci-cascade-updatedeps"
 EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
+EAPP_CI_TAG_INHIBIT_ALPHA="ci-inhibit-alpha"
+EAPP_CI_TAG_INHIBIT_PATCH="ci-inhibit-patch"
 
 # REFER: See ./.github/workflows/ci-tags-wrangle.yml for the 
 #        environs this script uses as runtime args. They all
@@ -66,6 +68,8 @@ EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 #           EAPP_INHIBIT_FOREVER: ${{ inputs.inhibit-forever }}
 #           EAPP_CASCADE_UPDATEDEPS: ${{ inputs.cascade-updatedeps }}
 #           EAPP_CASCADE_VERSIONING: ${{ inputs.cascade-versioning }}
+#           EAPP_INHIBIT_ALPHA: ${{ inputs.inhibit-alpha }}
+#           EAPP_INHIBIT_PATCH: ${{ inputs.inhibit-patch }}
 #
 #        The corresponding delete tags each default false:
 #
@@ -73,6 +77,8 @@ EAPP_CI_TAG_CASCADE_VERSIONING="ci-cascade-versioning"
 #           EAPP_DELETE_INHIBIT_FOREVER: ${{ inputs.delete-inhibit-forever }}
 #           EAPP_DELETE_CASCADE_UPDATEDEPS: ${{ inputs.delete-cascade-updatedeps }}
 #           EAPP_DELETE_CASCADE_VERSIONING: ${{ inputs.delete-cascade-versioning }}
+#           EAPP_DELETE_INHIBIT_ALPHA: ${{ inputs.delete-inhibit-alpha }}
+#           EAPP_DELETE_INHIBIT_PATCH: ${{ inputs.delete-inhibit-patch }}
 
 # Optional special keyword, e.g., "FALSE", you could use to delete
 # tags, vs. using the EAPP_DELETE_* environs.
@@ -193,8 +199,12 @@ wrangle_tag () {
     if head_tag_found "${tag_name}"; then
       tag_exists=true
     fi
-  else
+  elif [ "${tag_scope}" = "branch" ]; then
     if branch_tag_found "${tag_name}" "${branch_name}"; then
+      tag_exists=true
+    fi
+  elif [ "${tag_scope}" = "project" ]; then
+    if project_tag_found "${tag_name}"; then
       tag_exists=true
     fi
   fi
@@ -277,7 +287,9 @@ format_tag_name () {
   ; then
     # Convert, 'ci-{postfix}' → 'ci-{branch_name}-{postfix}'
     tag_name="ci-${branch_name}-${tag_name_raw}"
-  else
+  elif [ "${tag_scope}" != "project" ]; then
+    # "project" tags are unmunged, but if scope var
+    # says something unknown, that's a dev error.
     >&2 echo "GAFFE: Unknown tag_scope: ${tag_scope}"
 
     exit 1
@@ -356,6 +368,17 @@ branch_tag_found () {
   [ -n "${branch_tag_match}" ] || [ -n "${merged_tag_match}" ]
 }
 
+# A "project" tag is hot if its on any commit,
+# i.e., if it exists.
+
+project_tag_found () {
+  local tag_name="$1"
+
+  local any_tag_match="$(git tag --list "${tag_name}")"
+
+  [ -n "${any_tag_match}" ]
+}
+
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 # (lb): These functions act in lieu of Bash (or shell) having any
@@ -384,6 +407,10 @@ set_tag_locals () {
   set_tag_locals_cascade_updatedeps
 
   set_tag_locals_cascade_versioning
+
+  set_tag_locals_inhibit_alpha
+
+  set_tag_locals_inhibit_patch
 
   # ***
 
@@ -468,6 +495,30 @@ set_tag_locals_cascade_versioning () {
     default_value="skip"
     new_tag_value="${EAPP_CASCADE_VERSIONING}"
     delete_if=${EAPP_DELETE_CASCADE_VERSIONING:-false}
+  fi
+}
+
+set_tag_locals_inhibit_alpha () {
+  # E.g., "ci-inhibit-alpha"
+  tag_name="${EAPP_CI_TAG_INHIBIT_ALPHA}"
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
+    out_name="old_inhibit_alpha"
+    tag_scope="project"
+    default_value="false"
+    new_tag_value="${EAPP_INHIBIT_ALPHA}"
+    delete_if=${EAPP_DELETE_INHIBIT_ALPHA:-false}
+  fi
+}
+
+set_tag_locals_inhibit_patch () {
+  # E.g., "ci-inhibit-patch"
+  tag_name="${EAPP_CI_TAG_INHIBIT_PATCH}"
+  if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
+    out_name="old_inhibit_patch"
+    tag_scope="project"
+    default_value="false"
+    new_tag_value="${EAPP_INHIBIT_PATCH}"
+    delete_if=${EAPP_DELETE_INHIBIT_PATCH:-false}
   fi
 }
 
