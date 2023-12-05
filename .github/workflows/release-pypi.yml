@@ -403,6 +403,8 @@ jobs:
     steps:
       - name: Checkout repository (for gh)
         uses: actions/checkout@v4
+        # Skip: No need to checkout ${{ vars.PRERELEASE_BRANCH }}
+        #       if pre-release; we just need repo for `gh` command.
 
       # Note that `gh status` does not work here, prints error:
       #   could not load notifications: could not get notifications:
@@ -542,6 +544,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        # Skip: No need to checkout ${{ vars.PRERELEASE_BRANCH }}
+        #       if pre-release; we just need repo for `gh` command.
 
       # # REFER: https://cli.github.com/manual/gh_workflow_run
       # - name: Re-run this workflow...
@@ -563,7 +567,8 @@ jobs:
             -f "INDEX_PIP=${INDEX_PIP}" \
             -f "INDEX_PIPX=${INDEX_PIPX}" \
             -f "PACKAGE_NAME=${PACKAGE_NAME}" \
-            -f "VERSION=${VERSION}"
+            -f "VERSION=${VERSION}" \
+            -f "PRERELEASE=${PRERELEASE}"
           #
           # echo "... | gh workflow run release-smoke-test.yml --json"
           # # Doesn't like double-quotes outside, singles inside:
@@ -588,5 +593,6 @@ jobs:
           INDEX_PIPX: ${{ needs.prepare-publish.outputs.INDEX_PIPX }}
           PACKAGE_NAME: ${{ needs.prepare-publish.outputs.PACKAGE_NAME }}
           VERSION: ${{ needs.prepare-publish.outputs.VERSION }}
+          PRERELEASE: ${{ needs.prepare-publish.outputs.PRERELEASE }}
 
 # ***

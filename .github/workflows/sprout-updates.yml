@@ -107,6 +107,8 @@ jobs:
     steps:
       - name: Checkout repository (so `gh` works)
         uses: actions/checkout@v4
+        # Skip: No need to checkout ${{ vars.PRERELEASE_BRANCH }}
+        #       if pre-release; we just need repo for `gh` command.
 
       # REFER:
       # https://docs.github.com/en/actions/using-workflows/reusing-workflows#nesting-reusable-workflows

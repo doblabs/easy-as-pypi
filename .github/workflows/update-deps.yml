@@ -133,6 +133,10 @@ env:
   CASCADE_VERSIONING: ${{
     inputs.bump-part
     || 'skip' }}
+  PRERELEASE: ${{
+    inputs.bump-part == 'alpha'
+    || inputs.include-prerelease-lock
+    }}
 
 jobs:
   # `env.` doesn't work from within `with:`, so kluge it.
@@ -142,9 +146,11 @@ jobs:
       - run: |
           echo "CASCADE_UPDATEDEPS: ${CASCADE_UPDATEDEPS}"
           echo "CASCADE_VERSIONING: ${CASCADE_VERSIONING}"
+          echo "PRERELEASE: ${PRERELEASE}"
     outputs:
       cascade-updatedeps: ${{ env.CASCADE_UPDATEDEPS }}
       cascade-versioning: ${{ env.CASCADE_VERSIONING }}
+      prelease: ${{ env.PRERELEASE }}
 
   # Here we check for branch tags (ci-inhibit-forever) and HEAD tags the
   # user might've set deliberately on this project. Because this is the
@@ -153,6 +159,9 @@ jobs:
   wrangle-ci-tags:
     name: Wrangle (read) CI tags
     uses: ./.github/workflows/ci-tags-wrangle.yml
+    needs: [env-outputs]
+    with:
+      prerelease: ${{ needs.env-outputs.outputs.prelease == 'true' }}
 
   poetry-update:
     name: Update lock deps
@@ -179,7 +188,11 @@ jobs:
       - name: Checkout this repo
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.repository.default_branch }}
+          # If pre-release, use alternative branch if defined.
+          ref: ${{
+            needs.env-outputs.outputs.prelease == 'true'
+            && vars.PRERELEASE_BRANCH
+            || github.event.repository.default_branch }}
           # Use the user token, not ${{ github.token }}, so that
           # git-push triggers workflow events. (Though TBH I don't
           # remember if it's the token setting here or the one on

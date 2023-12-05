@@ -32,6 +32,13 @@ on:
   # https://docs.github.com/en/actions/using-workflows/reusing-workflows#nesting-reusable-workflows
   workflow_call:
     inputs:
+      prerelease:
+        type: boolean
+        default: false
+        # required: true
+
+      # ***
+
       cascade-updatedeps:
         type: string
         # Use empty string to fallback Git tag value if input not set.
@@ -70,10 +77,32 @@ on:
 
 # ***
 
+env:
+  PRERELEASE: ${{
+    false
+    || inputs.prerelease
+    || inputs.cascade-versioning == 'alpha' }}
+
+# ***
+
 jobs:
+  # `env.` doesn't work from within `with:`, so kluge it.
+  env-outputs:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "PRERELEASE: ${PRERELEASE}"
+    outputs:
+      prerelease: ${{ env.PRERELEASE }}
+
+  # ***
+
   wrangle-ci-tags:
     name: Wrangle (read) CI tags
     uses: ./.github/workflows/ci-tags-wrangle.yml
+    needs: [env-outputs]
+    with:
+      prerelease: ${{ needs.env-outputs.outputs.prelease == 'true' }}
 
   # ***
 
@@ -82,10 +111,18 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    needs: [env-outputs]
+
     steps:
       # CXREF: https://github.com/actions/checkout
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          # If pre-release, use alternative branch if defined.
+          ref: ${{
+            needs.env-outputs.outputs.prelease == 'true'
+            && vars.PRERELEASE_BRANCH
+            || github.event.repository.default_branch }}
 
       # CXREF: https://github.com/marketplace/actions/yq-portable-yaml-processor
       - name: Probe Yaml config
@@ -188,9 +225,10 @@ jobs:
 
   wrangle-ci-tags-cleanup:
     name: Remove (temporary) CI tags
-    needs: dispatch-downstream-repos
+    needs: [env-outputs, dispatch-downstream-repos]
     uses: ./.github/workflows/ci-tags-wrangle.yml
     with:
+      prerelease: ${{ needs.env-outputs.outputs.prelease == 'true' }}
       delete-inhibit-cascade: true
       delete-inhibit-forever: false
       delete-cascade-updatedeps: true
