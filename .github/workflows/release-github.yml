@@ -114,6 +114,7 @@ jobs:
       #   - But until that day when this check actually annoys you, leave it.
       - name: Verify branch HEAD is what was tagged
         run: |
+          echo "test \"${GITHUB_SHA}\" = \"$(git rev-parse HEAD)\""
           [ "${GITHUB_SHA}" = "$(git rev-parse HEAD)" ] || exit 1
 
       # ***
