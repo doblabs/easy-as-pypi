@@ -71,15 +71,15 @@ jobs:
       - name: Check if prerelease
         # Note the v?: Don't care!
         run: |
-          echo "$VERSION_TAG" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
-            || echo "PRERELEASE=--prerelease" >> "$GITHUB_ENV"
+          echo "${VERSION_TAG}" | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
+            || echo "PRERELEASE=--prerelease" >> "${GITHUB_ENV}"
 
       - name: Announcement
         run: |
           [ -z "${PRERELEASE}" ] \
             && prerelease_msg="" \
             || prerelease_msg=" (prerelease)"
-          echo "Processing $VERSION_TAG tag${prerelease_msg}"
+          echo "Processing ${VERSION_TAG} tag${prerelease_msg}"
 
       # ***
 
