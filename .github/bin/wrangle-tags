@@ -183,11 +183,7 @@ wrangle_tag () {
   local tag_exists=false
 
   if [ "${tag_scope}" = "HEAD" ]; then
-    # A "HEAD" tag is only valid if on HEAD commit.
-    # - This branch followed by all tags but 'ci-inhibit-forever'.
-    local head_tag_match="$(git tag --list --points-at HEAD "${tag_name}")"
-
-    if [ -n "${head_tag_match}" ]; then
+    if head_tag_found "${tag_name}"; then
       tag_exists=true
     fi
   else
@@ -253,6 +249,17 @@ wrangle_tag () {
 }
 
 # ***
+
+# A "HEAD" tag is only valid if on HEAD commit.
+# - This branch followed by all tags but 'ci-inhibit-forever'.
+
+head_tag_found () {
+  local tag_name="$1"
+
+  local head_tag_match="$(git tag --list --points-at HEAD "${tag_name}")"
+
+  [ -n "${head_tag_match}" ]
+}
 
 # A "branch" tag is valid if it's on any commit in the branch.
 # - This code path followed by only the 'ci-inhibit-forever'
