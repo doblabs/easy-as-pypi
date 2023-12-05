@@ -131,7 +131,9 @@ jobs:
 
       - name: Report Maybe
         if: steps.check-is-app.outputs.is_app == 'true'
-        run: echo "Installs-app detected"
+        run: |
+          branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
+          echo "Installs-app detected (branch “${branch_name}”)"
 
     outputs:
       is_app: ${{ steps.check-is-app.outputs.is_app }}
