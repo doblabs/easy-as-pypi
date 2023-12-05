@@ -116,6 +116,7 @@ jobs:
         if: github.event_name == 'workflow_dispatch'
 
       - name: Probe version tag (is workflow_dispatch)
+        if: github.event_name == 'workflow_dispatch'
         run: |
           version_tags="$(
             git tag --list --points-at HEAD \
@@ -154,7 +155,6 @@ jobs:
           echo "VERSION_TAG=${VERSION_TAG} [${version_tags}]"
 
           echo "VERSION_TAG=${VERSION_TAG}" >> "${GITHUB_ENV}"
-        if: github.event_name == 'workflow_dispatch'
 
       # MEH: We could support HEAD not being tagged (e.g., user wants to
       # tag and release previous commit) if we looked instead for highest
