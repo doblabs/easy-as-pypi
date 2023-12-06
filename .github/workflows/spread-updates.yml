@@ -79,9 +79,8 @@ on:
 
 env:
   PRERELEASE: ${{
-    false
-    || inputs.prerelease
-    || inputs.cascade-versioning == 'alpha' }}
+    (inputs.prerelease || inputs.cascade-versioning == 'alpha')
+    && 'true' || 'false' }}
 
 # ***
 
