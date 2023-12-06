@@ -216,6 +216,9 @@ jobs:
             || 'false' }}"
           echo "${out_name}=${old_tag_value}" >> "${GITHUB_OUTPUT}"
 
+          echo "GITHUB_OUTPUT:"
+          cat "${GITHUB_OUTPUT}" | sed 's/^/  /'
+
       # ***
 
       - name: Trace vars

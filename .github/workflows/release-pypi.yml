@@ -345,6 +345,9 @@ jobs:
           echo "VERSION=${VERSION}" >> "${GITHUB_OUTPUT}"
           echo "VERSION_TAG=${VERSION_TAG}" >> "${GITHUB_OUTPUT}"
 
+          echo "GITHUB_OUTPUT:"
+          cat "${GITHUB_OUTPUT}" | sed 's/^/  /'
+
     outputs:
       INDEX_PIP: ${{ steps.set_outputs.outputs.INDEX_PIP }}
       INDEX_PIPX: ${{ steps.set_outputs.outputs.INDEX_PIPX }}
