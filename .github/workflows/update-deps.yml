@@ -267,8 +267,8 @@ jobs:
     steps:
       # yamllint disable rule:line-length
       - run: |
-          echo "needs.old-inhibit-cascade: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-cascade }}"
-          echo "needs.old-inhibit-forever: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-forever }}"
+          echo "wrangle-ci-tags.old-inhibit-cascade: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-cascade }}"
+          echo "wrangle-ci-tags.old-inhibit-forever: ${{ needs.wrangle-ci-tags.outputs.old-inhibit-forever }}"
           #
           echo "needs.poetry-update.result: ${{ needs.poetry-update.result }}"
           echo "needs.poetry-update.outputs.new_pr_num: ${{ needs.poetry-update.outputs.new_pr_num }}"
@@ -289,8 +289,21 @@ jobs:
           #   echo "inputs.cascade-dispatch != '': ${{ inputs.cascade-dispatch != '' }}"
           #   echo "inputs.cascade-dispatch || foo: ${{ inputs.cascade-dispatch || 'foo' }}"
           #
-          echo "needs.cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}"
-          echo "needs.cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}"
+          echo "wrangle-ci-tags.old-cascade-updatedeps: ${{ needs.wrangle-ci-tags.outputs.old-cascade-updatedeps }}"
+          echo "needs.env-outputs.cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}"
+          echo "needs.env-outputs.cascade-versioning: ${{ needs.env-outputs.outputs.cascade-versioning }}"
+
+          # Trace the next job's complicated `if`.
+          # - REFER: Cannot escape GHA brackets, so output as text, ha.
+          #     https://github.com/orgs/community/discussions/26621
+          echo "if: ${{ '\${{' }} !cancelled()
+              && (${{ needs.env-outputs.outputs.cascade-versioning }} != 'skip'
+                  || (${{ inputs.cascade-dispatch }}
+                      && ${{ needs.wrangle-ci-tags.outputs.old-inhibit-cascade }} == 'false'
+                      && ${{ needs.wrangle-ci-tags.outputs.old-inhibit-forever }} == 'false')
+              && (${{ needs.poetry-update.result }} == 'skipped'
+                  || (${{ needs.poetry-update.result }} == 'success'
+                      && ${{ needs.poetry-update.outputs.new_pr_num }} == '')) }}"
       # yamllint enable rule:line-length
 
   # If no PR, move on to versioning here. And if versioning being skipped,
