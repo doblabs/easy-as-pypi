@@ -273,8 +273,8 @@ jobs:
       - name: Check if previously released
         run: |
           IS_RELEASED=false
-          echo "pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION}"
-          pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION} \
+          echo "pip install ${INDEX_PIP} ${PACKAGE_NAME}==${VERSION}"
+          pip install ${INDEX_PIP} ${PACKAGE_NAME}==${VERSION} \
             && IS_RELEASED=true
           echo "IS_RELEASED=${IS_RELEASED}" >> "${GITHUB_ENV}"
         shell: bash
