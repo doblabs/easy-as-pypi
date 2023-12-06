@@ -107,11 +107,7 @@ on:
       # - But the calculated value for the current branch is interesting:
       old-inhibit-release-pypi:
         description: "Either old-inhibit-alpha or old-inhibit-patch per prerelease"
-        value: ${{ false
-          || (inputs.prerelease
-              && jobs.wrangle-ci-tags.outputs.old-inhibit-alpha == 'true')
-          || (!inputs.prerelease
-              && jobs.wrangle-ci-tags.outputs.old-inhibit-patch == 'true') }}
+        value: ${{ jobs.wrangle-ci-tags.outputs.old-inhibit-release-pypi }}
 
 # ***
 
@@ -141,6 +137,9 @@ jobs:
       }}"
       old-inhibit-patch: "${{
         steps.wrangle-ci-tags.outputs.old_inhibit_patch
+      }}"
+      old-inhibit-release-pypi: "${{
+        steps.compute-ci-tags.outputs.old_inhibit_release_pypi
       }}"
 
     steps:
@@ -203,6 +202,22 @@ jobs:
 
       # ***
 
+      - name: Compute CI tags
+        id: compute-ci-tags
+        run: |
+          out_name="old_inhibit_release_pypi"
+          old_tag_value="${{ false
+            || (inputs.prerelease
+                && steps.wrangle-ci-tags.outputs.old-inhibit-alpha == 'true'
+                && 'true')
+            || (!inputs.prerelease
+                && steps.wrangle-ci-tags.outputs.old-inhibit-patch == 'true'
+                && 'true')
+            || 'false' }}"
+          echo "${out_name}=${old_tag_value}" >> "${GITHUB_OUTPUT}"
+
+      # ***
+
       - name: Trace vars
         run: |
           echo "old-inhibit-cascade: ${{
@@ -222,4 +237,7 @@ jobs:
           }}"
           echo "old-inhibit-patch: ${{
             steps.wrangle-ci-tags.outputs.old_inhibit_patch
+          }}"
+          echo "old-inhibit-release-pypi: ${{
+            steps.compute-ci-tags.outputs.old_inhibit_release_pypi
           }}"
