@@ -272,9 +272,11 @@ jobs:
       # On GHA: pipx: error: unrecognized arguments: easy-as-pypi==1.1.1a20
       - name: Check if previously released
         run: |
+          IS_RELEASED=false
           echo "pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION}"
-          ! pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION} \
-            || echo "IS_RELEASED=true" >> "${GITHUB_ENV}"
+          pipx install ${INDEX_PIPX} ${PACKAGE_NAME}==${VERSION} \
+            && IS_RELEASED=true
+          echo "IS_RELEASED=${IS_RELEASED}" >> "${GITHUB_ENV}"
         shell: bash
 
       # Determine if previously released (and skip re-releasing if so).
@@ -302,15 +304,15 @@ jobs:
       #         gh release download ${VERSION_TAG} -D dist/
       #       env:
       #         GH_TOKEN: ${{ github.token }}
-      #       if: env.IS_RELEASED == ''
+      #       if: env.IS_RELEASED == 'false'
       #
       #     - name: Install poetry
       #       run: pipx install poetry
-      #       if: env.IS_RELEASED == ''
+      #       if: env.IS_RELEASED == 'false'
       #
       #     - name: Install poetry-dynamic-versioning
       #       run: poetry self add "poetry-dynamic-versioning[plugin]"
-      #       if: env.IS_RELEASED == ''
+      #       if: env.IS_RELEASED == 'false'
       #
       #     # CXREF: https://python-poetry.org/docs/repositories/
       #     - name: Poetry publish package
@@ -332,7 +334,7 @@ jobs:
       #         echo
       #         echo "poetry publish ${repository}"
       #         poetry publish ${repository}
-      #       if: env.IS_RELEASED == ''
+      #       if: env.IS_RELEASED == 'false'
 
       - name: Store variables for next job
         id: set_outputs
@@ -365,7 +367,7 @@ jobs:
     needs: [prepare-publish]
     if: ${{ ! cancelled()
       && needs.prepare-publish.result == 'success'
-      && needs.prepare-publish.outputs.IS_RELEASED == '' }}
+      && needs.prepare-publish.outputs.IS_RELEASED == 'false' }}
     with:
       prerelease: ${{ needs.prepare-publish.outputs.PRERELEASE == 'true' }}
 
@@ -378,14 +380,14 @@ jobs:
     needs: [prepare-publish, wrangle-ci-tags]
 
     # Easiest approach would be to skip if IS_RELEASED, e.g.,
-    #   if: needs.prepare-publish.outputs.IS_RELEASED == '' && ...
+    #   if: needs.prepare-publish.outputs.IS_RELEASED == 'false' && ...
     # but if this job is skipped, so is smoke-test, which 'needs'
     # this job. So we'll skip the individual steps, and not the job.
     # - Unfortunately, pypa/gh-action-pypi-publish@release/v1 still builds
     #   its image, even when its step(s) skipped, which takes a few moments.
     if: ${{ ! cancelled()
       && needs.prepare-publish.result == 'success'
-      && needs.prepare-publish.outputs.IS_RELEASED == ''
+      && needs.prepare-publish.outputs.IS_RELEASED == 'false'
       && needs.wrangle-ci-tags.outputs.old-inhibit-release-pypi == 'false' }}
 
     # CXREF: PyPI recommends using an environment ('release')
@@ -512,7 +514,7 @@ jobs:
       - name: Sleep for 13 seconds
         run: sleep 13s
         shell: bash
-        if: needs.prepare-publish.outputs.IS_RELEASED == ''
+        if: needs.prepare-publish.outputs.IS_RELEASED == 'false'
 
   # ***
 
