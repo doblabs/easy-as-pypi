@@ -152,13 +152,10 @@ jobs:
             inputs.prerelease
             && vars.PRERELEASE_BRANCH
             || github.event.repository.default_branch }}
-          # We can `fetch-depth: 0` or `fetch-tags: 'true'` for all tags.
-          # - We don't need history, just tags.
-          # - The docs don't say why it matters. It's left to the reader
-          #   to assume that fetching history and/or tags is more resource
-          #   intensive and/or degrades job performance. *Just saying.*
-          #  fetch-depth: 1  # 1 is the default
-          fetch-tags: true
+          # Use `fetch-depth: 0` to fetch all tags.
+          # - Note that `fetch-tags: 'true'` only fetches branch tags.
+          # - I didn't see this in GHA docs, just something I learned.
+          fetch-depth: 0
 
       # ***
 
