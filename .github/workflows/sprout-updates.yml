@@ -27,6 +27,8 @@
 #   poetry-update will likely not see any new versions of "our" deps,
 #   but poetry-update may find third-party deps with newer versions.
 
+# USYNC: This name is used by `gh workflow run`.
+# - Search for: 'Start Cascade!'
 name: Start Cascade!
 
 run-name: 👣 — Cascade — 1.) Start Cascade! ${{

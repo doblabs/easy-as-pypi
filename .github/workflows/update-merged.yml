@@ -5,6 +5,8 @@
 
 ---
 
+# USYNC: This name is used by `gh workflow run`.
+# - Search for: 'Release Cascade — Version'
 name: Release Cascade — Version
 
 run-name: 👣 — Cascade — 3.) Version ${{
