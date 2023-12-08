@@ -123,7 +123,7 @@ jobs:
               -f \"include-prerelease-lock=\" \\
               -f \"bump-part=${CASCADE_VERSIONING}\" \\
               -f \"cascade-dispatch=true\" \\
-              -f \"from-upstream=${from_upstream}\" \\
+              -f \"from-upstream=${from_upstream}\" \
             "
           gh workflow run "${workflow_name}" \
             -f "which-deps=${CASCADE_UPDATEDEPS}" \
