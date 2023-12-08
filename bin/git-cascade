@@ -1,0 +1,334 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+PROG_NAME="$(basename "$0")"
+
+USAGE="\
+USAGE: ${PROG_NAME} [all|ours|skip] [alpha|patch|skip] [cascade|inhibit] [here|there]
+
+Defaults:
+
+  ${PROG_NAME} skip skip inhibit there
+
+Positionals:
+
+  cascade-updatedeps:  [all|ours|skip]
+  cascade-versioning:  [alpha|patch|skip]
+  start-cascade:       [yes|no|cascade|inhibit]
+  where-first-op-runs: [here|there|local|remote]
+"
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+source_deps () {
+  # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
+  insist_cmd 'realpath'
+
+  insist_cmd 'git-bump-version-tag'
+}
+
+insist_cmd () {
+  local cmdname="$1"
+
+  command -v "${cmdname}" > /dev/null && return 0
+
+  >&2 echo "ERROR: Missing system command ‘${cmdname}’."
+
+  exit 1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+git_cascade () {
+  local cliarg_updatedeps="$1"
+  local cliarg_versioning="$2"
+  local cliarg_downstream="$3"
+  local cliarg_kickoffenv="$4"
+
+  if [ $# -eq 0 ]; then
+    echo "${USAGE}"
+
+    exit_0
+  fi
+
+  local cascade_updatedeps
+  local cascade_versioning
+  local cascade_dodispatch
+  local firstop_kickoffenv
+
+  # So that pathname expansion works in the parse case calls,
+  # e.g., case "$arg" in foo*) ;;
+  shopt -s extglob
+
+  if ! cascade_updatedeps="$(parse_cascade_updatedeps "${cliarg_updatedeps}")"; then
+    exit_1
+  fi
+
+  if ! cascade_versioning="$(parse_cascade_versioning "${cliarg_versioning}")"; then
+    exit_1
+  fi
+
+  if ! cascade_dodispatch="$(parse_cascade_dodispatch "${cliarg_downstream}")"; then
+    exit_1
+  fi
+
+  if ! firstop_kickoffenv="$(parse_firstop_kickoffenv "${cliarg_kickoffenv}")"; then
+    exit_1
+  fi
+
+  eapp_ci_dispatch \
+    "${cascade_updatedeps}" \
+    "${cascade_versioning}" \
+    "${cascade_dodispatch}" \
+    "${firstop_kickoffenv}"
+}
+
+# ***
+
+parse_cascade_updatedeps () {
+  local cli_arg="$1"
+
+  local cascade_updatedeps="skip"
+
+  if [ -n "${cli_arg}" ]; then
+    case "${cli_arg}" in
+      all|a|al)
+        cascade_updatedeps="all"
+        ;;
+      ours|o|ou)
+        cascade_updatedeps="ours"
+        ;;
+      skip|s|sk)
+        cascade_updatedeps="skip"
+        ;;
+      *)
+        >&2 echo "ERROR: Unknown argument for cascade-updatedeps: ${cli_arg}"
+
+        return 1
+    esac
+  fi
+
+  printf "%s" "${cascade_updatedeps}"
+}
+
+parse_cascade_versioning () {
+  local cli_arg="$1"
+
+  local cascade_versioning="skip"
+
+  if [ -n "${cli_arg}" ]; then
+    case "${cli_arg}" in
+      alpha|a|al)
+        cascade_versioning="alpha"
+        ;;
+      patch|p|pa)
+        cascade_versioning="patch"
+        ;;
+      skip|s|sk)
+        cascade_versioning="skip"
+        ;;
+      *)
+        >&2 echo "ERROR: Unknown argument for cascade-versioning: ${cli_arg}"
+
+        return 1
+    esac
+  fi
+
+  printf "%s" "${cascade_versioning}"
+}
+
+parse_cascade_dodispatch () {
+  local cli_arg="$1"
+
+  local cascade_dodispatch="false"
+
+  if [ -n "${cli_arg}" ]; then
+    case "${cli_arg}" in
+      cascade|c|ca|yes|y|ye)
+        cascade_dodispatch="true"
+        ;;
+      inhibit|i|in|no|n)
+        cascade_dodispatch="false"
+        ;;
+      *)
+        >&2 echo "ERROR: Unknown argument for dispatch-downstream: ${cli_arg}"
+
+        return 1
+    esac
+  fi
+
+  printf "%s" "${cascade_dodispatch}"
+}
+
+parse_firstop_kickoffenv () {
+  local cli_arg="$1"
+
+  local firstop_kickoffenv="false"
+
+  if [ -n "${cli_arg}" ]; then
+    case "${cli_arg}" in
+      here|h|he|local|l|lo)
+        firstop_kickoffenv="local"
+        ;;
+      there|t|th|remote|r|re)
+        firstop_kickoffenv="remote"
+        ;;
+      *)
+        >&2 echo "ERROR: Unknown argument for firstop-kickoffenv: ${cli_arg}"
+
+        return 1
+    esac
+  fi
+
+  printf "%s" "${firstop_kickoffenv}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+eapp_ci_dispatch () {
+  local cascade_updatedeps="$1"
+  local cascade_versioning="$2"
+  local cascade_dodispatch="$3"
+  local firstop_kickoffenv="$4"
+
+  # Ugh, should I this app's CLI arg also be inhibit-cascade,
+  # rather than the reverse? I think I chose the reverse because
+  # the internal meaning it takes longer to reason what it means,
+  # where start-cascade is very obvious to the user. In any case,
+  # translate the cli arg to the internal arg.
+  local inhibit_cascade
+  inhibit_cascade=$(${cascade_dodispatch} && echo "false" || echo "true")
+
+  # When Git runs us, it's ($(pwd)) from project root. But to
+  # support being called directly from wherever, use $0's path.
+  local project_root
+  project_root="$(realpath "$(dirname "$0")/..")"
+
+  local TRACE=""
+  # DEVs: Uncomment for dry-runs.
+  #  local TRACE="echo"
+
+  local workflow_name
+
+  if [ "${firstop_kickoffenv}" = "remote" ]; then
+    if [ "${cascade_dodispatch}" = "true" ]; then
+      # CXREF: ~/.kit/py/easy-as-pypi/.github/workflows/sprout-updates.yml
+      workflow_name="Start Cascade!"
+      echo "\
+        gh workflow run \"${workflow_name}\" \\
+          -f \"cascade-updatedeps=${cascade_updatedeps}\" \\
+          -f \"cascade-versioning=${cascade_versioning}\" \
+        " | sed 's/^      //'
+      ${TRACE} gh workflow run "${workflow_name}" \
+        -f "cascade-updatedeps=${cascade_updatedeps}" \
+        -f "cascade-versioning=${cascade_versioning}"
+    elif [ "${cascade_updatedeps}" != "skip" ]; then
+      # CXREF: ~/.kit/py/easy-as-pypi/.github/workflows/update-deps.yml
+      workflow_name="Release Cascade — Update"
+      echo "\
+        gh workflow run \"${workflow_name}\" \\
+          -f \"which-deps=${cascade_updatedeps}\" \\
+          -f \"include-prerelease-lock=\" \\
+          -f \"bump-part=${cascade_versioning}\" \\
+          -f \"cascade-dispatch=${cascade_dodispatch}\"
+          -f \"from-upstream=false\" \
+        " | sed 's/^      //'
+      ${TRACE} gh workflow run "${workflow_name}" \
+        -f "which-deps=${cascade_updatedeps}" \
+        -f "include-prerelease-lock=" \
+        -f "bump-part=${cascade_versioning}" \
+        -f "cascade-dispatch=${cascade_dodispatch}" \
+        -f "from-upstream=false"
+    elif [ "${cascade_versioning}" != "skip" ]; then
+      workflow_name="Release Cascade — Version"
+      echo "\
+        gh workflow run \"${workflow_name}\" \\
+          -f \"bump-part=${cascade_versioning}\" \\
+          -f \"cascade-dispatch=${cascade_dodispatch}\" \\
+          -f \"cascade-updatedeps=${cascade_updatedeps}\" \
+        " | sed 's/^      //'
+      ${TRACE} gh workflow run "${workflow_name}" \
+        -f "bump-part=${cascade_versioning}" \
+        -f "cascade-dispatch=${cascade_dodispatch}" \
+        -f "cascade-updatedeps=${cascade_updatedeps}"
+    else
+      echo "So, what? Do nothing? Cascade nothing? We're done here"
+    fi
+  elif [ "${cascade_updatedeps}" != "skip" ]; then
+    local update_poetry="${project_root}/bin/update-poetry"
+    echo "\
+      UPDEPS_CASCADE_INHIBIT=\"${inhibit_cascade}\" \\
+      UPDEPS_CASCADE_UPDATEDEPS=\"${cascade_updatedeps}\" \\
+      UPDEPS_CASCADE_VERSIONING=\"${cascade_versioning}\" \\
+        \"${update_poetry}\" \
+      " | sed 's/^    //'
+    ${TRACE} \
+    UPDEPS_CASCADE_INHIBIT="${inhibit_cascade}" \
+    UPDEPS_CASCADE_UPDATEDEPS="${cascade_updatedeps}" \
+    UPDEPS_CASCADE_VERSIONING="${cascade_versioning}" \
+      "${update_poetry}"
+  elif [ "${cascade_versioning}" != "skip" ]; then
+    local git_bump="${project_root}/bin/git-bump-version-tag"
+    if ${git_bump} --check "${cascade_versioning}"; then
+      echo "\
+        VALUE_CI_TAG_INHIBIT_CASCADE=\"${inhibit_cascade}\" \\
+        VALUE_CI_TAG_CASCADE_UPDATEDEPS=\"${cascade_updatedeps}\" \\
+        VALUE_CI_TAG_CASCADE_VERSIONING=\"${cascade_versioning}\" \\
+          ${git_bump} \"${cascade_versioning}\" \
+        " | sed 's/^      //'
+      ${TRACE} \
+      VALUE_CI_TAG_INHIBIT_CASCADE="${inhibit_cascade}" \
+      VALUE_CI_TAG_CASCADE_UPDATEDEPS="${cascade_updatedeps}" \
+      VALUE_CI_TAG_CASCADE_VERSIONING="${cascade_versioning}" \
+        ${git_bump} "${cascade_versioning}"
+    else
+      echo "Already versioned appropriately: $(git-bump-version-tag -c)"
+    fi
+  else
+    echo "Well that was a bust, wasn't it"
+  fi
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+_NORMAL_EXIT=false
+
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
+
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
+
+exit_cleanup () {
+  if ! ${_NORMAL_EXIT}; then
+    >&2 echo "GAFFE: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
+main () {
+  set -e
+
+  trap exit_cleanup EXIT
+
+  source_deps
+
+  git_cascade "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  # Being executed, so execute.
+  main "$@"
+fi
+
+unset -f main
+unset -f source_deps
+unset -f insist_cmd
+
