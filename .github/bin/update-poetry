@@ -76,7 +76,7 @@ Pull requests that update poetry.lock}"
 UPDEPS_LABEL_NAME_INHIBIT_CASCADE="${UPDEPS_LABEL_NAME_INHIBIT_CASCADE:-\
 ci-inhibit-cascade}"
 UPDEPS_LABEL_DESC_INHIBIT_CASCADE="${UPDEPS_LABEL_DESC_INHIBIT_CASCADE:-\
-Tells CI not to cascade after versioning and release}"
+Tells CI to not start a release cascade after PR is approved}"
 
 # ***
 
@@ -85,7 +85,7 @@ Tells CI not to cascade after versioning and release}"
 UPDEPS_LABEL_NAME_UPDATE_OURS="${UPDEPS_LABEL_NAME_UPDATE_OURS:-\
 ci-update-ours}"
 UPDEPS_LABEL_DESC_UPDATE_OURS="${UPDEPS_LABEL_DESC_UPDATE_OURS:-\
-Tells CI to keep cascading update-\"ours\" after PR is approved}"
+Tells CI to use updatedeps value \"ours\" after PR is approved}"
 
 UPDEPS_LABEL_NAME_UPDATE_ALL="${UPDEPS_LABEL_NAME_UPDATE_ALL:-\
 ci-update-all}"
@@ -95,7 +95,7 @@ Tells CI to keep cascading update-all after PR is approved}"
 UPDEPS_LABEL_NAME_UPDATE_SKIP="${UPDEPS_LABEL_NAME_UPDATE_SKIP:-\
 ci-update-skip}"
 UPDEPS_LABEL_DESC_UPDATE_SKIP="${UPDEPS_LABEL_DESC_UPDATE_SKIP:-\
-Tells CI to keep cascading update-skip after PR is approved}"
+Tells CI to use updatedeps value \"skip\" after PR is approved}"
 
 # ***
 
@@ -110,22 +110,22 @@ Tells CI to keep cascading update-skip after PR is approved}"
 UPDEPS_LABEL_NAME_VERSION_ALPHA="${UPDEPS_LABEL_NAME_VERSION_ALPHA:-\
 ci-version-alpha}"
 UPDEPS_LABEL_DESC_VERSION_ALPHA="${UPDEPS_LABEL_DESC_VERSION_ALPHA:-\
-Tells CI to bump alpha version after PR is approved}"
+Tells CI to use versioning value \"alpha\" after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_PATCH="${UPDEPS_LABEL_NAME_VERSION_PATCH:-\
 ci-version-patch}"
 UPDEPS_LABEL_DESC_VERSION_PATCH="${UPDEPS_LABEL_DESC_VERSION_PATCH:-\
-Tells CI to bump patch version after PR is approved}"
+Tells CI to use versioning value \"patch\" after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_LEAST="${UPDEPS_LABEL_NAME_VERSION_LEAST:-\
 ci-version-least}"
 UPDEPS_LABEL_DESC_VERSION_LEAST="${UPDEPS_LABEL_DESC_VERSION_LEAST:-\
-Tells CI to bump least version after PR is approved}"
+Tells CI to use versioning value \"least\" after PR is approved}"
 #
 UPDEPS_LABEL_NAME_VERSION_SKIP="${UPDEPS_LABEL_NAME_VERSION_SKIP:-\
 ci-version-skip}"
 UPDEPS_LABEL_DESC_VERSION_SKIP="${UPDEPS_LABEL_DESC_VERSION_SKIP:-\
-Tells CI to skip version bump after PR is approved}"
+Tells CI to use versioning value \"skip\" after PR is approved}"
 
 # ***
 
