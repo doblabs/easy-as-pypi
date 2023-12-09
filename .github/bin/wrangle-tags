@@ -490,10 +490,6 @@ set_tag_locals_cascade_versioning () {
   if is_this_tag_object_specified "${which_tag}" "${tag_name}"; then
     out_name="old_cascade_versioning"
     tag_scope="HEAD"
-    # This particular default is not really important, because user has to
-    # choose from a dropdown to send workflow_event to initiate the cascade.
-    # - So this tag value should always be set.
-    # But we'll use 'alpha' to match update-merged.yml.
     default_value="skip"
     new_tag_value="${EAPP_CASCADE_VERSIONING}"
     delete_if=${EAPP_DELETE_CASCADE_VERSIONING:-false}

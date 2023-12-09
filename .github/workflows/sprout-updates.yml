@@ -58,8 +58,6 @@ on:
           - 'full'
           - 'ours'
           - 'skip'
-        # LATER/2023-11-30: Revert to 'all', after testing
-        #  default: 'all'
         default: 'skip'
 
       cascade-versioning:
@@ -69,8 +67,6 @@ on:
           - 'alpha'
           - 'patch'
           - 'skip'
-        # LATER/2023-11-30: Revert to 'alpha', after testing
-        #  default: 'alpha'
         default: 'skip'
 
 # SAVVY: GitHub imposes a nested reusable workflow limit of 3, so we cannot
