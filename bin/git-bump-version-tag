@@ -28,7 +28,7 @@ source_deps () {
   _bumpp_insist_cmd 'git-bump-version-tag'
 
   # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/wrangle-tags
-  # - For: EAPP_CI_TAG_*
+  # - For: EAPP_CI_TAG_*, format_tag_name
   . "$(dirname "$(realpath "$0")")/../.github/bin/wrangle-tags"
 }
 
@@ -56,23 +56,40 @@ git_bump_version_tag () {
     local tag_commit="$2"
     local remote_name="$3"
 
-    echo "Pushing CI tags" \
-      "(${EAPP_CI_TAG_INHIBIT_CASCADE}," \
-      "${EAPP_CI_TAG_CASCADE_UPDATEDEPS}," \
-      "${EAPP_CI_TAG_CASCADE_VERSIONING})"
+    local tag_inhibit_cascade
+    local tag_cascade_updatedeps
+    local tag_cascade_versioning
 
-    echo_or_eval git tag -f -a "${EAPP_CI_TAG_INHIBIT_CASCADE}" \
+    local tag_scope="HEAD"
+    local branch_name="$(git rev-parse --abbrev-ref=loose HEAD)"
+
+    tag_inhibit_cascade="$(
+      format_tag_name "${EAPP_CI_TAG_INHIBIT_CASCADE}" "${tag_scope}" "${branch_name}"
+    )"
+    tag_cascade_updatedeps="$(
+      format_tag_name "${EAPP_CI_TAG_CASCADE_UPDATEDEPS}" "${tag_scope}" "${branch_name}"
+    )"
+    tag_cascade_versioning="$(
+      format_tag_name "${EAPP_CI_TAG_CASCADE_VERSIONING}" "${tag_scope}" "${branch_name}"
+    )"
+
+    echo "Pushing CI tags" \
+      "(${tag_inhibit_cascade}," \
+      "${tag_cascade_updatedeps}," \
+      "${tag_cascade_versioning})"
+
+    echo_or_eval git tag -f -a "${tag_inhibit_cascade}" \
       -m "${VALUE_CI_TAG_INHIBIT_CASCADE:-true}" "${tag_commit}"
 
-    echo_or_eval git tag -f -a "${EAPP_CI_TAG_CASCADE_UPDATEDEPS}" \
+    echo_or_eval git tag -f -a "${tag_cascade_updatedeps}" \
       -m "${VALUE_CI_TAG_CASCADE_UPDATEDEPS:-skip}" "${tag_commit}"
 
-    echo_or_eval git tag -f -a "${EAPP_CI_TAG_CASCADE_VERSIONING}" \
+    echo_or_eval git tag -f -a "${tag_cascade_versioning}" \
       -m "${VALUE_CI_TAG_CASCADE_VERSIONING:-skip}" "${tag_commit}"
 
-    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_INHIBIT_CASCADE}"
-    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_CASCADE_UPDATEDEPS}"
-    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${EAPP_CI_TAG_CASCADE_VERSIONING}"
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${tag_inhibit_cascade}"
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${tag_cascade_updatedeps}"
+    echo_or_eval git push -q -f "${remote_name}" "refs/tags/${tag_cascade_versioning}"
 
     echo "✓ Pushed CI tags"
   }
