@@ -87,10 +87,10 @@ ci-update-ours}"
 UPDEPS_LABEL_DESC_UPDATE_OURS="${UPDEPS_LABEL_DESC_UPDATE_OURS:-\
 Tells CI to use updatedeps value \"ours\" after PR is approved}"
 
-UPDEPS_LABEL_NAME_UPDATE_ALL="${UPDEPS_LABEL_NAME_UPDATE_ALL:-\
-ci-update-all}"
-UPDEPS_LABEL_DESC_UPDATE_ALL="${UPDEPS_LABEL_DESC_UPDATE_ALL:-\
-Tells CI to keep cascading update-all after PR is approved}"
+UPDEPS_LABEL_NAME_UPDATE_FULL="${UPDEPS_LABEL_NAME_UPDATE_FULL:-\
+ci-update-full}"
+UPDEPS_LABEL_DESC_UPDATE_FULL="${UPDEPS_LABEL_DESC_UPDATE_FULL:-\
+Tells CI to use updatedeps value \"full\" after PR is approved}"
 
 UPDEPS_LABEL_NAME_UPDATE_SKIP="${UPDEPS_LABEL_NAME_UPDATE_SKIP:-\
 ci-update-skip}"
@@ -321,8 +321,7 @@ make_inspect_var () {
 #   - Use case: User wants to test their code changes, and they
 #               don't want to be surprised by a failure caused by
 #               changes to a third-party dependency.
-# - If 'all' (the recommended default), update all pyproject.toml
-#   dependencies.
+# - If 'full', update all pyproject.toml dependencies.
 #   - Use case: User wants project to use latest deps,
 #               and, bonus, you make dependabot happy.
 poetry_update_lock_normal () {
@@ -339,8 +338,8 @@ poetry_update_lock_normal () {
 
       # Restrict to updating just our org's repos (aka "our" deps).
       poetry update --lock ${editable_pjs} >> "${POETRY_OUTPUT_DUMP}"
-    elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "all" ]; then
-      print_prog "all... "
+    elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "full" ]; then
+      print_prog "full... "
 
       poetry update --lock >> "${POETRY_OUTPUT_DUMP}"
     else
@@ -743,12 +742,12 @@ print_pr_ci_labels_cascade_updatedeps () {
       "${UPDEPS_LABEL_DESC_UPDATE_OURS}"
 
     printf "%s" "--label ${UPDEPS_LABEL_NAME_UPDATE_OURS} "
-  elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "all" ]; then
+  elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "full" ]; then
     gh_label_create \
-      "${UPDEPS_LABEL_NAME_UPDATE_ALL}" \
-      "${UPDEPS_LABEL_DESC_UPDATE_ALL}"
+      "${UPDEPS_LABEL_NAME_UPDATE_FULL}" \
+      "${UPDEPS_LABEL_DESC_UPDATE_FULL}"
 
-    printf "%s" "--label ${UPDEPS_LABEL_NAME_UPDATE_ALL} "
+    printf "%s" "--label ${UPDEPS_LABEL_NAME_UPDATE_FULL} "
   elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "skip" ]; then
     gh_label_create \
       "${UPDEPS_LABEL_NAME_UPDATE_SKIP}" \

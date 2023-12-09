@@ -45,7 +45,7 @@ on:
         type: choice
         options:
           - 'ours'
-          - 'all'
+          - 'full'
           # ISOFF: There's no 'skip' option when this workflow is run
           #        directly from the GitHub Actions page.
           #        - If user wants to skip poetry-update, they should
@@ -90,7 +90,7 @@ on:
       #    description: 'Cascade poetry-update'
       #    type: choice
       #    options:
-      #      - 'all'
+      #      - 'full'
       #      - 'ours'
       #      - 'skip'
       #    default: 'skip'
@@ -239,7 +239,7 @@ jobs:
           # tag created, after checks pass, and after package is released and
           # smoke-tested).
           UPDEPS_CASCADE_INHIBIT: ${{ inputs.cascade-dispatch && 'false' || 'true' }}
-          # Whether to update all deps, or just "ours".
+          # Whether to update all deps ("full"), or just "ours".
           # - This value is passed to the next project in the cascade, too.
           UPDEPS_CASCADE_UPDATEDEPS: ${{ env.CASCADE_UPDATEDEPS }}
           # Whether to version, and how, after PR is approved.

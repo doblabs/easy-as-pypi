@@ -61,7 +61,7 @@ on:
         description: 'Cascade poetry-update'
         type: choice
         options:
-          - 'all'
+          - 'full'
           - 'ours'
           - 'skip'
         default: 'skip'

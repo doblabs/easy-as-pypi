@@ -105,7 +105,7 @@ on:
         description: 'Cascade poetry-update'
         type: choice
         options:
-          - 'all'
+          - 'full'
           - 'ours'
           - 'skip'
         default: 'skip'
@@ -187,15 +187,15 @@ on:
 
 env:
   # USYNC: .github/bin/update-poetry defines these strings:
-  #   UPDEPS_LABEL_NAME_UPDATE_(OURS|ALL|SKIP)=\
-  #     "ci-update-(ours|all|skip)"
+  #   UPDEPS_LABEL_NAME_UPDATE_(OURS|FULL|SKIP)=\
+  #     "ci-update-(ours|full|skip)"
   CASCADE_UPDATEDEPS: ${{
     false
     || inputs.cascade-updatedeps
     || (contains(github.event.pull_request.labels.*.name, 'ci-update-ours')
         && 'ours')
-    || (contains(github.event.pull_request.labels.*.name, 'ci-update-all')
-        && 'all')
+    || (contains(github.event.pull_request.labels.*.name, 'ci-update-full')
+        && 'full')
     || (contains(github.event.pull_request.labels.*.name, 'ci-update-skip')
         && 'skip')
     || 'skip' }}

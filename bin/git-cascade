@@ -16,7 +16,7 @@ Defaults:
 
 Positionals:
 
-  cascade-updatedeps:  [all|ours|skip]
+  cascade-updatedeps:  [full|ours|skip]
   cascade-versioning:  [alpha|patch|skip]
   start-cascade:       [yes|no|cascade|inhibit]
   where-first-op-runs: [here|there|local|remote]
@@ -96,8 +96,8 @@ parse_cascade_updatedeps () {
 
   if [ -n "${cli_arg}" ]; then
     case "${cli_arg}" in
-      all|a|al)
-        cascade_updatedeps="all"
+      full|f|fu)
+        cascade_updatedeps="full"
         ;;
       ours|o|ou)
         cascade_updatedeps="ours"

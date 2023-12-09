@@ -11,7 +11,7 @@
 #        The user can choose both cascade options:
 #
 #        - Whether to call poetry-update, and whether to update
-#          all deps, or just "our" deps.
+#          all deps ("full"), or just "our" deps.
 #
 #        - Whether to bump the version, and by how much.
 #
@@ -55,7 +55,7 @@ on:
         description: 'Cascade poetry-update'
         type: choice
         options:
-          - 'all'
+          - 'full'
           - 'ours'
           - 'skip'
         # LATER/2023-11-30: Revert to 'all', after testing
