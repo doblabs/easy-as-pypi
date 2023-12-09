@@ -8,18 +8,24 @@
 PROG_NAME="$(basename "$0")"
 
 USAGE="\
-USAGE: ${PROG_NAME} [all|ours|skip] [alpha|patch|skip] [cascade|inhibit] [here|there]
+USAGE: ${PROG_NAME} [options] ...
+
+Specify one or more options, in any order:
+
+  [full|ours|skip] [alpha|patch|skip] [cascade|inhibit] [here|there] [help|--help|-h]
+
+Options:
+
+  Release/Cascade Args     Option Values (and|synonyms)
+  ====================     =====================================
+  cascade-updatedeps       full          | ours           | skip
+  cascade-versioning       alpha         | patch          | skip
+  start-cascade            (cascade|yes) | (inhibit|no)
+  where-first-op-runs      (here|local)  | (there|remote)
 
 Defaults:
 
   ${PROG_NAME} skip skip inhibit there
-
-Positionals:
-
-  cascade-updatedeps:  [full|ours|skip]
-  cascade-versioning:  [alpha|patch|skip]
-  start-cascade:       [yes|no|cascade|inhibit]
-  where-first-op-runs: [here|there|local|remote]
 "
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -55,36 +61,114 @@ git_cascade () {
     exit_0
   fi
 
-  local cascade_updatedeps
-  local cascade_versioning
-  local cascade_dodispatch
-  local firstop_kickoffenv
+  local cascade_updatedeps=""
+  local cascade_versioning=""
+  local cascade_dodispatch=""
+  local firstop_kickoffenv=""
 
   # So that pathname expansion works in the parse case calls,
   # e.g., case "$arg" in foo*) ;;
   shopt -s extglob
 
-  if ! cascade_updatedeps="$(parse_cascade_updatedeps "${cliarg_updatedeps}")"; then
-    exit_1
-  fi
+  while [ -n "$1" ]; do
+    local cur_arg="$1"
+    shift
 
-  if ! cascade_versioning="$(parse_cascade_versioning "${cliarg_versioning}")"; then
-    exit_1
-  fi
+    local accepted
 
-  if ! cascade_dodispatch="$(parse_cascade_dodispatch "${cliarg_downstream}")"; then
-    exit_1
-  fi
+    must_print_usage_and_exit_unless_not_help_arg "${cur_arg}"
 
-  if ! firstop_kickoffenv="$(parse_firstop_kickoffenv "${cliarg_kickoffenv}")"; then
-    exit_1
-  fi
+    if [ -z "${cascade_updatedeps}" ] \
+      && accepted="$(parse_cascade_updatedeps "${cur_arg}")" \
+    ; then
+      cascade_updatedeps="${accepted}"
+
+      continue
+    fi
+
+    if [ -z "${cascade_versioning}" ] \
+      && accepted="$(parse_cascade_versioning "${cur_arg}")" \
+    ; then
+      cascade_versioning="${accepted}"
+
+      continue
+    fi
+
+    if [ -z "${cascade_dodispatch}" ] \
+      && accepted="$(parse_cascade_dodispatch "${cur_arg}")" \
+    ; then
+      cascade_dodispatch="${accepted}"
+
+      continue
+    fi
+
+    if [ -z "${firstop_kickoffenv}" ] \
+      && accepted="$(parse_firstop_kickoffenv "${cur_arg}")" \
+    ; then
+      firstop_kickoffenv="${accepted}"
+
+      continue
+    fi
+
+    exit_fail_unrecognized_input "${cur_arg}"
+  done
 
   eapp_ci_dispatch \
-    "${cascade_updatedeps}" \
-    "${cascade_versioning}" \
-    "${cascade_dodispatch}" \
-    "${firstop_kickoffenv}"
+    "${cascade_updatedeps:-skip}" \
+    "${cascade_versioning:-skip}" \
+    "${cascade_dodispatch:-false}" \
+    "${firstop_kickoffenv:-remote}"
+}
+
+# SAVVY: B/c Git intercepts a dash-less call, e.g., `git cascade`
+# vs. `git-cascade`, it modifies help command behavior slightly:
+#
+#   $ git cascade -h
+#   'cascade' is aliased to '! bin/git-cascade'
+#   USAGE: git-cascade [options] ...
+#   ...
+#   
+#   $ git cascade --help
+#   'cascade' is aliased to '! bin/git-cascade'
+#
+#   $ git cascade help
+#   USAGE: git-cascade [options] ...
+#   ...
+#
+# - So:
+#   `-h`      prints 'is aliased' prefix from Git
+#   `--help`  inhibits our help output completely
+#   `help`    is left unadultered, Git is <shush>
+must_print_usage_and_exit_unless_not_help_arg () {
+  local cli_arg="$1"
+
+  case "${cli_arg}" in
+    help|--help|-h)
+      echo "${USAGE}"
+
+      exit_0
+      ;;
+    version|--version|-v)
+      # Completely undocumented <shhhhhush>
+      # - See also `git-bump-version-tag -c`. But this script part of
+      #   "the faithful", so we'd technically want to print canon version
+      #   from latest 'Deps: Update faithfuls <easy-as-pypi>' commit. But
+      #   that's a complete waste of anyone's time to implement (apologies
+      #   to future you if you implement it).
+      #   - For now, exposing this option because all CLI should --version.
+      echo "OG"
+
+      exit_0
+      ;;
+  esac
+}
+
+exit_fail_unrecognized_input () {
+  local cli_arg="$1"
+
+  >&2 echo "ERROR: Unrecognized input: ${cli_arg}"
+
+  exit_1
 }
 
 # ***
@@ -92,7 +176,7 @@ git_cascade () {
 parse_cascade_updatedeps () {
   local cli_arg="$1"
 
-  local cascade_updatedeps="skip"
+  local cascade_updatedeps=""
 
   if [ -n "${cli_arg}" ]; then
     case "${cli_arg}" in
@@ -106,7 +190,6 @@ parse_cascade_updatedeps () {
         cascade_updatedeps="skip"
         ;;
       *)
-        >&2 echo "ERROR: Unknown argument for cascade-updatedeps: ${cli_arg}"
 
         return 1
     esac
@@ -118,7 +201,7 @@ parse_cascade_updatedeps () {
 parse_cascade_versioning () {
   local cli_arg="$1"
 
-  local cascade_versioning="skip"
+  local cascade_versioning=""
 
   if [ -n "${cli_arg}" ]; then
     case "${cli_arg}" in
@@ -132,7 +215,6 @@ parse_cascade_versioning () {
         cascade_versioning="skip"
         ;;
       *)
-        >&2 echo "ERROR: Unknown argument for cascade-versioning: ${cli_arg}"
 
         return 1
     esac
@@ -144,7 +226,7 @@ parse_cascade_versioning () {
 parse_cascade_dodispatch () {
   local cli_arg="$1"
 
-  local cascade_dodispatch="false"
+  local cascade_dodispatch=""
 
   if [ -n "${cli_arg}" ]; then
     case "${cli_arg}" in
@@ -155,7 +237,6 @@ parse_cascade_dodispatch () {
         cascade_dodispatch="false"
         ;;
       *)
-        >&2 echo "ERROR: Unknown argument for dispatch-downstream: ${cli_arg}"
 
         return 1
     esac
@@ -167,7 +248,7 @@ parse_cascade_dodispatch () {
 parse_firstop_kickoffenv () {
   local cli_arg="$1"
 
-  local firstop_kickoffenv="false"
+  local firstop_kickoffenv=""
 
   if [ -n "${cli_arg}" ]; then
     case "${cli_arg}" in
@@ -178,7 +259,6 @@ parse_firstop_kickoffenv () {
         firstop_kickoffenv="remote"
         ;;
       *)
-        >&2 echo "ERROR: Unknown argument for firstop-kickoffenv: ${cli_arg}"
 
         return 1
     esac
