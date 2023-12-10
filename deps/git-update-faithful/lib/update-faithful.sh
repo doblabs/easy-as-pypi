@@ -1303,7 +1303,7 @@ venv_activate () {
 
 venv_deactivate () {
   # Aka 'off'.
-  type deactivate >/dev/null 2>&1 && deactivate
+  type deactivate >/dev/null 2>&1 && deactivate || true
 }
 
 # TRACK/2023-10-17 19:36: Using single -q so only warnings or worse printed:
