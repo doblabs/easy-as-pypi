@@ -288,7 +288,7 @@ update_deps_easy_as_pypi () {
 
   update-faithful-finish "${sourcerer}" "${skip_venv_manage}" "${commit_subject}"
 
-  # *** Completed undate-faithsul session
+  # *** Completed undate-faithful session
 
   if ${UPFUL_PYPROJECT_TMPL_CACHE_DISABLE}; then
     command rm "${UPDEPS_TMPL_SRC_DATA}"
