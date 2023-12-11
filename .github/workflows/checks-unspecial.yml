@@ -20,7 +20,7 @@ name: checks
 
 # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#name
 #  run-name: Run checks on ‘${{ github.ref_name }}’ — ${{ github.event.head_commit.message }}
-run-name: ✅ — ‘${{ github.ref_name }}’ — ${{ github.event.head_commit.message }}
+run-name: ✅ — Checks — ${{ github.ref_name }}
 
 on:
   push:
