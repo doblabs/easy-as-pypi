@@ -321,7 +321,9 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Suss pseudo subproject directory name
-        run: echo "PYPROJECT_DOC8_DIR=$(echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')")" >> $GITHUB_ENV
+        run: echo "PYPROJECT_DOC8_DIR=$(
+            echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')"
+          )" >> $GITHUB_ENV
         shell: bash
 
       # USYNC: The cache path is different for this job, because the pseudo
