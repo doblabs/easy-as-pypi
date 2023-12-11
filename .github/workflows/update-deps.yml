@@ -46,19 +46,13 @@ on:
         options:
           - 'ours'
           - 'full'
-          # ISOFF: There's no 'skip' option when this workflow is run
-          #        directly from the GitHub Actions page.
-          #        - If user wants to skip poetry-update, they should
-          #          set cascade-updatedeps to 'skip' and call one of
-          #          the other workflows (spread-updates.yml,
-          #          sprout-updates.yml or update-merged.yml).
-          #
-          #  - 'skip'
-        # Use the empty string ('') as the default, and also list the 'ours'
-        # option first, above. This causes the GH Actions page button to
-        # default to 'ours', and then the env.CASCADE_UPDATEDEPS var, set
-        # below, defaults to inputs.cascade-updatedeps.
-        default: ''
+          # Ideally, there'd be no 'skip' option from the GitHub Actions page,
+          # b/c why bother starting this workflow if you're just going to skip
+          # it? But we need the option to support `gh workflow run` from
+          # sprout-updates.yml.
+          # - We can at least default 'ours'.
+          - 'skip'
+        default: 'ours'
 
       # Note if bump-part is "alpha" *and* cascade-dispatch is
       # true, then include-prerelease-lock is implicitly true.
