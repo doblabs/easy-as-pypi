@@ -308,8 +308,9 @@ jobs:
       prerelease: ${{ needs.env-outputs.outputs.cascade-versioning == 'alpha' }}
       # Manage "ci-inhibit-cascade"
       inhibit-cascade: ${{
-        contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade')
-        || (! inputs.cascade-dispatch) }}
+        github.event_name != 'pull_request'
+        && (!inputs.cascade-dispatch)
+        || contains(github.event.pull_request.labels.*.name, 'ci-inhibit-cascade') }}
       # LEAVE: "ci-inhibit-forever"
       # Manage "ci-cascade-updatedeps"
       cascade-updatedeps: ${{ needs.env-outputs.outputs.cascade-updatedeps }}
