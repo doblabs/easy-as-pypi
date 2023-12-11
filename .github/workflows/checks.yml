@@ -417,7 +417,13 @@ jobs:
         run: pip install -U pip doc8>="1.1.1"
 
       - name: Run doc8
-        run: python -m doc8 *.rst docs/
+        run: |
+          docs_dir=""
+          if [ -d "docs" ]; then
+            docs_dir="docs/"
+          fi
+
+          python -m doc8 *.rst ${docs_dir}
 
   # *** DOC8-POETRY
 
@@ -473,7 +479,13 @@ jobs:
         # shell: bash
 
       - name: Run doc8
-        run: poetry -C "${{ env.PYPROJECT_DOC8_DIR }}" run python -m doc8 *.rst docs/
+        run: |
+          docs_dir=""
+          if [ -d "docs" ]; then
+            docs_dir="docs/"
+          fi
+
+          poetry -C "${{ env.PYPROJECT_DOC8_DIR }}" run python -m doc8 *.rst ${docs_dir}
 
   # *** DOCS
 

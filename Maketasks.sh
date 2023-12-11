@@ -85,7 +85,12 @@ make_doc8_pip () {
   python -c "import doc8" 2> /dev/null \
     || pip install -U pip "doc8>=1.1.1"
 
-  python -m doc8 *.rst docs/
+  local docs_dir=""
+  if [ -d "docs" ]; then
+    docs_dir="docs/"
+  fi
+
+  python -m doc8 *.rst ${docs_dir}
 }
 
 # ***
@@ -113,7 +118,12 @@ make_doc8_poetry () {
 
   cd "${before_cd}"
 
-  python -m doc8 *.rst docs/
+  local docs_dir=""
+  if [ -d "docs" ]; then
+    docs_dir="docs/"
+  fi
+
+  python -m doc8 *.rst ${docs_dir}
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
