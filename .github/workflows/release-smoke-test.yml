@@ -91,7 +91,20 @@ jobs:
             pip install $INDEX_PIP $PACKAGE_NAME==$VERSION
 
       - name: Infer module name
-        run: echo "MODULE_NAME=${PACKAGE_NAME//-/_}" >> "$GITHUB_ENV"
+        run: |
+          pip install yq
+
+          trim_null="select( . != null )"
+
+          module_name="$(
+            tomlq -r ".tool.poetry.packages[0].include | ${trim_null}" "pyproject.toml"
+          )"
+
+          if [ -z "${module_name}" ]; then
+            module_name="${PACKAGE_NAME//-/_}"
+          fi
+
+          echo "MODULE_NAME=${module_name}" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Load it!
