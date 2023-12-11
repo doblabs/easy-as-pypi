@@ -13,6 +13,10 @@
 #   GH_REPO="doblabs/$(basename "$(git rev-parse --show-toplevel)")" gh run list...
 
 eapp_gh_aliases_setup () {
+  # NOTE: The run-name is displayed last, b/c "%<n>s" padding doesn't work
+  #       well with wide chars (and then any text that would come after
+  #       wouldn't align, at least not without properly counting wide
+  #       chars and manually padding).
   _gh_run_list_eapp () {
     local input_line
 
