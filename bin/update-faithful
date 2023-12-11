@@ -17,6 +17,8 @@ source_deps () {
   # Ensure coreutils installed (from Linux pkg. mgr., or from macOS Homebrew).
   insist_cmd 'realpath'
 
+  insist_cmd 'git-bump-version-tag'
+
   # CXREF: ~/.kit/git/git-update-faithful/lib/update-faithful.sh
   #   https://github.com/thegittinsgood/git-update-faithful#⛲
   # - Includes: logger.sh, git-nubs.sh, common_put_wise.sh.
@@ -172,8 +174,7 @@ print_tmpl_src_data () {
   eapp_version="$(
     cd "${canon_base_absolute}"
 
-    git bump current 2> /dev/null \
-      || git latest-version 2> /dev/null
+    git-bump-version-tag -c 2> /dev/null
   )"
 
   echo "\
