@@ -192,7 +192,11 @@ update_faithful_file () {
   if ! ${success}; then
     handle_failed_state "${canon_head}" "${canon_file_absolute}"
 
-    return 1
+    # No callers check return value; they'll happily continue,
+    # and should, so they can print one final `rm` command that
+    # user can copy-paste to resolve all the issues.
+    #
+    #  return 1
   fi
 }
 
