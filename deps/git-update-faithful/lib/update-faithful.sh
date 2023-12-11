@@ -1455,7 +1455,7 @@ update_faithfuls_commit_changes () {
 
   local versiony=""
   if command -v git-bump-version-tag > /dev/null; then
-    versiony=" [$(git-bump-version-tag -c)]"
+    versiony=" [$(cd "${canon_base_absolute}" && git-bump-version-tag -c)]"
   fi
 
   local sourcery=""
