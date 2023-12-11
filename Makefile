@@ -205,6 +205,8 @@ MAKEFILE_PROJECT ?= Makefile.project
 
 EAPP_MAKEFILE_DEVELOP_DEFINED ?=
 
+EAPP_MAKEFILE_FLAKE8_DISABLE ?=
+
 EAPP_MAKEFILE_PYDOCSTYLE_DISABLE ?=
 
 EAPP_MAKEFILE_LINKCHECK_DISABLE ?=
@@ -853,8 +855,14 @@ black: _depends_active_venv
 #     cgetfile /path/to/project/.flake8.out
 #   Which is automated by the gvim_load_quickfix shell-out.
 
+ifndef EAPP_MAKEFILE_FLAKE8_DISABLE
 flake8: _depends_active_venv _run_flake8 _gvim_load_quickfix_flake8
 .PHONY: flake8
+else
+flake8:
+	@printf ""
+.PHONY: flake8
+endif
 
 _run_flake8: SHELL:=/bin/bash
 _run_flake8: _depends_active_venv
