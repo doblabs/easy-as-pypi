@@ -64,7 +64,7 @@ jobs:
                 "-include Makefile.project\nprint_value:\n\t@echo \$(${var_name})"
             ) print_value)"
 
-            environ_value=$([ -z "${var_value}" ] && echo "false" || echo "true")
+            environ_value=$([ -z "${var_value}" ] && echo "false" || echo "${var_value}")
 
             echo "${var_name}=${environ_value}"
 
