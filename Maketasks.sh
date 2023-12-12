@@ -296,7 +296,7 @@ make_editable () {
     pyproject.toml \
   | awk -v pyprojs_root="${EDITABLES_ROOT}" ' \
       match($0, /^('${concat_pjs}')\s*=\s*"[<>=^]{1,2}\s*[0-9]+/, matches) { \
-        print matches[1] " = { path = \"" pyprojs_root "/" matches[1] "/${EDITABLE_DIR}\", develop = true }"; \
+        print matches[1] " = { path = \"" pyprojs_root "/" matches[1] "/'${EDITABLE_DIR}'\", develop = true }"; \
         next; \
       } 1 \
     ' - >> "${EDITABLE_DIR}/pyproject.toml"
