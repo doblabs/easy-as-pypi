@@ -205,13 +205,39 @@ MAKEFILE_PROJECT ?= Makefile.project
 
 EAPP_MAKEFILE_DEVELOP_DEFINED ?=
 
+# CI '.github/workflows/checks.yml' opt-outs
+#
+# - USAGE: Add these to Makefile.project, and set true.
+
+EAPP_MAKEFILE_TESTS_DISABLE ?=
+
+EAPP_MAKEFILE_BLACK_DISABLE ?=
+
 EAPP_MAKEFILE_FLAKE8_DISABLE ?=
+
+EAPP_MAKEFILE_ISORT_DISABLE ?=
+
+EAPP_MAKEFILE_DOC8_PIP_DISABLE ?=
+
+EAPP_MAKEFILE_DOC8_POETRY_DISABLE ?=
+
+EAPP_MAKEFILE_DOCS_DISABLE ?=
+
+# Not disableable:
+#   EAPP_MAKEFILE_TWINE_CHECK_DISABLE
+
+# Not disableable:
+#   EAPP_MAKEFILE_POETRY_CHECK_DISABLE
 
 EAPP_MAKEFILE_PYDOCSTYLE_DISABLE ?=
 
-EAPP_MAKEFILE_LINKCHECK_DISABLE ?=
+EAPP_MAKEFILE_COVERAGE_DISABLE ?=
 
-EAPP_MAKEFILE_DOCS_DISABLE ?=
+# Not disableable:
+#   EAPP_MAKEFILE_YAMLLINT_DISABLE ?=
+
+# Local-only (CI never linkcheck's).
+EAPP_MAKEFILE_LINKCHECK_DISABLE ?=
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
