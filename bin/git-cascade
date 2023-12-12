@@ -113,6 +113,8 @@ git_cascade () {
     exit_fail_unrecognized_input "${cur_arg}"
   done
 
+  report_which_remote
+
   eapp_ci_dispatch \
     "${cascade_updatedeps:-skip}" \
     "${cascade_versioning:-skip}" \
@@ -265,6 +267,102 @@ parse_firstop_kickoffenv () {
   fi
 
   printf "%s" "${firstop_kickoffenv}"
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# The gh-workflow-run commands use GH_REPO,
+# or the .git/config setting, 'gh-resolved'.
+#
+# - Examine the default repo, e.g.,
+#
+#   $ gh repo set-default --view
+#   no default repository has been set; use `gh repo set-default` to select one
+#
+#   $ gh repo set-default --view
+#   doblabs/easy-as-pypi
+#
+# - REFER: gh help environment | less
+
+report_which_remote () {
+  local remote_repo=""
+  local remote_name
+  local remote_url
+  local source_name
+
+  # ***
+
+  if [ -n "${GH_REPO}" ]; then
+    remote_repo="${GH_REPO}"
+    source_name="GH_REPO"
+  else
+    remote_repo="$(gh repo set-default --view)"
+
+    # If response has whitespace in it, assume it's the "no
+    # default repository" message (gh exits 0 either way).
+    if [[ "${remote_repo}" == *" "* ]]; then
+      remote_repo=""
+
+      source_name="first-match"
+    else
+      source_name="gh default"
+    fi
+  fi
+
+  # ***
+
+  local repo_regex=""
+  local host_regex=""
+
+  if [ -n "${remote_repo}" ]; then
+    repo_regex="${remote_repo}\(\.git\)\?\$"
+
+    # Note that GH_REPO allows a host, too: "[HOST/]OWNER/REPO".
+    local just_slashes="${remote_repo//[^\/]}"
+    if [ ${#just_slashes} -eq 1 ]; then
+      host_regex="github\.com[:/]"
+    fi
+  fi
+
+  # ***
+
+  # Look for a matching remote. Note if gh-default wasn't set and
+  # GH_REPO isn't being used, this uses the first github.com remote...
+  # which I think is how `gh` works (SPIKE: Check its source to confirm).
+
+  local curr_remote
+
+  for curr_remote in $(git remote); do
+    local curr_url
+    curr_url="$(git remote get-url "${curr_remote}")"
+
+    if echo "${curr_url}" \
+      | grep -q -e "\W${host_regex}${repo_regex}" \
+    ; then
+      remote_name="${curr_remote}"
+      remote_url="${curr_url}"
+      remote_repo="$(
+        echo "${curr_url}" \
+        | sed -E "s/^.*\W${host_regex}//" \
+        | sed -E 's/\.git$//'
+      )"
+
+      break
+    fi
+  done
+
+  # ***
+
+  # MAYBE/2023-12-11: Add some color here, and/or emoji.
+
+  if [ -n "${remote_name}" ]; then
+    # Meh: ${remote_repo} is essentially an abbreviated ${remote_url}.
+    echo "using ‘${remote_name}’ remote for ‘${remote_repo}’ [${source_name}]"
+  else
+    echo "BWARE: Undetermined GitHub remote"
+  fi
+
+  echo
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
