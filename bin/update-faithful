@@ -382,11 +382,23 @@ update_poetry_lock_no_update () {
 
   printf "%s" "Running poetry lock --no-update..."
 
-  if ! poetry_output="$(poetry lock --no-update)"; then
+  local poetry_failed=false
+
+  if ${UPFUL_VERBOSE:-false}; then
+    if ! poetry lock --no-update; then
+      poetry_failed=true
+    fi
+  elif ! poetry_output="$(poetry lock --no-update)"; then
+    poetry_failed=true
+  fi
+
+  if ${poetry_failed}; then
     echo
 
     >&2 error "ERROR: poetry lock failed!"
-    >&2 echo "${poetry_output}"
+    if [ -n "${poetry_output}" ]; then
+      >&2 echo "${poetry_output}"
+    fi
 
     # DUNNO: There might be reason for graceful exit, but unsure of one yet.
     exit 1
