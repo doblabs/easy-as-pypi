@@ -54,6 +54,7 @@ __UPDEPS__CPYST__="
   UPDEPS_CASCADE_UPDATEDEPS=skip \
   UPDEPS_CASCADE_VERSIONING=skip \
   UPDEPS_INCLUDE_PRERELEASE=false \
+  UPDEPS_SKIP_PR=false \
     ./.github/bin/update-poetry
 "
 
@@ -229,10 +230,12 @@ update_poetry_update () {
   local NEW_PR_URL=""
 
   if ${has_changes}; then
-    push_branch "${branch_name}" "${remote_name}"
+    if ! ${UPDEPS_SKIP_PR:-false}; then
+      push_branch "${branch_name}" "${remote_name}"
 
-    # Set NEW_PR_URL
-    gh_pr_create_and_auto_merge_when_checks_finish
+      # Set NEW_PR_URL
+      gh_pr_create_and_auto_merge_when_checks_finish
+    fi
 
     resume_old_branch_and_cleanup "${branch_name}"
   else
@@ -460,10 +463,17 @@ resume_old_branch_and_cleanup () {
   #   - REFER:
   # https://docs.github.com/en/actions/learn-github-actions/variables#default-environment-variables
   if ! ${CI:-false}; then
-    # Ignore stderr message that -q doesn't inhibit:
-    #   warning: deleting branch 'foo' that has been merged to
-    #            'refs/remotes/origin/foo', but not yet merged to HEAD.
-    git branch -q -D "${branch_name}" 2> /dev/null
+    if ! ${UPDEPS_SKIP_PR:-false}; then
+      # Ignore stderr message that -q doesn't inhibit:
+      #   warning: deleting branch 'foo' that has been merged to
+      #            'refs/remotes/origin/foo', but not yet merged to HEAD.
+      git branch -q -D "${branch_name}" 2> /dev/null
+    else
+      echo "You opted to not use a PR, so you'll need to merge changes yourself:"
+      echo
+      echo "  git rebase ${branch_name}"
+      echo "  git branch -d ${branch_name}"
+    fi
   fi
 }
 
