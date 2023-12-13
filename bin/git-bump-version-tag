@@ -98,6 +98,12 @@ git_bump_version_tag () {
   export EAPP_CI_TAG_CASCADE_UPDATEDEPS
   export EAPP_CI_TAG_CASCADE_VERSIONING
 
+  # Defined by git-bump-version-tag:
+  #  export -f echo_or_eval
+  export -f format_tag_name
+  # From format_tag_name fcn:
+  export -f trace_full
+
   export -f push_ci_tags_first
 
   BUMP_PRE_PUSH_HOOK="push_ci_tags_first" \
