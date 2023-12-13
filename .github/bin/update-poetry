@@ -342,10 +342,12 @@ poetry_update_lock_normal () {
       print_prog "full... "
 
       poetry update --lock >> "${POETRY_OUTPUT_DUMP}"
+    elif [ "${UPDEPS_CASCADE_UPDATEDEPS}" = "skip" ]; then
+      print_prog "skip "
     else
-      # Note that UPDEPS_CASCADE_UPDATEDEPS cannot be 'skip', because
-      # caller precludes calling this script otherwise.
-      >&2 echo "GAFFE: Impossible path"
+      >&2 echo "ERROR: Unrecognized UPDEPS_CASCADE_UPDATEDEPS value:" \
+        "‘${UPDEPS_CASCADE_UPDATEDEPS}’"
+      >&2 echo "- Hint: Try one of: 'ours', 'full', or 'skip'"
 
       # D_b_C: This execution is kaput, by the laws of Design by Contract.
       exit_1
