@@ -1337,7 +1337,8 @@ venv_install_jinja2_cli () {
   local ignore_warning="WARNING: There was an error checking the latest version of pip."
 
   pip install -q jinja2-cli 2>&1 \
-    | grep -v "${ignore_warning}"
+    | grep -v "${ignore_warning}" \
+    || true
 
   # ALTLY:
   #   python -m pip install jinja2-cli
