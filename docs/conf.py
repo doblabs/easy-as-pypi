@@ -23,8 +23,7 @@
 import os
 import sys
 from collections.abc import MutableMapping
-
-from pkg_resources import get_distribution
+from importlib.metadata import version as importlib_metadata_version
 
 # import sphinx_rtd_theme
 
@@ -290,7 +289,7 @@ author = project_auth
 # the built documents.
 #
 # The full version, including alpha/beta/rc tags.
-release = get_distribution(package_name).version
+release = importlib_metadata_version(package_name)
 # The short X.Y version.
 # - (lb): One place I see `release` used — to name the browser page.
 version = ".".join(release.split(".")[:2])
