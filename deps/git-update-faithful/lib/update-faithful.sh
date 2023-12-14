@@ -1083,7 +1083,7 @@ render_document_from_template () {
   # Localize template sources.
 
   local tmp_source_dir
-  tmp_source_dir="$(mktemp -d -t ${UPDEPS_VENV_PREFIX}XXXX)"
+  tmp_source_dir="$(mktemp -d -t ${UPDEPS_VENV_PREFIX}--render_document--XXXX)"
 
   local tmp_tmpl_absolute="${tmp_source_dir}/${canon_tmpl_relative}"
 
@@ -1286,7 +1286,7 @@ venv_activate_and_prepare () {
 # - BEGET: https://gist.github.com/csinchok/9714005
 venv_activate () {
   local throwaway_dir
-  throwaway_dir=$(mktemp -d -t ${UPDEPS_VENV_PREFIX}XXXX)
+  throwaway_dir=$(mktemp -d -t ${UPDEPS_VENV_PREFIX}--venv_activate--XXXX)
 
   cd "${throwaway_dir}"
 
