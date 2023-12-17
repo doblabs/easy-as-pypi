@@ -184,6 +184,27 @@ jobs:
 
       # ***
 
+      - name: Infer version command
+        id: infer-version-command
+        run: |
+          pip install yq
+
+          trim_null="select( . != null )"
+
+          version_command="$(
+            tomlq -r \
+              ".tool.easy_as_pypi.smoke_test_version | ${trim_null}" \
+              "pyproject.toml"
+          )"
+
+          if [ -z "${version_cmd}" ]; then
+            version_cmd="$PACKAGE_NAME version"
+          fi
+
+          echo "version_command=${version_command}" >> "$GITHUB_OUTPUT"
+
+      # ***
+
       # See comment above: The first one or few pipx-install don't
       # always find the version.
       # - 2023-10-08: So far I've only ever seen one retry needed,
@@ -218,15 +239,17 @@ jobs:
       #            and application version are different.
       - name: Run it!
         run: |
+          version_cmd="${{ steps.infer-version-command.outputs.version_command }}"
           echo "Checking \$PACKAGE_NAME version » $VERSION"
           # FIXME/2023-10-01 14:00: This echo probably unnecessary.
-          echo "\$ $PACKAGE_NAME version"
-          $PACKAGE_NAME version
+          echo "\$ ${version_cmd}"
+          ${version_cmd}
         shell: bash
 
       - name: Check version
         run: |
-          [ "$($PACKAGE_NAME version)" = "$PACKAGE_NAME version $VERSION" ] \
+          version_cmd="${{ steps.infer-version-command.outputs.version_command }}"
+          [ "$($version_cmd)" = "$PACKAGE_NAME version $VERSION" ] \
             || exit 1
         shell: bash
 
