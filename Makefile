@@ -1123,8 +1123,18 @@ coverage: _coverage_sqlite _coverage_report
 .PHONY: coverage
 
 # Create '.coverage' file.
+# - SAVVY: Use `--source=src` to restrict post-test analysis,
+#   and not `--omit`, to ignore /tmp paths:
+#   - Added for sqlalchemy-migrate-hotoffthehamster, i.e.,:
+#
+#       $ make coverage
+#       ... [tests run]
+#       ============ 175 passed, 141 warnings in 40.95s ============
+#       coverage report
+#       No source for code: '/tmp/tmp14c2e6wv/test_load_model.py'.
+#       Makefile:1131: recipe for target '_coverage_report' failed
 _coverage_sqlite: _depends_active_venv
-	coverage run $(TEST_ARGS) -m pytest tests
+	coverage run --source=src $(TEST_ARGS) -m pytest tests
 .PHONY: _coverage_sqlite
 
 _coverage_report: _depends_active_venv
