@@ -687,8 +687,9 @@ update_local_from_canon () {
     # This is not a simple "meld \"${local_file}\" \"${canon_file_absolute}\" &"
     # because we need the scoped version of the canon file.
     printf "%s"                      "( cd \"$(dirname "${canon_file_absolute}")\" \\
-                                        && meld \"$(pwd)/${local_file}\" \\
-                                           <(git show ${short_head}:\"${canon_file_relative}\") ) &"
+                                        && meld \\
+                                            <(git show ${short_head}:\"${canon_file_relative}\") \\
+                                            \"$(pwd)/${local_file}\") &"
   }
 
   warn_usage_hint_add_meld_compare_cpyst () {
