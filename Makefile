@@ -1042,11 +1042,12 @@ endif
 
 # SAVVY: Consider other useful options we don't expose via this Makefile, e.g.,:
 #
-#     pytest --pdb -vv -k test_function tests/
+#     pytest --pdb -s -vv -k test_function tests/
 #
-#                                       ^^^^^^ Test specific path or file
-#                      ^^ ^^^^^^^^^^^^^ Test specific function or class
-#                  ^^^ Increase verbosity
+#                                          ^^^^^^ Test specific path or file
+#                         ^^ ^^^^^^^^^^^^^ Test specific function or class
+#                     ^^^ Increase verbosity
+#                  ^^ In conjunction with --pdb, so it can haz input (aka --capture=no)
 #            ^^^^^ Start pdb on error or KeyboardInterrupt
 
 # SAVVY: By default, pipeline returns exit value from final command, e.g.,
