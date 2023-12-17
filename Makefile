@@ -1124,7 +1124,7 @@ coverage: _coverage_sqlite _coverage_report
 
 # Create '.coverage' file.
 _coverage_sqlite: _depends_active_venv
-	coverage run -m pytest $(TEST_ARGS) tests
+	coverage run $(TEST_ARGS) -m pytest tests
 .PHONY: _coverage_sqlite
 
 _coverage_report: _depends_active_venv
