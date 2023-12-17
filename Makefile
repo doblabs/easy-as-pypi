@@ -657,6 +657,7 @@ EDITABLE_PJS = \
 	human-friendly_pedantic-timedelta \
 	pep440-version-compare-cli \
 	sqlalchemy-migrate-hotoffthehamster \
+	tempita-hotoffthehamster \
 	\
 	dob-bright \
 	dob-prompt \
