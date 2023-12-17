@@ -48,12 +48,18 @@ def __version_probe__():
     # CXREF: `git-latest-version` is from git-smart:
     #   https://github.com/landonb/git-smart#💡
     #     https://github.com/landonb/git-smart/blob/release/bin/git-latest-version
-    # MEH: There might be a Pythonic way to find the version from Git tags,
-    # but I didn't dig too deep. This path only affects developers, and I'd
-    # encourage co-devs to install git-smart (and git-extras, and lots of
-    # other brilliant Git projects). And this code works without it, too.
-    # So while somewhat esoteric and mostly about making one dev happy (I
-    # am!), does no harm and does not impose upon normal users.
+    # MEH: There is a Pythonic way to find the version from Git tags,
+    #      using setuptools_scm.
+    #      - CXREF: ~/.kit/py/easy-as-pypi-getver/src/easy_as_pypi_getver/__init__.py
+    #          https://github.com/doblabs/easy-as-pypi-getver#🔢
+    #      But we're not gonna use that code, b/c DRY (in a sense,
+    #      easy-as-pypi-getver should really just be easy-as-pypi itself).
+    # - But this path only followed on a dev install (e.g., `make develop`),
+    #   and I'd encourage co-devs to install git-smart (and git-extras, and
+    #   lots of other brilliant Git projects).
+    # - Also this code works without git-smart, just prints "<unknown>".
+    # - So while somewhat esoteric and mostly about making one dev happy
+    #   (I'm happy!), this is harmless and does not impose upon normal users.
 
     import subprocess
 
