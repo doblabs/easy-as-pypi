@@ -57,6 +57,7 @@ jobs:
 
           for var_name in \
             "EAPP_MAKEFILE_TESTS_DISABLE" \
+            "EAPP_MAKEFILE_TESTS_WINDOWS_DISABLE" \
             "EAPP_MAKEFILE_BLACK_DISABLE" \
             "EAPP_MAKEFILE_FLAKE8_DISABLE" \
             "EAPP_MAKEFILE_ISORT_DISABLE" \
@@ -85,6 +86,8 @@ jobs:
     outputs:
       EAPP_MAKEFILE_TESTS_DISABLE: ${{
         steps.read-environs.outputs.EAPP_MAKEFILE_TESTS_DISABLE }}
+      EAPP_MAKEFILE_TESTS_WINDOWS_DISABLE: ${{
+        steps.read-environs.outputs.EAPP_MAKEFILE_TESTS_WINDOWS_DISABLE }}
       EAPP_MAKEFILE_BLACK_DISABLE: ${{
         steps.read-environs.outputs.EAPP_MAKEFILE_BLACK_DISABLE }}
       EAPP_MAKEFILE_FLAKE8_DISABLE: ${{
@@ -172,9 +175,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check enablement flags
+        id: check-disablement
+        run: |
+          inhibit_test=false
+          if [ ${{ matrix.platform }} = 'windows-latest' ] \
+            && ${{
+            needs.disablement-detector.outputs.EAPP_MAKEFILE_TESTS_WINDOWS_DISABLE
+          }} = 'true' ]; then
+            inhibit_test=true
+          fi
+          echo "inhibit_test=${inhibit_test}"
+          echo "inhibit_test=${inhibit_test}" >> "$GITHUB_OUTPUT"
+
       # CXREF: https://github.com/actions/setup-python
       - name: Set up Python ${{ matrix.python-version }}
         id: setup-python
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
@@ -203,12 +220,15 @@ jobs:
       - name: Set pip wheels path (Ubuntu/macOS)
         run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
         shell: bash
-        if: (runner.os == 'Linux') || (runner.os == 'macOS')
+        if: ${{ (runner.os == 'Linux') || (runner.os == 'macOS')
+          && steps.check-disablement.outputs.inhibit_test == 'false' }}
       - name: Set pip wheels path (Windows)
         run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
         shell: bash
-        if: runner.os == 'Windows'
+        if: ${{ runner.os == 'Windows'
+          && steps.check-disablement.outputs.inhibit_test == 'false' }}
       - name: Load cached $HOME/.local
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         uses: actions/cache@v3
         with:
           path: ${{ env.PIP_CACHE }}
@@ -217,6 +237,7 @@ jobs:
             }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install Poetry
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         uses: snok/install-poetry@v1
         with:
           virtualenvs-create: true
@@ -243,6 +264,7 @@ jobs:
       # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
       - name: Load cached venv
         id: cached-poetry-dependencies
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         uses: actions/cache@v3
         with:
           path: .venv
@@ -253,10 +275,12 @@ jobs:
             }}-${{ hashFiles('.github/workflows/checks.yml')
             }}
       - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: ${{ steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+          && steps.check-disablement.outputs.inhibit_test == 'false' }}
         run: poetry install --no-interaction --with test,project_test
 
       - name: Test
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         run: |
           poetry run make test
           # DEVs: If you need to test a specific function or class, try, e.g.,:
