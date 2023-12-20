@@ -40,7 +40,7 @@ eapp_gh_aliases_setup () {
   #               `gh open fail|failure` opens last failed job.
   gh alias delete open 2> /dev/null || true
   gh alias set --shell open \
-    "$(declare -f _gh_open_last_failure_eapp); _gh_open_last_failure_eapp"
+    "$(declare -f _gh_open_last_failure_eapp); _gh_open_last_failure_eapp \"\$@\""
 }
 
 # ***
@@ -117,14 +117,18 @@ _gh_run_list_eapp () {
 #     data wrangling, makes life so much easier.
 
 _gh_open_last_failure_eapp () {
-  local run_id
+  local run_id="$1"
+
   local run_url
 
   # Select first "failure" and print the run-id.
-  run_id="$(
-    gh run list -L 13 --json "conclusion,databaseId" \
-      | jq -r '[.[] | select(.conclusion=="failure")][0] | .databaseId'
-  )"
+  if [ -z "${run_id}" ]; then
+    run_id="$(
+      gh run list -L 13 --json "conclusion,databaseId" \
+        | jq -r \
+          '[.[] | select(.conclusion=="failure")][0] | .databaseId'
+    )"
+  fi
 
   if [ -z "${run_id}" ]; then
     echo "All good!"
