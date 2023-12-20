@@ -20,8 +20,26 @@ eapp_gh_aliases_setup () {
   gh alias set --shell list "$(declare -f _gh_run_list_eapp); _gh_run_list_eapp"
 
   # DUNNO/2023-12-20: Call it 'fail'? 'open-fail'? 'open-last-failure'??
-  gh alias delete open-last-failure 2> /dev/null || true
-  gh alias set --shell open-last-failure \
+  # - Well, I was gonna use the long name to be more discoverable, and
+  #   to make it more obvious in the command list what it does. But it
+  #   doesn't work with tab completion, because `gh` appends something:
+  #
+  #     $ gh ope<TAB>
+  #     $ gh open-last-failure  (Shell alias
+  #
+  #   `gh` literally adds "  (Shell alias". And while I've worked on
+  #   completion files before, they're not always easy to fix in five.
+  #
+  #   - So rather than `gh open-last-failure`, how's `gh fail`?
+  #     Or maybe just `gh open`?? What else would you want to open?
+  #     - If you wanted to use `gh open` for more purposes later, you
+  #       could have `gh open` by default open the most recent failure,
+  #       and then user could add args for other jobs...
+  #       - Like, `gh open last|latest` opens last job run
+  #               `gh open 1|2|3|4|...` opens nth job run ago
+  #               `gh open fail|failure` opens last failed job.
+  gh alias delete open 2> /dev/null || true
+  gh alias set --shell open \
     "$(declare -f _gh_open_last_failure_eapp); _gh_open_last_failure_eapp"
 }
 
