@@ -59,14 +59,16 @@ doblabs/click-hotoffthehamster:
   # - doblabs/dob-viewer
   # - doblabs/dob
   # - befinance/birdseye
-  - doblabs/easy-as-pypi-config
+  - doblabs/click-hotoffthehamster-alias
 
 doblabs/click-hotoffthehamster-alias:
   # Upstream deps:
   # - doblabs/click-hotoffthehamster
   # Downstream deps:
   # - doblabs/dob
-  - doblabs/dob
+  # Rather than cascade straight to doblabs/dob, this project
+  # maybe called by click-HOTH, so choose next click-HOTH ancestor.
+  - doblabs/easy-as-pypi-termio
 
 doblabs/config-decorator:
   # Upstream deps:
@@ -121,7 +123,7 @@ doblabs/easy-as-pypi-appdirs:
   # - doblabs/dob-prompt
   # - doblabs/dob
   # - befinance/birdseye
-  - doblabs/easy-as-pypi-config
+  - doblabs/easy-as-pypi-getver
 
 doblabs/easy-as-pypi-config:
   # Upstream deps:
@@ -133,7 +135,8 @@ doblabs/easy-as-pypi-config:
   # - doblabs/dob-bright
   # - doblabs/dob
   # - befinance/birdseye
-  - doblabs/easy-as-pypi-getver
+  - doblabs/nark
+  - befinance/birdseye
 
 doblabs/easy-as-pypi-getver:
   # Upstream deps:
@@ -156,8 +159,7 @@ doblabs/easy-as-pypi-termio:
   # - doblabs/dob-viewer
   # - doblabs/dob
   # - befinance/birdseye
-  - doblabs/nark
-  - befinance/birdseye
+  - doblabs/easy-as-pypi-config
 
 # ***
 
