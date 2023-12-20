@@ -18,6 +18,11 @@ eapp_gh_aliases_setup () {
   # DUNNO/2023-12-10: What's a good alias name? Going w/ 'list' for now.
   gh alias delete list 2> /dev/null || true
   gh alias set --shell list "$(declare -f _gh_run_list_eapp); _gh_run_list_eapp"
+
+  # DUNNO/2023-12-20: Call it 'fail'? 'open-fail'? 'open-last-failure'??
+  gh alias delete open-last-failure 2> /dev/null || true
+  gh alias set --shell open-last-failure \
+    "$(declare -f _gh_open_last_failure_eapp); _gh_open_last_failure_eapp"
 }
 
 # ***
@@ -47,6 +52,92 @@ _gh_run_list_eapp () {
       "$(echo "${input_line}" | cut -f 3 | head -c 60)" \
       ;
   done
+}
+
+# ***
+
+# 2023-12-20: Make it easier to most recently failed job.
+#
+# - Use case: Automate what had been these manual steps:
+#
+#     # Print list of recent runs:
+#     gh run list | cat
+#     # OR, using our gh alias:
+#     gh list
+#
+#     # Look for "failure" in list and double-click-copy
+#     # the run-id, then open it's webpage, e.g.,:
+#     gh run view -w ${run_id} | cat
+#
+# - Some annoyances with `gh` (which I otherwise love!):
+#
+#   - Note the use of `| cat`, otherwise `gh` shows
+#     *paged* output that you must dismiss (e.g.,
+#     by pressing `q`).
+#
+#   - The 'view' command opens the page in an existing
+#     browser window.
+#
+#     - This is annoying for a few reasons, firstly
+#       that it pops up a window you already had open,
+#       whether it had one tab, or one hundred, and
+#       pollutes the window with a new tab.
+#
+#     - When you Ctrl-w close the window, if it had
+#       opened alongside other tabs, the window that
+#       was raised by the 'view' command is still
+#       there.
+#
+#       Whereas when you open to a *new* window, a
+#       single Close with *always* dismiss the new
+#       window! (Guh, how is this not the default,
+#       open a new window?)
+#
+#   - Fortunately this isn't my first rodeo, so I
+#     just mimicked what git-smart's `git open`
+#     does, and who doesn't love `jq` for some
+#     data wrangling, makes life so much easier.
+
+_gh_open_last_failure_eapp () {
+  local run_id
+  local run_url
+
+  # Select first "failure" and print the run-id.
+  run_id="$(
+    gh run list -L 13 --json "conclusion,databaseId" \
+      | jq -r '[.[] | select(.conclusion=="failure")][0] | .databaseId'
+  )"
+
+  if [ -z "${run_id}" ]; then
+    echo "All good!"
+
+    return 0
+  fi
+
+  # "Trick" 'view' into just printing the URL; we'll take it from there.
+  # - gh-run-view sends a string to pager output which user won't see, e.g.,
+  #     Opening github.com/doblabs/easy-as-pypi/actions/runs/7274859732 in your browser.
+  run_url="$(GH_BROWSER=echo gh run view -w ${run_id})"
+
+  if type -t sensible-open > /dev/null; then
+    # https://github.com/landonb/sh-sensible-open
+    sensible-open "${run_url}"
+  elif [ "$(uname)" = "Darwin" ]; then
+    open "${run_url}" > /dev/null &
+  else
+    # - Backgrounding (&) necessary in case opens new browser session [I think].
+    # - Ignore stderr because something (this file is from chromium) sometimes spews:
+    #     [8257:8257:0100/000000.437736:ERROR:zygote_linux.cc(662)] write: Broken pipe (32)
+    # - Use sub-process so shell doesn't print "Done" message, e.g.,
+    #     [2]-  Done                    <command-and-args>
+    (
+      sensible-browser \
+        --new-window \
+        "${run_url}" \
+        --profile-directory=Default \
+          > /dev/null 2>&1 &
+    )
+  fi
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
