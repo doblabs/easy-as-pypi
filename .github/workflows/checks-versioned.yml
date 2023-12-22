@@ -63,9 +63,37 @@ jobs:
 
   # ***
 
+  check-if-prerelease:
+    runs-on: ubuntu-latest
+    steps:
+      # USYNC: See same-named, similar steps in: checks-versioned, release-github.
+      - name: Check if prerelease
+        id: check-if-prerelease
+        run: |
+          is_prerelease=false
+
+          # Note the v?: Don't care!
+          if ! echo "${{ github.event.ref }}" \
+            | grep -q -E -e "^refs/tags/v?[0-9]+\.[0-9]+\.[0-9]+$" \
+          ; then
+            is_prerelease=true
+          fi
+
+          echo "is_prerelease=${is_prerelease}"
+
+          echo "is_prerelease=${is_prerelease}" >> "${GITHUB_OUTPUT}"
+
+    outputs:
+      is_prerelease: ${{ steps.check-if-prerelease.outputs.is_prerelease }}
+
+  # ***
+
   versioned-checks-runner:
+    needs: check-if-prerelease
     uses: ./.github/workflows/checks.yml
     secrets: inherit
+    with:
+      prerelease: ${{ needs.check-if-prerelease.outputs.is_prerelease }}
 
   # ***
 
