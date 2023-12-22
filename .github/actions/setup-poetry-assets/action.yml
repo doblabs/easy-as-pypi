@@ -33,6 +33,28 @@ runs:
         echo "inputs.prerelease: ${{ inputs.prerelease }}"
         echo "github.action_path: ${{ github.action_path }}"
 
+    # The `make --eval` command is not recognized by default macOS make:
+    #   /Applications/Xcode_14.2.app/Contents/Developer/usr/bin/make:
+    #     unrecognized option `--eval=print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)'
+
+    # REFER: https://github.com/Homebrew/actions/tree/master/setup-homebrew
+    - name: Set up Homebrew
+      # REFER:
+      # https://docs.github.com/en/actions/learn-github-actions/contexts#runner-context
+      if: runner.os == 'macOS'
+      uses: Homebrew/actions/setup-homebrew@master
+
+    - name: Set up make
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew install make
+        # Where, e.g.,
+        #   $ make -v
+        #   GNU Make 3.81
+        #   $ gmake -v
+        #   GNU Make 4.4.1
+
     # ALERT: Assumes EAPP-infused repo is checked out.
 
     # NOICE: DRY: Use `make --eval` to add temp. make target that prints
@@ -42,9 +64,14 @@ runs:
       run: |
         pyproject_dir="."
 
+        MAKE=make
+        if command -v gmake > /dev/null; then
+          MAKE=gmake
+        fi
+
         if [ "${{ inputs.prerelease }}" = "true" ]; then
           pyproject_dir="$(
-            make \
+            ${MAKE} \
               --eval='print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)' \
               print-var
           )"
