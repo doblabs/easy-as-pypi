@@ -32,6 +32,31 @@ runs:
       run: |
         echo "inputs.prerelease: ${{ inputs.prerelease }}"
         echo "github.action_path: ${{ github.action_path }}"
+        echo "make -v"
+        make -v
+
+    # The `make --eval` command is not recognized by default macOS make:
+    #   /Applications/Xcode_14.2.app/Contents/Developer/usr/bin/make:
+    #     unrecognized option `--eval=print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)'
+
+    # REFER: https://github.com/Homebrew/actions/tree/master/setup-homebrew
+    - name: Set up Homebrew
+      # id: set-up-homebrew
+      # REFER:
+      # https://docs.github.com/en/actions/learn-github-actions/contexts#runner-context
+      if: runner.os == 'macOS'
+      uses: Homebrew/actions/setup-homebrew@master
+
+    - name: Set up make
+      if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        echo "HOMEBREW_PREFIX: ${HOMEBREW_PREFIX}"
+
+        brew install make
+
+        echo "make -v"
+        make -v
 
     # ALERT: Assumes EAPP-infused repo is checked out.
 
@@ -41,6 +66,11 @@ runs:
       shell: bash
       run: |
         pyproject_dir="."
+
+        echo "HOMEBREW_PREFIX: ${HOMEBREW_PREFIX}"
+        if [ -n "${HOMEBREW_PREFIX}" ]; then
+          PATH="${HOMEBREW_PREFIX}/opt/make/libexec/gnubin:${PATH}"
+        fi
 
         if [ "${{ inputs.prerelease }}" = "true" ]; then
           pyproject_dir="$(
