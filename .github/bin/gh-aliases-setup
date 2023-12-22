@@ -40,7 +40,9 @@ eapp_gh_aliases_setup () {
   #               `gh open fail|failure` opens last failed job.
   gh alias delete open 2> /dev/null || true
   gh alias set --shell open \
-    "$(declare -f _gh_open_last_failure_eapp); _gh_open_last_failure_eapp \"\$@\""
+    "$(declare -f _gh_run_view_web_run_id);
+     $(declare -f _gh_open_last_failure_eapp);
+     _gh_open_last_failure_eapp \"\$@\""
 }
 
 # ***
