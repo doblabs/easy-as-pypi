@@ -68,6 +68,7 @@ jobs:
         run: echo "VERSION_TAG=${GITHUB_REF#refs/tags/}" >> "$GITHUB_ENV"
         shell: bash
 
+      # USYNC: See same-named, similar steps in: checks-versioned, release-github.
       - name: Check if prerelease
         id: check-if-prerelease
         run: |
