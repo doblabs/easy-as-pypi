@@ -82,6 +82,8 @@ jobs:
             echo "PRERELEASE=--prerelease" >> "${GITHUB_ENV}"
           fi
 
+          echo "is_prerelease=${is_prerelease}"
+
           echo "is_prerelease=${is_prerelease}" >> "${GITHUB_OUTPUT}"
 
       - name: Announcement
