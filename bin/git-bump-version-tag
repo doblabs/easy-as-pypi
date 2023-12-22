@@ -130,9 +130,14 @@ exit_cleanup () {
 main () {
   set -e
 
+  trap exit_cleanup EXIT
+
   source_deps
 
   git_bump_version_tag "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
 }
 
 if [ "$0" = "${BASH_SOURCE[0]}" ]; then
