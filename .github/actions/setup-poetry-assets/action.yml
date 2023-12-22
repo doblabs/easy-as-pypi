@@ -26,6 +26,9 @@ runs:
   using: "composite"
   steps:
     - name: Trace vars
+      # While not normally required in job steps,
+      # 'shell' is required in action steps.
+      shell: bash
       run: |
         echo "inputs.prerelease: ${{ inputs.prerelease }}"
         echo "github.action_path: ${{ github.action_path }}"
@@ -35,6 +38,7 @@ runs:
     # NOICE: DRY: Use `make --eval` to add temp. make target that prints
     # the pre-release pyproject.toml directory (avoids USYNC/hardcoding).
     - name: Determine pyproject.toml to use (normal or alpha)
+      shell: bash
       run: |
         pyproject_dir="."
 
@@ -51,6 +55,7 @@ runs:
         echo "PYPROJECT_DIR=${pyproject_dir}" >> "${GITHUB_ENV}"
 
     - name: Verify Poetry assets — pyproject.toml and poetry.lock
+      shell: bash
       run: |
         assets_exist () {
           local pyproject_dir="${1:-.}"
@@ -82,6 +87,7 @@ runs:
     # references anything from root, so clobber root's lock and toml.
     - name: Prepare Pre-release Poetry assets — pyproject.toml and poetry.lock
       if: inputs.prerelease
+      shell: bash
       run: |
         command cp -f "${PYPROJECT_DIR}/poetry.lock" "poetry.lock"
         command cp -f "${PYPROJECT_DIR}/pyproject.toml" "pyproject.toml"
