@@ -89,5 +89,7 @@ runs:
       if: inputs.prerelease
       shell: bash
       run: |
-        command cp -f "${PYPROJECT_DIR}/poetry.lock" "poetry.lock"
-        command cp -f "${PYPROJECT_DIR}/pyproject.toml" "pyproject.toml"
+        if [ "${PYPROJECT_DIR}" != "." ]; then
+          command cp -f "${PYPROJECT_DIR}/poetry.lock" "poetry.lock"
+          command cp -f "${PYPROJECT_DIR}/pyproject.toml" "pyproject.toml"
+        fi
