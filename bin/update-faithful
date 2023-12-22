@@ -523,9 +523,11 @@ update_faithful_files_excluding_pyproject_toml () {
   update-faithful-file ".github/dependabot.yml"
   update-faithful-file ".github/doblabs-dependencies.yml"
   # IGNOR: ".github/README--github-variable-dump--example.rst"
+  # IGNOR: ".github/README-workflows.md"
   #
   update-faithful-file ".github/actions/setup-poetry-assets/action.yml"
   #
+  # IGNOR: ".github/bin/gh-aliases-setup"
   update-faithful-file ".github/bin/update-poetry"
   update-faithful-file ".github/bin/wrangle-tags"
   #
