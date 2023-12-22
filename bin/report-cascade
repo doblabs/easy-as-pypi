@@ -73,6 +73,9 @@ report_all_projects () {
 
 # The `gh list` output looks like this:
 #   completed   success   19h  1m15s  7286979293  release  🎒 — Smoke test — 1.2.3 ... & Cascade dispatch
+# Note that cascade might skip the release if already out:
+#   completed   success   13m  2m32s  7298815421  release  👣 — Cascade — 2.) Update deps (via User)             
+# So maybe we should just check for success and ignore the rest...
 
 report_current_project () {
   local limit_lines=1
@@ -86,7 +89,7 @@ report_current_project () {
     | sed "s/ failure / $(attr_bold)$(fg_red)failure$(attr_reset) /"
 
   if echo "${latest_run}" \
-    | grep -q -e "^completed\s\+success\s\+.*— Smoke test —.*& Cascade dispatch" \
+    | grep -q -e "^completed\s\+success\s\+" \
   ; then
 
     # Latest job was successful Smoke test & Cascade dispatch,
@@ -106,16 +109,14 @@ report_current_project () {
 
     if [ -z "${run_id}" ]; then
       >&2 echo "ERROR: Job failed, but failed to parse run-id?!"
+
+      exit_1
     else
       >&2 echo "ERROR: Found failed job, opening browser"
 
       _gh_run_view_web_run_id "${run_id}"
     fi
-  else
-    >&2 echo "ERROR: Job not success, but not failure?!"
   fi
-
-  exit_1
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
