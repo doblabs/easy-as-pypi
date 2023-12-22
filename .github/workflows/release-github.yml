@@ -70,15 +70,18 @@ jobs:
 
       - name: Check if prerelease
         id: check-if-prerelease
-        # Note the v?: Don't care!
         run: |
           is_prerelease=false
+
+          # Note the v?: Don't care!
           if ! echo "${VERSION_TAG}" \
             | grep -q -E -e "^v?[0-9]+\.[0-9]+\.[0-9]+$" \
           ; then
             is_prerelease=true
+
             echo "PRERELEASE=--prerelease" >> "${GITHUB_ENV}"
           fi
+
           echo "is_prerelease=${is_prerelease}" >> "${GITHUB_OUTPUT}"
 
       - name: Announcement
