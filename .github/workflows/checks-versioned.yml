@@ -45,8 +45,6 @@ jobs:
           ]]; then
               echo "is_version_tag=true" >> $GITHUB_OUTPUT
           fi
-        env:
-          GH_REF_TYPE: ${{ github.ref_type }}
       - name: Report detected maybe
         if: steps.check-is-version-tag.outputs.is_version_tag == 'true'
         run: echo "Version tag detected"
