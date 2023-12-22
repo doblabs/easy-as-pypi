@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+# vim:tw=0:ts=2:sw=2:et:norl:nospell:ft=sh
+# Project: https://github.com/doblabs/easy-as-pypi#🥧
+# License: MIT
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+# CXREF:
+# - myrepos fork for ohmyrepos
+#   https://github.com/landonb/myrepos
+# - Oh, My Repos! supercharged `myrepos` multiple repository management
+#   https://github.com/landonb/ohmyrepos#😤
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+source_deps () {
+  _repcas_insist_cmd 'gh'
+  _repcas_insist_cmd 'mr'
+
+  # CXREF: ~/.kit/sh/sh-logger/bin/logger.sh
+  #   https://github.com/landonb/sh-logger#🎮🐸
+  # - Includes: logger.sh, git-nubs.sh, common_put_wise.sh.
+  . "$(dirname "$(realpath "$0")")/../deps/sh-logger/bin/logger.sh"
+
+  # CXREF: ~/.kit/py/easy-as-pypi/.github/bin/gh-aliases-setup
+  # - For: _gh_run_list_eapp, _gh_run_view_web_run_id
+  . "$(dirname "$(realpath "$0")")/../.github/bin/gh-aliases-setup"
+}
+
+_repcas_insist_cmd () {
+  local cmdname="$1"
+
+  command -v "${cmdname}" > /dev/null && return 0
+
+  >&2 echo "ERROR: Missing system command ‘${cmdname}’"
+
+  exit_1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+eapp_report_cascade () {
+  if [ -z "${MR_REPO}" ]; then
+    report_all_projects "$@"
+  else
+    report_current_project "$@"
+  fi
+}
+
+# ***
+
+# The MR_INCLUDE is specific to the author's myrepos config,
+# which you can find in the DepoXy dev environment orchestrator:
+#   https://github.com/DepoXy/depoxy#🍯
+
+report_all_projects () {
+  # DEV: Uncomment this instead to test against local project:
+  #
+  #  mr -d . -n run "$(realpath "$0")" "$@"
+  #  return
+
+  # Visit each project and run the report.
+  # - Note that `mr` exits nonzero if any project fails,
+  #   and the -x/--exit-first stop its immediately.
+  MR_INCLUDE=eapp mr -d / -x run "$(realpath "$0")" "$@"
+}
+
+# ***
+
+# First implementation of this check:
+# - Check that most recent job was a successful smoke test,
+#   else die and open browser to failed job.
+
+# The `gh list` output looks like this:
+#   completed   success   19h  1m15s  7286979293  release  🎒 — Smoke test — 1.2.3 ... & Cascade dispatch
+
+report_current_project () {
+  local limit_lines=1
+
+  local latest_run
+  latest_run="$(_gh_run_list_eapp "${limit_lines}")"
+
+  echo "Lastest CI job for: $(fg_mintgreen)${MR_REPO}$(attr_reset)"
+  echo "───→ ${latest_run}" \
+    | sed "s/ success / $(attr_emphasis)$(fg_lightyellow)success$(attr_reset) /" \
+    | sed "s/ failure / $(attr_bold)$(fg_red)failure$(attr_reset) /"
+
+  if echo "${latest_run}" \
+    | grep -q -e "^completed\s\+success\s\+.*— Smoke test —.*& Cascade dispatch" \
+  ; then
+
+    # Latest job was successful Smoke test & Cascade dispatch,
+    # so this project is :thumbs-up:
+    return 0
+  fi
+
+  # Else, something went wrong. Print error and exit non-zero.
+
+  if echo "${latest_run}" \
+    | grep -q -e "^completed\s\+failure" \
+  ; then
+
+    local run_id
+
+    run_id="$(echo "${latest_run}" | tr -s ' ' | cut -f 5 -d' ')"
+
+    if [ -z "${run_id}" ]; then
+      >&2 echo "ERROR: Job failed, but failed to parse run-id?!"
+    else
+      >&2 echo "ERROR: Job failed, opening browser"
+
+      _gh_run_view_web_run_id "${run_id}"
+    fi
+  else
+    >&2 echo "ERROR: Job not success, but not failure?!"
+  fi
+
+  exit_1
+}
+
+# +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
+
+_NORMAL_EXIT=false
+
+exit_1 () { _NORMAL_EXIT=true; exit 1; }
+
+exit_0 () { _NORMAL_EXIT=true; exit 0; }
+
+exit_cleanup () {
+  if ! ${_NORMAL_EXIT}; then
+    >&2 echo "GAFFE: ${PROG_NAME} exited abnormally!"
+    >&2 echo "- Hint: Enable \`set -x\` and run again..."
+  fi
+}
+
+# ***
+
+main () {
+  set -e
+
+  trap exit_cleanup EXIT
+
+  source_deps
+
+  eapp_report_cascade "$@"
+
+  # Unhook exit_cleanup.
+  trap - EXIT
+}
+
+if [ "$0" = "${BASH_SOURCE[0]}" ]; then
+  # Being executed, so execute.
+  main "$@"
+fi
+
+unset -f main
+unset -f source_deps
+unset -f _repcas_insist_cmd
+
