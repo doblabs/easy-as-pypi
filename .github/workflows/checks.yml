@@ -15,6 +15,10 @@ name: Checks — Runner
 
 on:
   workflow_call:
+    inputs:
+      prerelease:
+        type: boolean
+        default: false
 
 # ***
 
@@ -190,6 +194,12 @@ jobs:
           fi
           echo "inhibit_test=${inhibit_test}"
           echo "inhibit_test=${inhibit_test}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Poetry assets — pyproject.toml and poetry.lock
+        if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
+        uses: ./.github/actions/setup-poetry-assets
+        with:
+          prerelease: ${{ inputs.prerelease }}
 
       # CXREF: https://github.com/actions/setup-python
       - name: Set up Python ${{ matrix.python-version }}
@@ -741,6 +751,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Prepare Poetry assets — pyproject.toml and poetry.lock
+        uses: ./.github/actions/setup-poetry-assets
+        with:
+          prerelease: ${{ inputs.prerelease }}
+
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
         uses: actions/setup-python@v4
@@ -876,6 +891,11 @@ jobs:
         with:
           # At least one downstream user (`nark`) tests for a version tag.
           fetch-depth: 0
+
+      - name: Prepare Poetry assets — pyproject.toml and poetry.lock
+        uses: ./.github/actions/setup-poetry-assets
+        with:
+          prerelease: ${{ inputs.prerelease }}
 
       - name: Set up Python ${{ env.PYTHON_VERSION }}
         id: setup-python
