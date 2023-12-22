@@ -269,6 +269,13 @@ jobs:
       #     https://github.com/snok/install-poetry/#caching-on-windows-runners
       #   So they recommend caching pip wheels instead of .venv.
       # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
+      # - 2023-12-22: This used to cache all poetry.lock files:
+      #                 }}-${{ hashFiles('**/poetry.lock')
+      #               But we might move a prerelease lock file in place, so:
+      #                 }}-${{ hashFiles('poetry.lock')
+      #               Also checks only use the one lock file (and I think
+      #               I saw the '**/poetry.lock' in an example, but don't
+      #               remember if it was useful in some other way; doubt it.)
       - name: Load cached venv
         id: cached-poetry-dependencies
         if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
@@ -278,8 +285,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: ${{ steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -415,8 +424,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -631,8 +642,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -697,8 +710,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -821,8 +836,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
@@ -901,8 +918,10 @@ jobs:
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
-            }}-${{ hashFiles('**/poetry.lock')
             }}-${{ hashFiles('.github/workflows/checks.yml')
+            }}-${{ hashFiles('Makefile')
+            }}-${{ hashFiles('Maketasks.sh')
+            }}-${{ hashFiles('poetry.lock')
             }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
