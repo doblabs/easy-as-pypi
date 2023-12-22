@@ -138,6 +138,12 @@ _gh_open_last_failure_eapp () {
     return 0
   fi
 
+  _gh_run_view_web_run_id "${run_id}"
+}
+
+_gh_run_view_web_run_id () {
+  local run_id="$1"
+
   # "Trick" 'view' into just printing the URL; we'll take it from there.
   # - gh-run-view sends a string to pager output which user won't see, e.g.,
   #     Opening github.com/doblabs/easy-as-pypi/actions/runs/7274859732 in your browser.
