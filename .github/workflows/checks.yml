@@ -314,8 +314,9 @@ jobs:
           virtualenvs-in-project: true
 
       - name: Suss pseudo subproject directory name
-        run: echo "PYPROJECT_DOC8_DIR=$(
-            echo "$(grep -e 'PYPROJECT_DOC8_DIR = ' Makefile | sed 's/^.* = //')"
+        run: |
+          echo "PYPROJECT_DOC8_DIR=$(
+            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
           )" >> $GITHUB_ENV
         shell: bash
 
@@ -464,9 +465,10 @@ jobs:
 
       # Example how to avoid hardcoding paths defined elsewhere.
       - name: Suss pseudo subproject directory name
-        run: echo "PYPROJECT_DOC8_DIR=$(
-               echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
-             )" >> $GITHUB_ENV
+        run: |
+          echo "PYPROJECT_DOC8_DIR=$(
+            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
+          )" >> $GITHUB_ENV
         shell: bash
 
       # # Prints, e.g., ".pyproject-doc8".
