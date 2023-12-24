@@ -12,7 +12,7 @@ description: 'Setup top-level pyproject.toml and poetry.lock for pre-release vs.
 
 inputs:
   prerelease:
-    description: 'Set true if pre-release context, else leave false for normal'
+    description: 'Set true to use pre-release poetry.lock'
     type: boolean
     required: true
     default: false

@@ -10,28 +10,54 @@ name: 'Install Python and load venv from cache'
 
 description: 'Install Python and load venv from cache'
 
+inputs:
+  prerelease:
+    description: 'Set true to use pre-release poetry.lock'
+    type: boolean
+    default: false
+
+  python-version:
+    description: 'Python version'
+    type: string
+    required: true
+
+outputs:
+  cache-hit:
+    description: 'True if venv loaded from cache'
+    value: ${{ steps.cached-poetry-dependencies.outputs.cache-hit }}
+
 runs:
   using: "composite"
   steps:
+    - name: Trace vars
+      shell: bash
+      run: |
+        echo "github.job: ${{ github.job }}"
+        echo "inputs.python-version: ${{ inputs.python-version }}"
+
+    # ***
+
     - name: Prepare Poetry assets — pyproject.toml and poetry.lock
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
       uses: ./.github/actions/setup-poetry-assets
       with:
         prerelease: ${{ inputs.prerelease }}
 
+    # ***
+
     # CXREF: https://github.com/actions/setup-python
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python ${{ inputs.python-version }}
       id: setup-python
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
       uses: actions/setup-python@v4
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: ${{ inputs.python-version }}
         # FIXME/2023-05-21: See comments elsewhere: Consider replacing
         # or complementing USYNC_PIP_CACHE mechanism with setup-python
         # cache.
         # - CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
         #
         #  cache: 'poetry' # cache virtualenv dir
+
+    # ***
 
     # Cache the pip wheels (avoid re-downloading from PyPI), and give
     # install-poetry a boost. Shaves ~10s off step time, from 15s to 5s.
@@ -47,19 +73,18 @@ runs:
     #   https://www.peterbe.com/plog/install-python-poetry-github-actions-faster
     #   https://github.com/snok/install-poetry/
     #   https://github.com/actions/cache
-    # USYNC_PIP_CACHE: Multiple jobs in this Yaml share the following steps.
+
     - name: Set pip wheels path (Ubuntu/macOS)
-      if: ${{ (runner.os == 'Linux') || (runner.os == 'macOS')
-        && steps.check-disablement.outputs.inhibit_test == 'false' }}
+      if: ${{ (runner.os == 'Linux') || (runner.os == 'macOS') }}
       shell: bash
       run: echo "PIP_CACHE=~/.local" >> $GITHUB_ENV
+
     - name: Set pip wheels path (Windows)
-      if: ${{ runner.os == 'Windows'
-        && steps.check-disablement.outputs.inhibit_test == 'false' }}
+      if: ${{ runner.os == 'Windows' }}
       shell: bash
       run: echo "PIP_CACHE=~/AppData/Local/pip/cache" >> $GITHUB_ENV
-    - name: Load cached $HOME/.local
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
+
+    - name: Load cached PIP_CACHE — ${{ env.PIP_CACHE }}
       uses: actions/cache@v3
       with:
         path: ${{ env.PIP_CACHE }}
@@ -67,16 +92,19 @@ runs:
           }}-${{ steps.setup-python.outputs.python-version
           }}-${{ hashFiles('.github/workflows/checks.yml')
           }}
+
+    # ***
+
     - name: Install Poetry
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
       uses: snok/install-poetry@v1
       with:
         virtualenvs-create: true
         virtualenvs-in-project: true
 
     - name: Install poetry-dynamic-versioning
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
       run: poetry self add "poetry-dynamic-versioning[plugin]"
+
+    # ***
 
     # 2022-10-04: Cache the virtualenv, avoid re-installing packages.
     # Saves ~35s from step time, from 35s to 0s (b/c skips step, because `if:`).
@@ -106,7 +134,6 @@ runs:
     #               remember if it was useful in some other way; doubt it.)
     - name: Load cached venv
       id: cached-poetry-dependencies
-      if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
       uses: actions/cache@v3
       with:
         path: .venv

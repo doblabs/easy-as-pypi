@@ -200,9 +200,12 @@ jobs:
         id: load-venv
         if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
         uses: ./.github/actions/load-venv-from-cache
+        with:
+          prerelease: ${{ inputs.prerelease }}
+          python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        if: ${{ steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        if: ${{ steps.load-venv.outputs.cache-hit != 'true'
           && steps.check-disablement.outputs.inhibit_test == 'false' }}
         run: poetry install --no-interaction --with test,project_test
 

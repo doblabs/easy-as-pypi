@@ -525,6 +525,7 @@ update_faithful_files_excluding_pyproject_toml () {
   # IGNOR: ".github/README--github-variable-dump--example.rst"
   # IGNOR: ".github/README-workflows.md"
   #
+  update-faithful-file ".github/actions/load-venv-from-cache/action.yml"
   update-faithful-file ".github/actions/setup-poetry-assets/action.yml"
   #
   # IGNOR: ".github/bin/gh-aliases-setup"
