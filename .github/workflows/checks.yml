@@ -453,6 +453,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Example how to avoid hardcoding paths defined elsewhere.
+      - name: Suss pseudo subproject directory name
+        run: |
+          echo "PYPROJECT_DOC8_DIR=$(
+            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
+          )" >> $GITHUB_ENV
+
+          # E.g., ".pyproject-doc8"
+          echo "PYPROJECT_DOC8_DIR: ${{ env.PYPROJECT_DOC8_DIR }}"
+        shell: bash
+
       - name: Install poetry
         run: pipx install poetry
 
@@ -466,14 +477,6 @@ jobs:
           # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
           #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
           cache: 'poetry'
-
-      # Example how to avoid hardcoding paths defined elsewhere.
-      - name: Suss pseudo subproject directory name
-        run: |
-          echo "PYPROJECT_DOC8_DIR=$(
-            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
-          )" >> $GITHUB_ENV
-        shell: bash
 
       # # Prints, e.g., ".pyproject-doc8".
       #
