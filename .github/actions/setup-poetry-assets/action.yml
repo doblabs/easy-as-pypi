@@ -29,46 +29,67 @@ runs:
         echo "github.action_path: ${{ github.action_path }}"
 
     # The `make --eval` command is not recognized by default macOS make:
+    #
     #   /Applications/Xcode_14.2.app/Contents/Developer/usr/bin/make:
     #     unrecognized option `--eval=print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)'
-
-    # REFER: https://github.com/Homebrew/actions/tree/master/setup-homebrew
-    - name: Set up Homebrew
-      # REFER:
-      # https://docs.github.com/en/actions/learn-github-actions/contexts#runner-context
-      if: runner.os == 'macOS'
-      uses: Homebrew/actions/setup-homebrew@master
-
-    - name: Set up make
-      if: runner.os == 'macOS'
-      shell: bash
-      run: |
-        brew install make
-        # Where, e.g.,
-        #   $ make -v
-        #   GNU Make 3.81
-        #   $ gmake -v
-        #   GNU Make 4.4.1
+    #
+    # so we cannot use `make --eval` to confidently fetch the variable.
+    # - But a grep-n-sed is practically just as good.
+    #
+    # And it saves us from a slow, inelegant solution using brew to get make, e.g.:
+    #
+    #   # REFER: https://github.com/Homebrew/actions/tree/master/setup-homebrew
+    #   - name: Set up Homebrew
+    #     # REFER:
+    #     # https://docs.github.com/en/actions/learn-github-actions/contexts#runner-context
+    #     if: runner.os == 'macOS'
+    #     uses: Homebrew/actions/setup-homebrew@master
+    #
+    #   - name: Set up make
+    #     if: runner.os == 'macOS'
+    #     shell: bash
+    #     run: |
+    #       brew install make
+    #       # Where, e.g.,
+    #       #   $ make -v
+    #       #   GNU Make 3.81
+    #       #   $ gmake -v
+    #       #   GNU Make 4.4.1
+    #
+    #   # NOICE: DRY: Use `make --eval` to add temp. make target that prints
+    #   # the pre-release pyproject.toml directory (avoids USYNC/hardcoding).
+    #   - name: Determine pyproject.toml to use (normal or alpha)
+    #     shell: bash
+    #     run: |
+    #       pyproject_dir="."
+    #
+    #       MAKE=make
+    #       if command -v gmake > /dev/null; then
+    #         MAKE=gmake
+    #       fi
+    #
+    #       if [ "${{ inputs.prerelease }}" = "true" ]; then
+    #         pyproject_dir="$(
+    #           ${MAKE} \
+    #             --eval='print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)' \
+    #             print-var
+    #         )"
+    #       fi
+    #
+    #       echo "PYPROJECT_DIR=${pyproject_dir}"
+    #
+    #       echo "PYPROJECT_DIR=${pyproject_dir}" >> "${GITHUB_ENV}"
 
     # ALERT: Assumes EAPP-infused repo is checked out.
 
-    # NOICE: DRY: Use `make --eval` to add temp. make target that prints
-    # the pre-release pyproject.toml directory (avoids USYNC/hardcoding).
     - name: Determine pyproject.toml to use (normal or alpha)
       shell: bash
       run: |
         pyproject_dir="."
 
-        MAKE=make
-        if command -v gmake > /dev/null; then
-          MAKE=gmake
-        fi
-
-        if [ "${{ inputs.prerelease }}" = "true" ]; then
+        if ${{ inputs.prerelease }}; then
           pyproject_dir="$(
-            ${MAKE} \
-              --eval='print-var: ; @echo $(PYPROJECT_PRERELEASE_DIR)' \
-              print-var
+            grep -e '^PYPROJECT_PRERELEASE_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //'
           )"
         fi
 
