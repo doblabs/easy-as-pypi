@@ -17,11 +17,6 @@ inputs:
     required: true
     default: false
 
-# outputs:
-#   nothing:
-#     description: "Nothing"
-#     value: null
-
 runs:
   using: "composite"
   steps:

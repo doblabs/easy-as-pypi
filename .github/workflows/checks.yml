@@ -179,8 +179,8 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # At least one downstream user (`nark`) tests for a version,
-          # which poetry-dynamic-versioning reads from tags.
+          # Fetch tags, so downstream projects can test 'em, e.g., to
+          # compare version tag versus project version.
           fetch-depth: 0
 
       - name: Check enablement flags
@@ -216,12 +216,6 @@ jobs:
           poetry run make test
           # DEVs: If you need to test a specific function or class, try, e.g.,:
           #   poetry run python -m pytest -k test_function tests/
-
-        # If you wanted to send an environ to the run task, you could set one,
-        # e.g.,
-        #
-        #   env:
-        #     PLATFORM: ${{ matrix.platform }}
 
   # *** SAVVY
 
@@ -489,9 +483,8 @@ jobs:
       #   virtualenv: error: argument --prompt: expected one argument
       - name: Install dependencies
         # E.g.,
-        #   run: poetry -C ".pyproject-doc8/" install --no-interaction --no-root --with dev
+        #   poetry -C ".pyproject-doc8/" install --no-interaction --no-root --with dev
         run: poetry -C "${{ env.PYPROJECT_DOC8_DIR }}" install --no-interaction --no-root --with dev
-        # shell: bash
 
       - name: Run doc8
         run: |
