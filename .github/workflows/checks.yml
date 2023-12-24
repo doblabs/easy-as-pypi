@@ -462,7 +462,6 @@ jobs:
 
           # E.g., ".pyproject-doc8"
           echo "PYPROJECT_DOC8_DIR: ${{ env.PYPROJECT_DOC8_DIR }}"
-        shell: bash
 
       - name: Install poetry
         run: pipx install poetry
