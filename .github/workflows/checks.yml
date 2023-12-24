@@ -317,13 +317,6 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Suss pseudo subproject directory name
-        run: |
-          echo "PYPROJECT_DOC8_DIR=$(
-            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
-          )" >> $GITHUB_ENV
-        shell: bash
-
       # USYNC: The cache path is different for this job, because the pseudo
       #        subproject is used, so we use the subproject's `.venv/`.
       #        - CXREF: .pyproject-doc8/pyproject.toml
@@ -334,7 +327,7 @@ jobs:
         with:
           # Because the pseudo subproject is used, use subproject's `.venv/`.
           #  path: .venv
-          path: ${{ env.PYPROJECT_DOC8_DIR }}/.venv
+          path: .venv
           key: venv-${{ runner.os
             }}-${{ steps.setup-python.outputs.python-version
             }}-${{ github.job
