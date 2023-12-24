@@ -204,6 +204,10 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           python-version: ${{ matrix.python-version }}
 
+      - name: Trace vars
+        run: |
+          echo "outputs.cache-hit: ${{ steps.load-venv.outputs.cache-hit }}"
+
       - name: Install dependencies
         if: ${{ steps.load-venv.outputs.cache-hit != 'true'
           && steps.check-disablement.outputs.inhibit_test == 'false' }}
