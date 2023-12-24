@@ -207,7 +207,8 @@ jobs:
       - name: Install dependencies
         if: ${{ steps.load-venv.outputs.cache-hit != 'true'
           && steps.check-disablement.outputs.inhibit_test == 'false' }}
-        run: poetry install --no-interaction --with test,project_test
+        run: |
+          poetry install --no-interaction --with test,project_test
 
       - name: Test
         if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
