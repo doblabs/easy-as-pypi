@@ -317,9 +317,6 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      # USYNC: The cache path is different for this job, because the pseudo
-      #        subproject is used, so we use the subproject's `.venv/`.
-      #        - CXREF: .pyproject-doc8/pyproject.toml
       # USYNC_LOAD_VENV: Multiple jobs in this Yaml share the following steps.
       - name: Load cached venv
         id: cached-poetry-dependencies
@@ -469,6 +466,9 @@ jobs:
           # CXREF: https://github.com/actions/setup-python#caching-packages-dependencies
           #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
           cache: 'poetry'
+          # E.g., ".pyproject-doc8/poetry.lock"
+          cache-dependency-path: |
+            ${{ env.PYPROJECT_DOC8_DIR }}/poetry.lock
 
       # USYNC: Similar to `make_doc8_poetry` in 'Maketasks.sh'.
 
