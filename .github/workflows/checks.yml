@@ -477,12 +477,6 @@ jobs:
           #   https://github.com/actions/setup-python/blob/main/docs/advanced-usage.md#caching-packages
           cache: 'poetry'
 
-      # # Prints, e.g., ".pyproject-doc8".
-      #
-      # - name: Dump PYPROJECT_DOC8_DIR (Bash)
-      #   run: echo "${{ env.PYPROJECT_DOC8_DIR }}"
-      #   shell: bash
-
       # USYNC: Similar to `make_doc8_poetry` in 'Maketasks.sh'.
 
       # Use poetry -C option, and not, e.g., `cd <dir> && poetry install`
