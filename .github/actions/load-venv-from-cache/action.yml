@@ -90,7 +90,11 @@ runs:
         path: ${{ env.PIP_CACHE }}
         key: dotlocal-${{ runner.os
           }}-${{ steps.setup-python.outputs.python-version
+          }}-${{ github.job
           }}-${{ hashFiles('.github/workflows/checks.yml')
+          }}-${{ hashFiles('Makefile')
+          }}-${{ hashFiles('Maketasks.sh')
+          }}-${{ hashFiles('poetry.lock')
           }}
 
     # ***
