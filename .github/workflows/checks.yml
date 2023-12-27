@@ -430,7 +430,7 @@ jobs:
       - name: Suss pseudo subproject directory name
         run: |
           echo "PYPROJECT_DOC8_DIR=$(
-            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //')"
+            echo "$(grep -e 'PYPROJECT_DOC8_DIR ?\?= ' Makefile | sed -E 's/^.* ?\?= //')"
           )" >> $GITHUB_ENV
 
           # E.g., ".pyproject-doc8"
