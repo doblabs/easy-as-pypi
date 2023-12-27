@@ -172,8 +172,9 @@ jobs:
 
     steps:
       - name: Fail if RUN_ONLYing another job
-        run: exit 1
         if: ${{ env.RUN_ONLY && env.RUN_ONLY != github.job }}
+        shell: bash
+        run: exit 1
 
       # CXREF: https://github.com/actions/checkout
       - name: Checkout repository
@@ -185,6 +186,7 @@ jobs:
 
       - name: Check enablement flags
         id: check-disablement
+        shell: bash
         run: |
           inhibit_test=false
           if [ ${{ matrix.platform }} = 'windows-latest' ] \
@@ -216,6 +218,7 @@ jobs:
 
       - name: Test
         if: ${{ steps.check-disablement.outputs.inhibit_test == 'false' }}
+        shell: bash
         run: |
           poetry run make test
           # DEVs: If you need to test a specific function or class, try, e.g.,:
