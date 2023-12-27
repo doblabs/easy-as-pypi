@@ -23,14 +23,6 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Trace vars
-      # While not normally required in job steps,
-      # 'shell' is required in action steps.
-      shell: bash
-      run: |
-        echo "inputs.prerelease: ${{ inputs.prerelease }}"
-        echo "github.action_path: ${{ github.action_path }}"
-
     # The `make --eval` command is not recognized by default macOS make:
     #
     #   /Applications/Xcode_14.2.app/Contents/Developer/usr/bin/make:
@@ -136,6 +128,10 @@ runs:
       shell: bash
       run: |
         if [ "${PYPROJECT_DIR}" != "." ]; then
+          echo "Replacing Poetry assets with pre-release files"
+
           command cp -f "${PYPROJECT_DIR}/poetry.lock" "poetry.lock"
           command cp -f "${PYPROJECT_DIR}/pyproject.toml" "pyproject.toml"
+        else
+          echo "Keeping production Poetry assets"
         fi
