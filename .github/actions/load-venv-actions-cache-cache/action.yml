@@ -69,6 +69,14 @@ runs:
         python-version: ${{ inputs.python-version }}
         # See load-venv-actions-cache for `cache: 'poetry'` usage.
 
+    - shell: bash
+      run: |
+        # - Local:
+        #   /home/landonb/.cache/pip
+        #
+        echo "pip cache dir"
+        pip cache dir || true
+
     # ***
 
     - name: Set poetry base path (Ubuntu/macOS)
