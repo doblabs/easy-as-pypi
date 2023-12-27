@@ -114,6 +114,36 @@ runs:
     #     another job may be creating this cache. More details: Cache already
     #     exists. Scope: refs/heads/liminal, Key: dotlocal-Linux-..., Version: ....
 
+    # TRACK: Refer here if "Unable to find installation candidates" happens again.
+    # - A downstream project's pre-release checks were failing:
+    #   - This step was a cache hit, loading ~/.local and the Poetry binary.
+    #   - The venv cache below was a miss, and the poetry-install step after
+    #     that runs on miss blurted "Unable to find installation candidates".
+    #   - When cache was skipped, the job succeeded however.
+    #   - We didn't dig deeper at the time, so we didn't confirm exactly what
+    #     subkey(s) to add.
+    #     - The old key was just: runner.os, python-version, and hashed checks.yml.
+    #     - The new key was updated to include: github.job, and to hash
+    #       Makefile, Maketasks.sh, and poetry.lock.
+    #       - But we did't go through the release cycle again to verify the
+    #         problem was truly gone. Nor did we revert to the old key to
+    #         definitively verify which subkey(s) fix the problem. So we'll
+    #         leave this long comment instead and remain vigilant in case it
+    #         happens again.
+    #   - The latest subkey makeup is refined further:
+    #     - It seems unnecessary to add the Makefile or Maketasks.sh hashes.
+    #     - It also seems unnecessary to add the poetry.lock hash here, because
+    #       this cache is for the Poetry binary. That's because it doesn't
+    #       include the pip wheel cache, and it seems more likely it was a
+    #       stale pip wheel cache causing the original issue.
+    #       - That is, this step only caches ~/.local, but pip wheels are at
+    #         ~/.cache/pip, or at least that's my understanding. So how could
+    #         the 'poetry.lock' hash make any difference here?
+    #       - But adding 'poetry.lock' also doesn't hurt.
+    #   - Oddly, it was only the Ubuntu Python 3.9 test that failed.
+    #     But the other OS and Python version tests passed.
+    #     - So yeah, no, I'm not convinced we won't see this issue again.
+
     - name: Load cached POETRY_BASE — ${{ env.POETRY_BASE }} — ($HOME/.local)
       id: cached-poetry
       if: ${{ inputs.disable-cache == 'false' }}
@@ -123,6 +153,7 @@ runs:
         key: dotlocal-${{ runner.os
           }}-${{ github.job
           }}-${{ steps.setup-python.outputs.python-version
+          }}-${{ hashFiles('poetry.lock')
           }}-${{ hashFiles('.github/actions/load-venv-actions-cache-cache/action.yml')
           }}
 
