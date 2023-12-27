@@ -200,17 +200,6 @@ runs:
 
     # ***
 
-    - id: set-vars-venv
-      shell: bash
-      run: |
-        args_key="$(
-          echo "${{ inputs.poetry-install-with }}${{ inputs.poetry-install-extras }}" \
-            | sed 's/,//'
-        )"
-
-        echo "CACHE_KEY_POETRY_ARGS=${args_key}"
-        echo "CACHE_KEY_POETRY_ARGS=${args_key}" >> "${GITHUB_OUTPUT}"
-
     - id: start-clock-venv
       shell: bash
       run: echo "CLOCK_0=$(date +%s)" >> "${GITHUB_OUTPUT}"
@@ -248,7 +237,6 @@ runs:
           }}-${{ github.job
           }}-${{ steps.setup-python.outputs.python-version
           }}-${{ hashFiles('poetry.lock')
-          }}-${{ steps.set-vars-venv.outputs.CACHE_KEY_POETRY_ARGS
           }}
 
     - name: Install dependencies (& populate cache)
