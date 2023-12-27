@@ -17,6 +17,9 @@ inputs:
     required: true
     default: false
 
+# SAVVY: While not required in normal workflow job steps,
+#        'shell' is required in composite action steps.
+
 runs:
   using: "composite"
   steps:
