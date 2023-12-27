@@ -84,7 +84,7 @@ runs:
 
         if ${{ inputs.prerelease }}; then
           pyproject_dir="$(
-            grep -e '^PYPROJECT_PRERELEASE_DIR ?\?= ' Makefile | sed 's/^.* ?\?= //'
+            grep -e '^PYPROJECT_PRERELEASE_DIR ?\?= ' Makefile | sed -E 's/^.* ?\?= //'
           )"
         fi
 
