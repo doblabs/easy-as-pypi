@@ -374,6 +374,10 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ env.PYTHON_VERSION }}
+          # DUNNO/2023-12-27: This cache always seems to hit,
+          # even when it shows different keys between runs.
+          # - Note that I think the cache that's restored is
+          #   $(pip cache dir), e.g., /home/runner/.cache/pip
           cache: 'pip'
           cache-dependency-path: |
             .github/workflows/checks.yml
@@ -387,7 +391,9 @@ jobs:
           python-version: ${{ env.PYTHON_VERSION }}
 
       - name: Install dependencies
-        if: ${{ steps.setup-python.outputs.cache-hit != 'true' }}
+        # Per comment above, actions/setup-python caches pip wheels,
+        # so we always need install.
+        #  if: ${{ steps.setup-python.outputs.cache-hit != 'true' }}
         run: pip install -U pip doc8>="1.1.1"
 
       - name: Cache analysis — poetry-install
