@@ -16,7 +16,7 @@
 # Generally user will not set these deliberately, but they could.
 # - A plain `git bump` will *only* bump version by default,
 #   and won't cascade.
-# - The `git update` command, on the other hand, will call this
+# - The `bin/git-cascade` command, on the other hand, will call this
 #   script with these environs set appropriately.
 VALUE_CI_TAG_INHIBIT_CASCADE="${VALUE_CI_TAG_INHIBIT_CASCADE:-true}"
 VALUE_CI_TAG_CASCADE_UPDATEDEPS="${VALUE_CI_TAG_CASCADE_UPDATEDEPS:-skip}"
