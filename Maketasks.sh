@@ -620,7 +620,12 @@ _pyenv_prepare_shell () {
 
   # Support `workon` from https://github.com/landonb/virtualenvwrapper
   # from all pyenv envs.
-  pip install virtualenvwrapper
+  vew_fork="${VENV_WRAP:-${DOPP_KIT:-${HOME}/.kit}/py/virtualenvwrapper}"
+  if [ -d "${vew_fork}" ]; then
+    pip install ${vew_fork}
+  else
+    pip install virtualenvwrapper
+  fi
 }
 
 _venv_manage_and_activate () {
