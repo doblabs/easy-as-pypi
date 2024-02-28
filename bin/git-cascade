@@ -50,11 +50,6 @@ insist_cmd () {
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 git_cascade () {
-  local cliarg_updatedeps="$1"
-  local cliarg_versioning="$2"
-  local cliarg_downstream="$3"
-  local cliarg_kickoffenv="$4"
-
   if [ $# -eq 0 ]; then
     echo "${USAGE}"
 
