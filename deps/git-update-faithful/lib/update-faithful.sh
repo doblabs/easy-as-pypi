@@ -248,7 +248,7 @@ must_pass_checks_and_ensure_cache () {
     local local_base
     local_base="$(dirname -- "${local_file}")"
 
-    command mkdir -p "${local_base}"
+    mkdir -p "${local_base}"
   fi
 }
 
@@ -1164,7 +1164,7 @@ render_template_localize_sources () {
     chosen_canon_head="${follower_head}"
   fi
 
-  command mkdir -p "$(dirname -- "${tmp_tmpl_absolute}")"
+  mkdir -p "$(dirname -- "${tmp_tmpl_absolute}")"
 
   canon_path_show_at_canon_head \
     "${chosen_tmpl_path}" \
@@ -1214,7 +1214,7 @@ render_template_localize_sources () {
         chosen_canon_head="${follower_head}"
       fi
 
-      command mkdir -p "$(dirname -- "${tmp_child_absolute}")"
+      mkdir -p "$(dirname -- "${tmp_child_absolute}")"
 
       canon_path_show_at_canon_head \
         "${chosen_tmpl_path}" \
