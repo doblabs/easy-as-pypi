@@ -74,8 +74,8 @@ source_dep_git_put_wise () {
   local put_wise_bin="$(dirname -- "$(realpath -- "$(command -v git-put-wise)")")"
 
   # CXREF: https://github.com/landonb/sh-git-nubs#🌰
-  #   ~/.kit/sh/sh-git-nubs/bin/git-nubs.sh
-  . "${put_wise_bin}/../deps/sh-git-nubs/bin/git-nubs.sh"
+  #   ~/.kit/sh/sh-git-nubs/lib/git-nubs.sh
+  . "${put_wise_bin}/../deps/sh-git-nubs/lib/git-nubs.sh"
 
   . "${put_wise_bin}/../lib/common_put_wise.sh"
   . "${put_wise_bin}/../lib/dep_apply_confirm_patch_base.sh"
@@ -421,6 +421,10 @@ examine_and_update_local_from_canon () {
 
 # ***
 
+# MAYBE/2024-04-02: Replace this block (and possibly remove
+# GPW sourcing, `source_dep_git_put_wise`) and replace with
+# new `git put-wise --scope` command.
+# - But hey, this currently works, why rock the boat.
 print_head_sha () {
   local any_repo_file_path="$1"
   local use_scoping="${2:-false}"
@@ -442,9 +446,10 @@ print_head_sha () {
     fi
 
     # identify-scope postfixes '^' parent shortcut, but we'll
-    # deference for the commit message.
+    # deference so caller doesn't have to (and can call, e.g.,
+    # git_sha_shorten).
 
-    printf "%s" "$(git rev-parse "${canon_head}")"
+    printf "%s" "$(git rev-parse --verify --end-of-options "${canon_head}")"
   )
 }
 
@@ -487,7 +492,7 @@ insist_canon_head_consistent () {
   >&2 error "  "
   >&2 error "   cd \"${projpath}\""
   >&2 error "   git reset HEAD"
-  >&2 error "   command rm \"${UPDEPS_CACHE_FILE}\""
+  >&2 error "   command rm -- \"${UPDEPS_CACHE_FILE}\""
 
   exit 1
 }
@@ -530,7 +535,7 @@ cache_file_cleanup () {
   if [ -d "$(dirname -- "${UPDEPS_CACHE_BASE}")" ] \
     && [ ! -e "${UPDEPS_CACHE_BASE}" ] \
   ; then
-    command rm -f "${UPDEPS_CACHE_BASE}"*
+    command rm -f -- "${UPDEPS_CACHE_BASE}"*
   fi
 }
 
@@ -614,7 +619,15 @@ has_no_diff () {
     "${canon_head}" \
     "${tmp_canon_copy}"
 
-  diff -q "${local_fullpath}" "${tmp_canon_copy}" > /dev/null
+  local _has_no_diff=true
+
+  if ! diff -q "${local_fullpath}" "${tmp_canon_copy}" > /dev/null; then
+    _has_no_diff=false
+  fi
+
+  command rm -f -- "${tmp_canon_copy}"
+
+  ${_has_no_diff}
 }
 
 canon_path_show_at_canon_head () {
@@ -704,7 +717,7 @@ update_local_from_canon () {
     if git status --porcelain=v1 -- "${local_file}" | grep -q -e "^??"; then
       warn " │   
                                       cd \"$(pwd -L)\"
-                                      command rm \"${local_file}\"
+                                      command rm -- \"${local_file}\"
                                       # Try again!
                                       $0"
 
@@ -712,7 +725,7 @@ update_local_from_canon () {
     else
       warn " │   
                                       cd \"$(pwd -L)\"
-                                      command rm \"${local_file}\"
+                                      command rm -- \"${local_file}\"
                                       # Try again!
                                       $0"
 
@@ -897,7 +910,7 @@ copy_canon_version () {
   # Delete previous file, in case it's a hard link to canon,
   # so that we don't overwrite canon with an earlier version.
   # - It's up to the caller to remake hard-links.
-  command rm -f "${local_file}"
+  command rm -f -- "${local_file}"
 
   local tmp_canon_copy
   tmp_canon_copy="$(mktemp -t ${UPDEPS_TEMP_PREFIX}XXXX)"
@@ -909,7 +922,7 @@ copy_canon_version () {
     "${canon_head}" \
     "${tmp_canon_copy}"
 
-  command mv -f "${tmp_canon_copy}" "${local_file}"
+  command mv -f -- "${tmp_canon_copy}" "${local_file}"
 
   apply_canon_permissions_to_follower "${local_file}" "${canon_file_absolute}"
 }
@@ -921,7 +934,7 @@ apply_canon_permissions_to_follower () {
   local canon_file_absolute="$2"
 
   # Copy file modes.
-  command chmod --reference="${canon_file_absolute}" "${local_file}"
+  command chmod --reference="${canon_file_absolute}" -- "${local_file}"
 }
 
 stage_follower () {
@@ -1117,7 +1130,7 @@ render_document_from_template () {
     ${src_data_and_format} \
       > "${local_file}"
 
-  command rm -rf "${tmp_source_dir}"
+  command rm -rf -- "${tmp_source_dir}"
 
   # ***
 
@@ -1245,7 +1258,7 @@ venv_activate_and_prepare () {
   local cmd_name="jinja2"
 
   # If Python environment looks like one we created, we're good.
-  if python -c "import sys; sys.stdout.write(sys.prefix)" \
+  if python3 -c "import sys; sys.stdout.write(sys.prefix)" \
     | grep -q -e "${UPDEPS_VENV_PREFIX}" \
   ; then
     if ${is_beginning}; then
@@ -1299,9 +1312,9 @@ venv_activate () {
 
   pip install --upgrade -q pip
   # ALTLY:
-  #   python -m pip install --upgrade --quiet pip
+  #   python3 -m pip install --upgrade --quiet pip
 
-  trap "command rm -rf \"${throwaway_dir}\"" EXIT
+  trap "command rm -rf -- \"${throwaway_dir}\"" EXIT
 
   cd - >/dev/null
 }
@@ -1342,7 +1355,7 @@ venv_install_jinja2_cli () {
     || true
 
   # ALTLY:
-  #   python -m pip install jinja2-cli
+  #   python3 -m pip install jinja2-cli
 }
 
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
@@ -1423,11 +1436,11 @@ update_faithful_finish () {
       local cleanup_git_cpyst""
       if test -n "${UPDEPS_CMD_RM_F_LIST}"; then
         cleanup_cmd_cpyst="
-                                      command rm ${UPDEPS_CMD_RM_F_LIST}"
+                                      command rm -- ${UPDEPS_CMD_RM_F_LIST}"
       fi
       if test -n "${UPDEPS_GIT_RM_F_LIST}"; then
         cleanup_git_cpyst="
-                                      command rm ${UPDEPS_GIT_RM_F_LIST}"
+                                      command rm -- ${UPDEPS_GIT_RM_F_LIST}"
       fi
       info
       info "    - If you wanna just replace all the conflicts, eh:
@@ -1461,7 +1474,7 @@ update_faithfuls_commit_changes () {
 
   local versiony=""
   if command -v git-bump-version-tag > /dev/null; then
-    versiony=" [$(cd "${canon_base_absolute}" && git-bump-version-tag -c)]"
+    versiony=" [$(cd "${canon_base_absolute}" && git-bump-version-tag --cur)]"
   fi
 
   local sourcery=""
