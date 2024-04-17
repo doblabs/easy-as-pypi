@@ -38,7 +38,9 @@ UPDEPS_TEMP_PREFIX="update-faithful-sh-"
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ #
 
 source_deps () {
-  # Ensure coreutils installed (from Linux pkg mgr, or from macOS Homebrew).
+  # Check for coreutils, macOS, or Homebrew `realpath`.
+  # - Lowest common denominator is macOS, which supports most basic
+  #   usage, e.g., `realpath <path>`, so avoid `realpath -s`, etc.
   _upful_insist_cmd 'realpath'
 
   # Load the logger library, from github.com/landonb/sh-logger.
