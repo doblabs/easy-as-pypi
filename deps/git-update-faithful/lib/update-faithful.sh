@@ -936,7 +936,12 @@ apply_canon_permissions_to_follower () {
   local canon_file_absolute="$2"
 
   # Copy file modes.
-  command chmod --reference="${canon_file_absolute}" -- "${local_file}"
+  $(chmod_kludge) --reference="${canon_file_absolute}" -- "${local_file}"
+}
+
+# Because `chmod --reference` and `chmod -- <>`.
+chmod_kludge () {
+  command -v gchmod || command -v chmod
 }
 
 stage_follower () {
@@ -1332,9 +1337,12 @@ venv_activate () {
   cd - >/dev/null
 }
 
+# Note that `deactivate` might be on PATH, e.g.,
+#   /opt/homebrew/Cellar/pyenv-virtualenv/1.2.3/shims/deactivate
+# So only call if it's defined as a shell function.
+# - ALTLY: Check: [ -n "${VIRTUAL_ENV}" ]
 venv_deactivate () {
-  # Aka 'off'.
-  type deactivate >/dev/null 2>&1 && deactivate || true
+  typeset -f deactivate >/dev/null && deactivate || true
 }
 
 # TRACK/2023-10-17 19:36: Using single -q so only warnings or worse printed:
@@ -1487,7 +1495,13 @@ update_faithfuls_commit_changes () {
 
   local versiony=""
   if command -v git-bump-version-tag > /dev/null; then
-    versiony=" [$(cd "${canon_base_absolute}" && git-bump-version-tag --cur)]"
+    local version
+    version="$(cd "${canon_base_absolute}" && git-bump-version-tag --cur -)"
+
+    if [ -z "${version}" ]; then
+      version="n/a"
+    fi
+    versiony=" [${version}]"
   fi
 
   local sourcery=""
