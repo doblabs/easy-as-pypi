@@ -1,4 +1,4 @@
-# vim:tw=0:ts=2:sw=2:et:ft=sh
+# vim:tw=0:ts=2:sw=2:et:ft=bash
 # Author: Landon Bouma <https://tallybark.com/>
 # Project: https://github.com/<varies>
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
