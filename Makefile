@@ -786,8 +786,8 @@ editable:
 #     EDITABLES_ROOT=~/.kit/py make editables
 editables:
 	@for project in $(EDITABLE_PJS); do \
+		echo "make editable -C \"$(EDITABLES_ROOT)/$${project}"\"; \
 		make editable -C "$(EDITABLES_ROOT)/$${project}"; \
-		echo; \
 	done
 .PHONY: editables
 

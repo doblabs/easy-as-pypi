@@ -304,6 +304,8 @@ make_editable () {
   # ***
 
   ensure_pyproject_dir_src_symlink "${EDITABLE_DIR}" "${SOURCE_DIR}"
+
+  echo "Editable project ready at: $(pwd)/${EDITABLE_DIR}/pyproject.toml"
 }
 
 ensure_pyproject_dir_src_symlink () {
