@@ -351,7 +351,8 @@ poetry_install_to_venv () {
   local venv_default="$4"
   local pyproject_dir="${5:-.}"
 
-  command -v deactivate >/dev/null 2>&1 && deactivate  
+  # ALTLY: typeset -f deactivate >/dev/null && deactivate
+  test "$(command -v deactivate)" = "deactivate" && deactivate
 
   eval "$($(which pyenv) init -)"
 
@@ -612,7 +613,8 @@ gvim_verify_servername_running () {
 _pyenv_prepare_shell () {
   local venv_pyver="$1"
 
-  command -v deactivate >/dev/null 2>&1 && deactivate
+  # ALTLY: typeset -f deactivate >/dev/null && deactivate
+  test "$(command -v deactivate)" = "deactivate" && deactivate
 
   eval "$(~/.local/bin/pyenv init -)"
 
