@@ -677,7 +677,6 @@ EDITABLE_PJS = \
 	easy-as-pypi-getver \
 	easy-as-pypi-termio \
 	human-friendly_pedantic-timedelta \
-	pep440-version-compare-cli \
 	python-editor-hotoffthehamster \
 	sqlalchemy-migrate-hotoffthehamster \
 	tempita-hotoffthehamster \
@@ -686,11 +685,6 @@ EDITABLE_PJS = \
 	dob-prompt \
 	dob-viewer \
 	nark \
-	\
-	dob-plugin-git-hip \
-	dob-plugin-hamster-dance \
-	dob-plugin-my-post-processor \
-	dob-plugin-stale-fact-goader \
 
 # ***
 
