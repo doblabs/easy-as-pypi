@@ -129,7 +129,7 @@ source_dep () {
     >&2 echo "ERROR: Could not identify update-faithful dependency path."
     >&2 echo "- Hint: Did you *copy* bin/update-faithful.sh somewhere on PATH?"
     >&2 echo "  - Please use a symlink instead."
-    >&2 echo "- Our incorrect dependency path guess: “${project_root}/${dep_path}”"
+    >&2 echo "- Our incorrect dependency path guess: ${project_root}/${dep_path}"
 
     exit 1
   fi
@@ -235,7 +235,7 @@ must_pass_checks_and_ensure_cache () {
       # If we don't exit here, user sees "Cannot update changed and divergent follower file"
       # message (warn_diverged_and_uncommitted) which is misleading when it's the canon file's
       # fault, not follower's.
-      >&2 error "ERROR: The canon reference file has uncommitted changes: “${canon_file_absolute}”"
+      >&2 error "ERROR: The canon reference file has uncommitted changes: ${canon_file_absolute}"
 
       # Rather than exit, let caller cleanup (e.g., unstage changes).
       return 1
@@ -306,7 +306,7 @@ must_canon_base_is_dir () {
   local canon_base_absolute="$1"
 
   if [ ! -d "${canon_base_absolute}" ]; then
-    >&2 error "ERROR: Canon path not a dir: “${canon_base_absolute}”"
+    >&2 error "ERROR: Canon path not a dir: ${canon_base_absolute}"
     >&2 error "- HINT: Specify the canon base path before updating:"
     >&2 error "        - Set UPDEPS_CANON_BASE_ABSOLUTE environ"
     >&2 error "        - Or call \`update-faithful-begin\` first"
@@ -325,7 +325,7 @@ must_be_file () {
 
     exit 1
   elif [ ! -f "${file}" ] && ( ! ${absent_ok} || [ -e "${file}" ] ); then
-    >&2 error "ERROR: The update-faithful ${what} file path is not a file: “${file}”"
+    >&2 error "ERROR: The update-faithful ${what} file path is not a file: ${file}"
 
     exit 1
   fi
@@ -520,7 +520,7 @@ cache_file_ensure_exists () {
 
   if [ ! -d "${cache_dir}" ]; then
     >&2 error "ERROR: Cache file directory is absent."
-    >&2 error "- UPDEPS_CACHE_FILE: “${UPDEPS_CACHE_FILE}”"
+    >&2 error "- UPDEPS_CACHE_FILE: ${UPDEPS_CACHE_FILE}"
 
     exit 1
   fi
