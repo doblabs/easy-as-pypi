@@ -1059,7 +1059,7 @@ has_unstaged_changes () {
     if [ "${modified_file}" = " M ${filename}" ] \
       || [ "${modified_file}" = "?? ${filename}" ] \
     ; then
-      
+
       return 0
     fi
   done <<< "${git_status}"
