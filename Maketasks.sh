@@ -667,7 +667,13 @@ _venv_create_and_metaize () {
   local project_dir="$4"
 
   if [ ! -d "${venv_name}" ]; then
-    python3 -m venv ${venv_args} "${venv_name}"
+    if ! python3 -m venv ${venv_args} "${venv_name}"; then
+      >&2 echo
+      >&2 echo "ERROR: Failed to create venv:"
+      >&2 echo "  python3 -m venv ${venv_args} \"${venv_name}\""
+
+      exit 1
+    fi
 
     VENV_CREATED=true
 
