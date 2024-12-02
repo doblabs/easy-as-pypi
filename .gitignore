@@ -60,7 +60,7 @@ __pycache__/
 /env/
 /venv/
 
-# *** Easy As Pypi articfacts
+# *** Easy As PyPI articfacts
 
 # Conventional -> .git/info/exclude symlink
 /.gitignore.local
