@@ -38,6 +38,9 @@
 *.py[cod]
 __pycache__/
 
+# Translations files.
+*.mo
+
 # *** Venv-related
 
 /.pyproject-doc8/.venv/
@@ -59,6 +62,9 @@ __pycache__/
 
 # *** Easy As Pypi articfacts
 
+# Conventional -> .git/info/exclude symlink
+/.gitignore.local
+
 # USYNC: UPFUL_PYPROJECT_TMPL_CACHE=".pyproject-cache.data"
 # - CXREF: ~/.kit/py/easy-as-pypi/bin/update-faithful
 # - This is jinja2 template source data compiled from pyproject.toml.
@@ -72,10 +78,17 @@ __pycache__/
 #   - If you use a different path, add yours to .git/info/exclude
 /.vimquickfix.pytest
 
+# Optional private Makefiles — the first included at the start of
+# the EAPP Makefile, and the latter at the end of it.
+/Makefile.local
+/Makefile.local.after
+
 # *** Other
 
 # User's personal .ignore (see .ignore.example).
 /.ignore
+/.fdignore
+/.rgignore
 
 # Non-DepoXy Developer-specific rules.
 .DS_Store/
