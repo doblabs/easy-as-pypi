@@ -45,6 +45,7 @@ __pycache__/
 # USYNC: EDITABLE_DIR (Makefile)
 /.pyproject-editable/poetry.lock
 /.pyproject-editable/pyproject.toml
+/.pyproject-editable/src
 # All and any venv: .venv-<project>/, .venv-doc8/, .venv-docs/,
 #                   .pyproject-doc8/.venv/, &c.
 # USYNC: VENV_NAME (Makefile)
