@@ -3,6 +3,8 @@
 # Pattern: https://github.com/doblabs/easy-as-pypi#🥧
 # License: MIT
 
+# *** Common Python & related tooling artifacts
+
 # Packaging — `make build`.
 /dist/
 
@@ -36,6 +38,8 @@
 *.py[cod]
 __pycache__/
 
+# *** Venv-related
+
 /.pyproject-doc8/.venv/
 # Editable pyproject.toml and .venv-<project> — `make develop`.
 # - USYNC: EDITABLE_DIR ?= .pyproject-editable
@@ -48,6 +52,12 @@ __pycache__/
 #     ... .venv-nark--SQLA-1.3/
 #     ... .venv-nark--SQLA-1.4/
 .venv-*
+
+# Alternative venv directories.
+/env/
+/venv/
+
+# *** Easy As Pypi articfacts
 
 # USYNC: UPFUL_PYPROJECT_TMPL_CACHE=".pyproject-cache.data"
 # - CXREF: ~/.kit/py/easy-as-pypi/bin/update-faithful
@@ -62,18 +72,15 @@ __pycache__/
 #   - If you use a different path, add yours to .git/info/exclude
 /.vimquickfix.pytest
 
+# *** Other
+
 # User's personal .ignore (see .ignore.example).
 /.ignore
 
-# ***
-
 # Non-DepoXy Developer-specific rules.
+.DS_Store/
 /.idea/
 /.vscode/
-.DS_Store/
-# Alternative venv directories.
-/env/
-/venv/
 # REFER: https://github.com/python-rope/rope
 # https://rope.readthedocs.io/en/latest/overview.html
 /.ropeproject
