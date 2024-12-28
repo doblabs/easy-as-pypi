@@ -79,8 +79,10 @@ source_dep_git_put_wise () {
   #   ~/.kit/sh/sh-git-nubs/lib/git-nubs.sh
   . "${put_wise_bin}/../deps/sh-git-nubs/lib/git-nubs.sh"
 
+  # For dep_scoped_commish.sh:
   . "${put_wise_bin}/../lib/common_put_wise.sh"
-  . "${put_wise_bin}/../lib/dep_apply_confirm_patch_base.sh"
+  # For identify_scope_ends_at:
+  . "${put_wise_bin}/../lib/dep_scoped_commits.sh"
 }
 
 # ***
